@@ -60,5 +60,14 @@ python/
 .idea/
 .DS_Store
 
+# Python virtual environments
+.venv/
+venv/
+
 # Ignore the compiled agent.
 objection/agent.js
+
+# Website (VitePress) build artifacts and dependencies
+website/node_modules/
+website/.vitepress/cache/
+website/.vitepress/dist/

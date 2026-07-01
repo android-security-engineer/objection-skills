@@ -1,0 +1,17 @@
+{
+  "name": "objection-website",
+  "version": "1.0.0",
+  "description": "objection 项目教学文档站",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vitepress dev",
+    "build": "vitepress build",
+    "preview": "vitepress preview"
+  },
+  "devDependencies": {
+    "vitepress": "^1.6.3",
+    "mermaid": "^11.4.1",
+    "vitepress-plugin-mermaid": "^2.0.17"
+  }
+}

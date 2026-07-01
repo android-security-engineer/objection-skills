@@ -1,0 +1,125 @@
+/* objection 文档站自定义主题
+   设计方向：渗透测试者的终端 —— 深炭墨 + 告警红强调，反"霓虹绿 cyber"默认。
+   Signature：品牌名等宽字 + 终端光标块 ▋，暗示"正在注入/运行中"。 */
+
+/* ---------- 色板 ---------- */
+:root {
+  /* 红色强调色 —— 对应 objection 命中输出的 (agent) 提示色与"凭证暴露"语义 */
+  --obj-accent: #E84855;
+  --obj-accent-soft: #FBE4E6;
+  --obj-ink: #0E1116;
+
+  /* 覆盖 VitePress 默认品牌色（绿）为我们的告警红 */
+  --vp-c-brand-1: #E84855;
+  --vp-c-brand-2: #d13a47;
+  --vp-c-brand-3: #b8323d;
+  --vp-c-brand-soft: rgba(232, 72, 85, 0.14);
+
+  /* 品牌渐变（hero 标题用） */
+  --vp-home-hero-name-color: transparent;
+  --vp-home-hero-name-background: -webkit-linear-gradient(120deg, #E84855 30%, #0E1116);
+
+  /* hero 图像光晕 */
+  --vp-home-hero-image-background-image: linear-gradient(-45deg, rgba(232, 72, 85, 0.18), transparent);
+  --vp-home-hero-image-filter: blur(44px);
+}
+
+.dark {
+  --obj-accent: #FF5C68;
+  --obj-accent-soft: rgba(255, 92, 104, 0.14);
+  --obj-ink: #0E1116;
+
+  --vp-c-brand-1: #FF5C68;
+  --vp-c-brand-2: #ff7079;
+  --vp-c-brand-3: #e84855;
+  --vp-c-brand-soft: rgba(255, 92, 104, 0.16);
+}
+
+/* ---------- 字体 ---------- */
+/* 等宽字仅用于品牌名、小标题点缀、代码 —— 不全用，让等宽成为个性焦点 */
+:root {
+  --vp-font-family-base: 'Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', sans-serif;
+  --vp-font-family-mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
+}
+
+/* ---------- Signature：品牌名 + 终端光标 ---------- */
+/* 顶栏 logo 旁的站点名用等宽字，配一个红色闪烁光标块 */
+.VPNavBar .title {
+  font-family: var(--vp-font-family-mono);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+/* 终端光标块 —— 用 ::after 在 hero 品牌名后加一个红色实心块 */
+.VPHero .name {
+  font-family: var(--vp-font-family-mono) !important;
+  letter-spacing: -0.03em;
+}
+
+/* hero name 末尾的光标 —— 终端"正在运行"的暗示 */
+.VPHero .name::after {
+  content: '';
+  display: inline-block;
+  width: 0.5ch;
+  height: 1em;
+  margin-left: 0.18em;
+  background: var(--obj-accent);
+  transform: translateY(0.12em);
+  animation: obj-blink 1.1s steps(2) infinite;
+}
+
+@keyframes obj-blink {
+  0%, 50% { opacity: 1; }
+  50.01%, 100% { opacity: 0; }
+}
+
+/* 尊重 reduced-motion —— 关掉光标闪烁 */
+@media (prefers-reduced-motion: reduce) {
+  .VPHero .name::after { animation: none; opacity: 1; }
+}
+
+/* ---------- 链接与强调 ---------- */
+a:hover {
+  text-decoration-thickness: 2px;
+}
+
+/* inline code：浅红底，呼应"代码即对象"的语境 */
+.vp-doc :not(pre) > code {
+  border-color: var(--vp-c-brand-soft);
+  background: var(--vp-c-brand-soft);
+  color: var(--vp-c-brand-1);
+  font-weight: 600;
+}
+
+/* 代码块左侧加一条细红线 —— 终端"会话"感 */
+.vp-doc div[class*='language-'] {
+  border-left: 2px solid var(--vp-c-brand-1);
+}
+
+/* ---------- 卡片（features） ---------- */
+.VPFeatures .VPFeature {
+  border-radius: 8px;
+  transition: border-color 0.18s, transform 0.18s;
+}
+.VPFeatures .VPFeature:hover {
+  border-color: var(--vp-c-brand-1);
+  transform: translateY(-2px);
+}
+/* emoji 图标用等宽底座，统一视觉重量 */
+.VPFeature .icon {
+  font-family: var(--vp-font-family-mono);
+}
+
+/* ---------- mermaid 图配色 ---------- */
+/* 让 mermaid 节点边框/文字与主题协调，命中节点用红 */
+.mermaid {
+  text-align: center;
+}
+
+/* ---------- 提示框（::: tip / ::: warning）左侧色条 ---------- */
+.custom-block {
+  border-left-width: 3px;
+}
+.custom-block.tip {
+  border-color: var(--vp-c-brand-1);
+}
