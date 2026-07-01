@@ -50,6 +50,10 @@ jobs:
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
+        with:
+          # 自动启用仓库的 GitHub Pages 并把 Source 设为 GitHub Actions
+          # （首次部署前仓库未启用 Pages，configure-pages 默认不开启，会报 Not Found）
+          enablement: true
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
