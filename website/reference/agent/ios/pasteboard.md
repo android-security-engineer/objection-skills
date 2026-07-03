@@ -21,7 +21,7 @@
 | `iosMonitorPasteboard` | 启动 5 秒轮询 `setInterval`，变化时 `send()` |
 
 ### `rpc.iosMonitorPasteboard` — 轮询剪贴板
-源码：`agent/src/ios/pasteboard.ts:5`
+源码：[`agent/src/ios/pasteboard.ts:5`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/pasteboard.ts#L5)
 
 取 `UIPasteboard.generalPasteboard()`，`setInterval` 每 5 秒读 `string()`，与本地变量 `data` 比对，不同则更新并 `send`：
 ```ts
@@ -59,7 +59,7 @@ flowchart TD
 ## 🔍 源码索引
 | 符号 | 位置 |
 | --- | --- |
-| `monitor` | `agent/src/ios/pasteboard.ts:5` |
+| `monitor` | [`agent/src/ios/pasteboard.ts:5`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/pasteboard.ts#L5) |
 
 ## 🔗 相关文档
 - [Frida 与 Agent](/guide/frida-agent)

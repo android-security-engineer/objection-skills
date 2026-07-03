@@ -21,7 +21,7 @@
 ## 🏗️ 核心结构
 
 ### `bp` — Agent API 蓝图
-源码：`objection/api/agent_endpoints.py:34`
+源码：[`objection/api/agent_endpoints.py:34`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/api/agent_endpoints.py#L34)
 
 ```python
 bp = Blueprint('agent_api', __name__, url_prefix='')
@@ -30,7 +30,7 @@ bp = Blueprint('agent_api', __name__, url_prefix='')
 空前缀，端点挂在根路径：`POST /command/exec`、`GET /state`、`GET /events/poll`、`GET /capabilities`、`GET/POST /agent/rpc/<method>`。
 
 ### `_ensure_json_mode` — 强制 JSON 输出
-源码：`objection/api/agent_endpoints.py:37`
+源码：[`objection/api/agent_endpoints.py:37`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/api/agent_endpoints.py#L37)
 
 ```python
 def _ensure_json_mode():
@@ -41,7 +41,7 @@ def _ensure_json_mode():
 每个端点入口先调它。`set_json_output(True)` 是全局开关，让 `utils/output` 与 `utils/events` 的 `record_event` 走 JSON 分支（缓冲事件、产出 `CommandResult` 结构）。
 
 ### `_no_agent_response` — 无 agent 统一错误
-源码：`objection/api/agent_endpoints.py:44`
+源码：[`objection/api/agent_endpoints.py:44`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/api/agent_endpoints.py#L44)
 
 ```python
 def _no_agent_response():
@@ -57,7 +57,7 @@ def _no_agent_response():
 未注入 agent 时返回 503 + 统一 schema。提示用户用 `objection api` 启动（HTTP 服务器与 agent 共进程）。
 
 ### `command_exec` — 执行 objection 命令
-源码：`objection/api/agent_endpoints.py:56`
+源码：[`objection/api/agent_endpoints.py:56`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/api/agent_endpoints.py#L56)
 
 ```python
 @bp.route('/command/exec', methods=('POST',))
@@ -128,7 +128,7 @@ def command_exec():
 延迟导入 `Repl` 避免循环依赖（repl 依赖 cli，cli 依赖 agent_cli）。
 
 ### `state` — 会话状态快照
-源码：`objection/api/agent_endpoints.py:133`
+源码：[`objection/api/agent_endpoints.py:133`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/api/agent_endpoints.py#L133)
 
 ```python
 @bp.route('/state', methods=('GET',))
@@ -163,7 +163,7 @@ def state():
 返回连接元信息（设备类型、host/port、device_id 等）+ agent pid + 运行中的 Job 列表。`sync_job_manager()` 先与设备同步 Job 状态（Frida 端 Job 可能已退出）再枚举。Job 块用 try/except 兜住——Job 同步失败不应让整个 state 请求失败。
 
 ### `events_poll` — 事件轮询
-源码：`objection/api/agent_endpoints.py:185`
+源码：[`objection/api/agent_endpoints.py:185`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/api/agent_endpoints.py#L185)
 
 ```python
 @bp.route('/events/poll', methods=('GET',))
@@ -184,7 +184,7 @@ def events_poll():
 默认 `drain_events()`（取出并清空队列），`?peek=1` 走 `peek_events()`（只看不清空）。结果包进统一 schema 的 `result` 字段。事件队列由 `utils/events.py` 维护，Frida `script.on('message')` 回调入队（仅在 JSON 模式）。
 
 ### `capabilities` — 命令自发现
-源码：`objection/api/agent_endpoints.py:213`
+源码：[`objection/api/agent_endpoints.py:213`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/api/agent_endpoints.py#L213)
 
 ```python
 @bp.route('/capabilities', methods=('GET',))
@@ -204,7 +204,7 @@ def capabilities():
 不需要设备连接——纯静态注册表快照。`_enumerate_capabilities`（来自 `agent_cli`）遍历 `COMMANDS` 注册表，产出每个命令的结构化描述（名称、参数、用途），供 Agent 自主构造合法命令。
 
 ### `agent_rpc` — 直调 agent RPC
-源码：`objection/api/agent_endpoints.py:236`
+源码：[`objection/api/agent_endpoints.py:236`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/api/agent_endpoints.py#L236)
 
 ```python
 @bp.route('/agent/rpc/<string:method>', methods=('GET', 'POST'))
@@ -301,14 +301,182 @@ flowchart TD
 ## 🔍 源码索引
 | 符号 | 位置 |
 | --- | --- |
-| `bp` | `objection/api/agent_endpoints.py:34` |
-| `_ensure_json_mode` | `objection/api/agent_endpoints.py:37` |
-| `_no_agent_response` | `objection/api/agent_endpoints.py:44` |
-| `command_exec` | `objection/api/agent_endpoints.py:56` |
-| `state` | `objection/api/agent_endpoints.py:133` |
-| `events_poll` | `objection/api/agent_endpoints.py:185` |
-| `capabilities` | `objection/api/agent_endpoints.py:213` |
-| `agent_rpc` | `objection/api/agent_endpoints.py:236` |
+| `bp` | [`objection/api/agent_endpoints.py:34`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/api/agent_endpoints.py#L34) |
+| `_ensure_json_mode` | [`objection/api/agent_endpoints.py:37`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/api/agent_endpoints.py#L37) |
+| `_no_agent_response` | [`objection/api/agent_endpoints.py:44`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/api/agent_endpoints.py#L44) |
+| `command_exec` | [`objection/api/agent_endpoints.py:56`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/api/agent_endpoints.py#L56) |
+| `state` | [`objection/api/agent_endpoints.py:133`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/api/agent_endpoints.py#L133) |
+| `events_poll` | [`objection/api/agent_endpoints.py:185`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/api/agent_endpoints.py#L185) |
+| `capabilities` | [`objection/api/agent_endpoints.py:213`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/api/agent_endpoints.py#L213) |
+| `agent_rpc` | [`objection/api/agent_endpoints.py:236`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/api/agent_endpoints.py#L236) |
+
+## 🗺️ 端点路由全景图
+
+下图刻画 `agent_endpoints.bp`（空前缀）注册的 5 个端点的路由、HTTP 方法、设备依赖性，以及它们与 `rpc.bp`（`/rpc` 前缀）、`script.bp`（`/script` 前缀）的位置关系。
+
+```mermaid
+flowchart TD
+    subgraph agent_endpoints.bp url_prefix=''
+        CE["POST /command/exec<br/>需 agent"]
+        ST["GET /state<br/>需 agent"]
+        EV["GET /events/poll<br/>不需 agent (读本地缓冲)"]
+        CAP["GET /capabilities<br/>不需 agent (静态注册表)"]
+        ARPC["GET/POST /agent/rpc/<method><br/>需 agent"]
+    end
+
+    subgraph rpc.bp url_prefix='/rpc'
+        RINV["GET/POST /rpc/invoke/<method><br/>需 agent"]
+    end
+
+    subgraph script.bp url_prefix='/script'
+        SR["POST /script/runonce<br/>需 agent"]
+    end
+
+    CE -->|复用| REPL["Repl.run_command"]
+    ARPC -->|互补| RINV
+    RINV -->|原始 RPC| AGJS["agent.js exports"]
+    ARPC -->|统一 schema| AGJS
+
+    CAP -->|静态| CMDREG["COMMANDS 注册表"]
+    ST -->|同步| JM["job_manager_state + sync_job_manager"]
+    EV -->|读| DEQUE["utils/events._events deque"]
+```
+
+路由设计要点（基于 [`agent_endpoints.py:34`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/api/agent_endpoints.py#L34)）：
+
+- **空前缀抢占根路径**：`agent_endpoints.bp` 用 `url_prefix=''`，端点直接挂在 `/command/exec`、`/state` 等根路径。这是刻意设计——Agent 端点是 objection HTTP API 的"主入口"，短 URL 便于 Agent 构造请求。代价是占用了根命名空间，插件蓝图若也用空前缀且注册同名路由会冲突。
+- **设备依赖性分级**：`/command/exec`、`/state`、`/agent/rpc/<method>` 需要已注入 agent（未注入返回 503，[`agent_endpoints.py:44-53`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/api/agent_endpoints.py#L44)）；`/capabilities` 是纯静态注册表快照，不需要设备（[`agent_endpoints.py:213`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/api/agent_endpoints.py#L213)）；`/events/poll` 读本地事件缓冲，技术上不需要 agent 在线（但缓冲里的事件是 agent 产生的，agent 离线后缓冲仍可读）。
+- **`/agent/rpc` 与 `/rpc/invoke` 路由共存**：两者都按 `<method>` 路由参数匹配，但前缀不同（`/agent/rpc/` vs `/rpc/invoke/`），Flask 路由层能区分。前者是"Agent 友好版"（统一 schema、JSON 数组参数），后者是"裸桥接版"（原始响应、JSON 对象参数）。
+
+## 🔁 command_exec 结果捕获时序
+
+下图刻画 `/command/exec` 的核心机制——结果捕获（result capture）的完整时序，展示 `push_result_capture`/`pop_result_capture` 如何拦截命令的结构化输出。
+
+```mermaid
+sequenceDiagram
+    participant C as Agent 客户端
+    participant CE as command_exec()
+    participant OUT as utils/output
+    participant R as Repl.run_command
+    participant CMD as 命令实现
+    participant JS as agent.js
+
+    C->>CE: POST /command/exec {"command":"android hooking list classes"}
+    CE->>CE: _ensure_json_mode()
+    CE->>CE: state_connection.agent 检查
+    CE->>OUT: push_result_capture()
+    Note over OUT: 挂载线程局部捕获缓冲
+    CE->>R: run_command("android hooking list classes")
+    R->>R: 解析 token, 找 exec 方法
+    R->>CMD: android_hooking.show_android_classes([])
+    CMD->>JS: RPC 调用
+    JS-->>CMD: 类列表数据
+    CMD->>OUT: output_result(CommandResult(result=..., status='ok'))
+    Note over OUT: 结果入捕获缓冲 (而非打印 stdout)
+    CMD-->>R: 完成
+    R-->>CE: 返回
+    CE->>OUT: pop_result_capture()
+    OUT-->>CE: captured = [CommandResult...]
+    alt captured 非空
+        CE->>CE: 取 captured[-1] 作 result
+        opt captured 多于1条
+            CE->>CE: warnings 追加"多条 payload"提示
+        end
+        CE-->>C: 200 {status:ok, command, result, jobs_created, warnings}
+    else captured 为空
+        CE-->>C: 200 {status:ok, result:null, warnings:["no structured output"]}
+    end
+```
+
+结果捕获机制细节：
+
+- **线程局部缓冲**：`push_result_capture`/`pop_result_capture` 操作的是线程局部存储（`utils/output` 内部实现）。这意味着 Flask 多线程处理并发 `/command/exec` 请求时，每个请求的捕获缓冲互不干扰——线程 A 的 `pop_result_capture` 不会取到线程 B 的命令输出。
+- **命令异常也入队**：`run_command` 抛异常时，`command_exec` 的 try 块捕获后主动调 `output_result(CommandResult(status='error', ...))`（[`agent_endpoints.py:98-104`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/api/agent_endpoints.py#L98)），把错误塞进捕获缓冲。所以 `pop_result_capture` 总能拿到至少一条结果，`captured` 为空仅当命令本身未调 `output_result`（即未改造的人类模式命令）。
+- **多条结果取最后一条**：一个命令可能多次调 `output_result`（如 `android hooking watch` 在 hook 命中时反复产出结果）。`command_exec` 取 `captured[-1]` 作 `result`，其余通过 warning 告知 Agent"命令产出了 N 条结构化 payload，只返回最后一条"（[`agent_endpoints.py:119-125`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/api/agent_endpoints.py#L119)）。Agent 若需全部事件应改用 `/events/poll` 轮询。
+- **`Repl()` 每请求新建**：`command_exec` 内 `repl = Repl()`（[`agent_endpoints.py:91`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/api/agent_endpoints.py#L91)）每次请求新建 Repl 实例。Repl 构造较轻（只初始化 completer 与 PromptSession，PromptSession 不实际启动），新建避免跨请求状态污染。但 `Repl.run_command` 会调 `app_state.add_command_to_history`，所以命令历史是跨请求共享的（历史在全局 `app_state` 单例）。
+
+## 📐 统一 JSON Schema 与端点响应结构（ASCII 框图）
+
+下图展示所有端点返回的统一五字段 schema，以及不同端点如何填充各字段。
+
+```
+统一响应 schema (所有 agent_endpoints 端点):
+┌──────────────────────────────────────────────────────────┐
+│ {                                                        │
+│   "status": "ok" | "error",                             │
+│   "command": "<执行的命令或端点路径>",                   │
+│   "result": <端点特定数据>,                             │
+│   "jobs_created": [<本次创建的 Job uuid>],              │
+│   "warnings": [<提示信息列表>]                          │
+│ }                                                        │
+└──────────────────────────────────────────────────────────┘
+
+各端点填充:
+┌─────────────┬──────────────┬──────────────┬──────────────┬──────────────┐
+│ 端点         │ status       │ command      │ result       │ jobs_created │
+├─────────────┼──────────────┼──────────────┼──────────────┼──────────────┤
+│ /command/exec│ ok/error    │ 用户命令串   │ CommandResult│ 命令产生的   │
+│  (单命令)    │              │              │ .result      │ Job uuid 列表│
+├─────────────┼──────────────┼──────────────┼──────────────┼──────────────┤
+│ /command/exec│ 数组, 每项   │ 每条命令     │ 每条的结果   │ 每条的       │
+│  (多命令)    │ 同上         │              │              │ jobs_created │
+├─────────────┼──────────────┼──────────────┼──────────────┼──────────────┤
+│ /state       │ ok           │ "/state"     │ {connection, │ []           │
+│              │              │              │  pid, jobs}  │              │
+├─────────────┼──────────────┼──────────────┼──────────────┼──────────────┤
+│ /events/poll │ ok           │ "/events/poll"│ {events,    │ []           │
+│              │              │              │  dropped,...}│              │
+├─────────────┼──────────────┼──────────────┼──────────────┼──────────────┤
+│ /capabilities│ ok           │ "/capabilities"│{commands:  │ []           │
+│              │              │              │  [...]}      │              │
+├─────────────┼──────────────┼──────────────┼──────────────┼──────────────┤
+│ /agent/rpc/m │ ok / error   │ "/agent/rpc/m"│ RPC 原始返回│ []           │
+│              │ (error→500)  │              │ 或 {error:}  │              │
+└─────────────┴──────────────┴──────────────┴──────────────┴──────────────┘
+
+错误响应 (无 agent, 通用):
+┌──────────────────────────────────────────────────────────┐
+│ status: 503 (无 agent) 或 500 (RPC 调用失败)             │
+│ body: {                                                  │
+│   "status": "error",                                    │
+│   "command": "" 或 "/agent/rpc/<method>",               │
+│   "result": {"error": "no agent is connected..."},      │
+│   "jobs_created": [],                                    │
+│   "warnings": []                                         │
+│ }                                                        │
+└──────────────────────────────────────────────────────────┘
+```
+
+Schema 设计要点：
+
+- **`jobs_created` 字段的语义**：它记录本次命令执行过程中新创建的 Job uuid 列表，让 Agent 知道"这条命令产生了哪些可后续 kill 的 Job"。该字段由 `output_result` 在命令调用 `job_manager_state.add_job` 后填充——但当前实现中 `command_exec` 直接从 `captured` 取 `jobs_created`（[`agent_endpoints.py:119`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/api/agent_endpoints.py#L119)），依赖命令实现主动在 `CommandResult` 里带上 `jobs_created`。未改造的命令该字段为空列表。
+- **`warnings` 的用途**：非致命提示信息。典型场景：命令无结构化输出（`["command produced no structured output..."]`，[`agent_endpoints.py:114`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/api/agent_endpoints.py#L114)）、命令产出多条 payload（`["command emitted N structured payloads..."]`，[`agent_endpoints.py:123`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/api/agent_endpoints.py#L123)）。Agent 应把 warnings 反馈给用户但不视为失败。
+- **`/command/exec` 的响应形态切换**：单命令返回对象，多命令返回数组（[`agent_endpoints.py:128-130`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/api/agent_endpoints.py#L128)）。Agent 解析时需先检查 `isinstance(response, list)` 决定是单对象还是数组——这与 `/agent/rpc` 总是返回单对象不同，多命令批处理的响应形态是动态的。
+- **`/agent/rpc` 的 `command` 字段保留原 method 名**：`command` 字段是 `/agent/rpc/{0}'.format(method)`（[`agent_endpoints.py:271`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/api/agent_endpoints.py#L271)），用 URL 里的原始 method 名（未转 snake_case），便于 Agent 回溯是哪个 RPC 调用。但实际调用用的是 `to_snake_case(method)`（[`agent_endpoints.py:252`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/api/agent_endpoints.py#L252)），所以 `command` 字段可能与实际方法名大小写不同。
+
+## 🔄 与 /rpc/invoke 的端点选择决策
+
+下图帮助 Agent 在 `/command/exec`、`/agent/rpc/<method>`、`/rpc/invoke/<method>` 三者间选择。
+
+```mermaid
+flowchart TD
+    Q1{"需要执行 objection<br/>命令字符串?"}
+    Q1 -->|是| CE["/command/exec<br/>复用人类命令逻辑"]
+    Q1 -->|否| Q2{"需要统一 JSON schema<br/>与错误处理?"}
+
+    Q2 -->|是| ARPC["/agent/rpc/<method><br/>统一 schema, JSON 数组参数"]
+    Q2 -->|否| RINV["/rpc/invoke/<method><br/>原始响应, JSON 对象参数"]
+
+    CE --> CE_NOTE["优点: 命令层全套逻辑<br/>缺点: 命令需已改造为 output_result"]
+    ARPC --> ARPC_NOTE["优点: Agent 友好<br/>缺点: 需知道 RPC 方法名"]
+    RINV --> RINV_NOTE["优点: 最薄桥接<br/>缺点: 朴素错误格式, 参数易错位"]
+```
+
+选择决策说明：
+
+- **优先用 `/command/exec`**：Agent 应优先用命令字符串而非直接 RPC。命令层封装了参数解析、Job 管理、输出格式化、历史记录，且 `jobs_created` 让 Agent 能追踪副作用。只有当目标能力未被任何命令覆盖时才下沉到 RPC 层。
+- **`/agent/rpc` 优于 `/rpc/invoke`**：当必须直接调 RPC 时，`/agent/rpc` 的统一 schema 与 JSON 数组参数更不易出错。`/rpc/invoke` 的 JSON 对象参数依赖字典有序，Agent 容易传错顺序。`/rpc/invoke` 适合已知 Frida RPC 返回结构、需要 `?json=false` 透传原始响应的场景。
+- **`/capabilities` 前置调用**：Agent 在连接设备前应先调 `/capabilities` 了解可用命令，据此规划后续 `/command/exec` 调用。这是"先看能力再行动"的 Agent 工作流模式。
 
 ## 🔗 相关文档
 - [整体架构](/guide/architecture)

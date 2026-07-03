@@ -66,7 +66,7 @@ http stop
 
 ### Android shell —— `Runtime.exec()`
 
-关键文件：`agent/src/android/shell.ts:15`。`execute()` 用 `Java.use("java.lang.Runtime")` 拿到 Runtime，`exec(cmd)` 起子进程，再分别读 stdout / stderr：
+关键文件：[`agent/src/android/shell.ts:15`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/shell.ts#L15)。`execute()` 用 `Java.use("java.lang.Runtime")` 拿到 Runtime，`exec(cmd)` 起子进程，再分别读 stdout / stderr：
 
 ```mermaid
 flowchart LR
@@ -100,7 +100,7 @@ flowchart TB
 
 ### Android deoptimize —— 强制解释执行
 
-关键文件：`agent/src/android/general.ts:6`。一行核心：`Java.deoptimizeEverything()`。
+关键文件：[`agent/src/android/general.ts:6`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/general.ts#L6)。一行核心：`Java.deoptimizeEverything()`。
 
 Art 虚拟机会 JIT 编译热点方法为机器码，**已编译的方法可能绕过你的 Java 层 hook**（因为 hook 改的是方法入口，而 JIT 版已脱离）。`deoptimize` 把所有方法打回解释执行，确保 hook 生效：
 
@@ -119,23 +119,23 @@ flowchart LR
 
 ### UI 截图与弹窗
 
-**Android 截图** `agent/src/android/userinterface.ts:19`：调 Frida 的 `screenshot()` API（底层走 SurfaceFlinger），返回 RGBA 字节流，Python 侧 `bytearray(map(lambda x: x % 256, data))` 把每字节压到 0–255 写入 png。
+**Android 截图** [`agent/src/android/userinterface.ts:19`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/userinterface.ts#L19)：调 Frida 的 `screenshot()` API（底层走 SurfaceFlinger），返回 RGBA 字节流，Python 侧 `bytearray(map(lambda x: x % 256, data))` 把每字节压到 0–255 写入 png。
 
-**iOS 截图** `agent/src/ios/userinterface.ts:9`：`take()` 同样用 Frida 截图 API。
+**iOS 截图** [`agent/src/ios/userinterface.ts:9`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/userinterface.ts#L9)：`take()` 同样用 Frida 截图 API。
 
-**iOS 弹窗** `agent/src/ios/userinterface.ts:19`：构造 `UIAlertController`，加一个 OK 按钮，`presentViewController` 弹出。**纯 ObjC 调用**，不依赖 UI 线程阻塞。
+**iOS 弹窗** [`agent/src/ios/userinterface.ts:19`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/userinterface.ts#L19)：构造 `UIAlertController`，加一个 OK 按钮，`presentViewController` 弹出。**纯 ObjC 调用**，不依赖 UI 线程阻塞。
 
-**iOS UI dump** `agent/src/ios/userinterface.ts:15`：调 `ios_ui_window_dump`，返回当前界面控件的序列化层级——自动化测试常用。
+**iOS UI dump** [`agent/src/ios/userinterface.ts:15`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/userinterface.ts#L15)：调 `ios_ui_window_dump`，返回当前界面控件的序列化层级——自动化测试常用。
 
-**TouchID 绕过** `agent/src/ios/userinterface.ts:48`：装一个 Job，Hook `LAContext.evaluatePolicy`，让生物识别校验恒返成功。
+**TouchID 绕过** [`agent/src/ios/userinterface.ts:48`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/userinterface.ts#L48)：装一个 Job，Hook `LAContext.evaluatePolicy`，让生物识别校验恒返成功。
 
 ### FLAG_SECURE
 
-`agent/src/android/userinterface.ts:60` `setFlagSecure(v)`：调当前 Activity 的 `Window.setFlags(FLAG_SECURE, FLAG_SECURE)`。开启后系统禁止对该窗口截屏/录屏——你反过来用它**关闭**这个保护，就能截屏了。
+[`agent/src/android/userinterface.ts:60`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/userinterface.ts#L60) `setFlagSecure(v)`：调当前 Activity 的 `Window.setFlags(FLAG_SECURE, FLAG_SECURE)`。开启后系统禁止对该窗口截屏/录屏——你反过来用它**关闭**这个保护，就能截屏了。
 
 ### Hook 脚本生成
 
-`android hooking generate simple <class>` (`objection/commands/android/generate.py:26`)：调 `android_hooking_get_class_methods` 拿到类所有方法，对每个方法生成一段 `Java.use(clazz).method.implementation = function(){...}` 骨架，输出给用户当起点。
+`android hooking generate simple <class>` ([`objection/commands/android/generate.py:26`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/android/generate.py#L26))：调 `android_hooking_get_class_methods` 拿到类所有方法，对每个方法生成一段 `Java.use(clazz).method.implementation = function(){...}` 骨架，输出给用户当起点。
 
 ```mermaid
 flowchart LR
@@ -204,9 +204,9 @@ flowchart TB
 
 | 内容 | 位置 |
 | --- | --- |
-| Android shell | `objection/commands/android/command.py` / `agent/src/android/shell.ts:15` |
+| Android shell | `objection/commands/android/command.py` / [`agent/src/android/shell.ts:15`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/shell.ts#L15) |
 | Android intent | `objection/commands/android/intents.py` / `agent/src/android/intent.ts` |
-| Android deoptimize | `objection/commands/android/general.py` / `agent/src/android/general.ts:6` |
+| Android deoptimize | `objection/commands/android/general.py` / [`agent/src/android/general.ts:6`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/general.ts#L6) |
 | Android UI（截图/FLAG_SECURE） | `objection/commands/ui.py` / `agent/src/android/userinterface.ts` |
 | iOS UI（弹窗/截图/dump/TouchID） | `objection/commands/ui.py` / `agent/src/ios/userinterface.ts` |
 | hook 生成 | `objection/commands/android/generate.py` / `objection/commands/ios/generate.py` |

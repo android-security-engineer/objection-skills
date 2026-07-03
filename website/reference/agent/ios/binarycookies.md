@@ -21,7 +21,7 @@
 | `iosCookiesGet` | 返回 `IIosCookie[]`，枚举 `NSHTTPCookieStorage` 共享存储 |
 
 ### `rpc.iosCookiesGet` — 枚举共享 Cookie 存储
-源码：`agent/src/ios/binarycookies.ts:10`
+源码：[`agent/src/ios/binarycookies.ts:10`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/binarycookies.ts#L10)
 
 通过 `ObjC.classes.NSHTTPCookieStorage` 拿到共享存储，调用 `sharedHTTPCookieStorage()` 后取 `cookies()` 数组逐项提取：
 ```ts
@@ -56,7 +56,7 @@ flowchart TD
 ## 🔍 源码索引
 | 符号 | 位置 |
 | --- | --- |
-| `get` | `agent/src/ios/binarycookies.ts:10` |
+| `get` | [`agent/src/ios/binarycookies.ts:10`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/binarycookies.ts#L10) |
 
 ## 🔗 相关文档
 - [Frida 与 Agent](/guide/frida-agent)

@@ -21,7 +21,7 @@
 | `iosBinaryInfo` | 返回 `IBinaryModuleDictionary`，按模块名索引二进制加固特性 |
 
 ### `rpc.iosBinaryInfo` — 解析 .app 模块的 Mach-O 头
-源码：`agent/src/ios/binary.ts:23`
+源码：[`agent/src/ios/binary.ts:23`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/binary.ts#L23)
 
 遍历 `Process.enumerateModules()`，对路径含 `.app` 的模块先用 `enumerateImports()` 收集导入符号集合，再借 `iosfilesystem.readFile` 把文件读进 `Buffer`，交给 `macho.parse`：
 ```ts
@@ -73,8 +73,8 @@ flowchart TD
 ## 🔍 源码索引
 | 符号 | 位置 |
 | --- | --- |
-| `isEncrypted` | `agent/src/ios/binary.ts:7` |
-| `info` | `agent/src/ios/binary.ts:23` |
+| `isEncrypted` | [`agent/src/ios/binary.ts:7`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/binary.ts#L7) |
+| `info` | [`agent/src/ios/binary.ts:23`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/binary.ts#L23) |
 
 ## 🔗 相关文档
 - [Frida 与 Agent](/guide/frida-agent)

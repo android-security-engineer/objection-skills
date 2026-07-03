@@ -29,7 +29,7 @@ Python 层极简：调用 `ios_nsuser_defaults_get()` 拿到字典，JSON 模式
 
 ### `get()` — 读取偏好
 
-源码：`objection/commands/ios/nsuserdefaults.py:9`
+源码：[`objection/commands/ios/nsuserdefaults.py:9`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/ios/nsuserdefaults.py#L9)
 
 ```python
 # objection/commands/ios/nsuserdefaults.py:18-19
@@ -37,7 +37,7 @@ api = state_connection.get_api()
 defaults = api.ios_nsuser_defaults_get()
 ```
 
-JSON 模式直接把 `defaults` 作为结果体（`objection/commands/ios/nsuserdefaults.py:21-25`）。
+JSON 模式直接把 `defaults` 作为结果体（[`objection/commands/ios/nsuserdefaults.py:21-25`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/ios/nsuserdefaults.py#L21)）。
 
 ```mermaid
 flowchart LR
@@ -55,7 +55,7 @@ flowchart LR
 
 | 符号 | 位置 |
 | --- | --- |
-| `get` | `objection/commands/ios/nsuserdefaults.py:9` |
+| `get` | [`objection/commands/ios/nsuserdefaults.py:9`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/ios/nsuserdefaults.py#L9) |
 
 ## 相关文档
 

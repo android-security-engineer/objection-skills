@@ -68,7 +68,7 @@ rpc.exports = {
 | 内联 | `ping` | 心跳 |
 
 ### `rpc.ping` — 心跳
-源码：`agent/src/index.ts:16`
+源码：[`agent/src/index.ts:16`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/index.ts#L16)
 最简单的 RPC，返回 `true`。Python 侧在 Agent 启动后用它确认脚本已注入并运行。
 
 ### ⚙️ 实现要点
@@ -103,15 +103,15 @@ flowchart LR
 ### 🔍 源码索引
 | 符号 | 位置 |
 | --- | --- |
-| `rpc.exports = { ... }` | `agent/src/index.ts:9` |
-| `ping` 内联 | `agent/src/index.ts:16` |
-| `import android` | `agent/src/index.ts:2` |
-| `import ios` | `agent/src/index.ts:4` |
-| `import env` | `agent/src/index.ts:3` |
-| `import jobs` | `agent/src/index.ts:5` |
-| `import memory` | `agent/src/index.ts:6` |
-| `import other` | `agent/src/index.ts:7` |
-| `import ping` | `agent/src/index.ts:1` |
+| `rpc.exports = { ... }` | [`agent/src/index.ts:9`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/index.ts#L9) |
+| `ping` 内联 | [`agent/src/index.ts:16`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/index.ts#L16) |
+| `import android` | [`agent/src/index.ts:2`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/index.ts#L2) |
+| `import ios` | [`agent/src/index.ts:4`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/index.ts#L4) |
+| `import env` | [`agent/src/index.ts:3`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/index.ts#L3) |
+| `import jobs` | [`agent/src/index.ts:5`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/index.ts#L5) |
+| `import memory` | [`agent/src/index.ts:6`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/index.ts#L6) |
+| `import other` | [`agent/src/index.ts:7`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/index.ts#L7) |
+| `import ping` | [`agent/src/index.ts:1`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/index.ts#L1) |
 
 ## 📂 分区入口
 

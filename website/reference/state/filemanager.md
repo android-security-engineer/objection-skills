@@ -17,7 +17,7 @@ objection 文件系统命令的「当前工作目录」单例。REPL 中 `cd` / 
 ## 🏗️ 核心结构
 
 ### `FileManagerState` — 工作目录容器
-源码：`objection/state/filemanager.py:1`
+源码：[`objection/state/filemanager.py:1`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/state/filemanager.py#L1)
 
 ```python
 class FileManagerState(object):
@@ -39,7 +39,7 @@ flowchart LR
 ```
 
 ### 模块级单例
-源码：`objection/state/filemanager.py:8`
+源码：[`objection/state/filemanager.py:8`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/state/filemanager.py#L8)
 
 ```python
 file_manager_state = FileManagerState()
@@ -53,9 +53,9 @@ file_manager_state = FileManagerState()
 ## 🔍 源码索引
 | 符号 | 位置 |
 | --- | --- |
-| `FileManagerState` | `objection/state/filemanager.py:1` |
-| `FileManagerState.__init__` | `objection/state/filemanager.py:4` |
-| `file_manager_state`（单例） | `objection/state/filemanager.py:8` |
+| `FileManagerState` | [`objection/state/filemanager.py:1`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/state/filemanager.py#L1) |
+| `FileManagerState.__init__` | [`objection/state/filemanager.py:4`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/state/filemanager.py#L4) |
+| `file_manager_state`（单例） | [`objection/state/filemanager.py:8`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/state/filemanager.py#L8) |
 
 ## 🔗 相关文档
 - [整体架构](/guide/architecture)

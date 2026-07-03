@@ -29,7 +29,7 @@
 
 ### `other` — 聚合对象
 
-源码：`agent/src/rpc/other.ts:4`
+源码：[`agent/src/rpc/other.ts:4`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/rpc/other.ts#L4)
 
 整个文件就是一张“RPC 名 → 箭头函数”映射表。`evaluate` 把 JS 字符串透传给 `custom.evaluate`；`httpServer*` 三个方法分别转发到 `http.start`/`status`/`stop`。注意 `generic/http.ts` 当前已禁用，`httpServerStart` 实际只会打印禁用提示。
 
@@ -77,11 +77,11 @@ flowchart LR
 
 | 符号 | 位置 |
 | --- | --- |
-| `other` 导出对象 | `agent/src/rpc/other.ts:4` |
-| `evaluate` | `agent/src/rpc/other.ts:5` |
-| `httpServerStart` | `agent/src/rpc/other.ts:8` |
-| `httpServerStatus` | `agent/src/rpc/other.ts:9` |
-| `httpServerStop` | `agent/src/rpc/other.ts:10` |
+| `other` 导出对象 | [`agent/src/rpc/other.ts:4`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/rpc/other.ts#L4) |
+| `evaluate` | [`agent/src/rpc/other.ts:5`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/rpc/other.ts#L5) |
+| `httpServerStart` | [`agent/src/rpc/other.ts:8`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/rpc/other.ts#L8) |
+| `httpServerStatus` | [`agent/src/rpc/other.ts:9`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/rpc/other.ts#L9) |
+| `httpServerStop` | [`agent/src/rpc/other.ts:10`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/rpc/other.ts#L10) |
 
 ## 🔗 相关文档
 

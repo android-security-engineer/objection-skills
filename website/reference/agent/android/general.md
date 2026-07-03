@@ -20,7 +20,7 @@
 | `androidDeoptimize` | 调用 `Java.deoptimizeEverything()` |
 
 ### `rpc.androidDeoptimize` — 全量 deopt
-源码：`agent/src/android/general.ts:6`
+源码：[`agent/src/android/general.ts:6`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/general.ts#L6)
 
 ```ts
 // agent/src/android/general.ts:6-10
@@ -34,7 +34,7 @@ export const deoptimize = (): Promise<void> => {
 ## ⚙️ 实现要点
 
 - `Java.deoptimizeEverything()` 是 frida-java-bridge 提供的 API，会让 ART 抛弃所有 quickening/optimizing 阶段产物，下次执行重新走解释器或 JIT，此时 Frida 的 `implementation` 替换一定生效。
-- 包在 `wrapJavaPerform` 内确保 Java 运行时已 attach（`libjava.ts:19`）。
+- 包在 `wrapJavaPerform` 内确保 Java 运行时已 attach（[`agent/src/android/lib/libjava.ts:19`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/lib/libjava.ts#L19)）。
 - 该操作开销大、会影响 App 性能，仅在排查 Hook 不生效时使用。
 
 ## 📐 调用关系
@@ -48,7 +48,7 @@ flowchart LR
 ## 🔍 源码索引
 | 符号 | 位置 |
 | --- | --- |
-| `deoptimize` | `agent/src/android/general.ts:6` |
+| `deoptimize` | [`agent/src/android/general.ts:6`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/general.ts#L6) |
 
 ## 🔗 相关文档
 - [Frida 与 Agent](/guide/frida-agent)

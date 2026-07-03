@@ -26,7 +26,7 @@
 
 ### `rpc.evaluate` — 执行任意 JS
 
-源码：`agent/src/generic/custom.ts:1`
+源码：[`agent/src/generic/custom.ts:1`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/generic/custom.ts#L1)
 
 `evaluate` 接收一段 JS 字符串 `js`，直接调用原生 `eval` 执行。代码中通过 `// tslint:disable-next-line:no-eval` 显式抑制了 TSLint 对 `eval` 的告警，表明这是有意为之的“后门”式能力。
 
@@ -58,8 +58,8 @@ flowchart LR
 
 | 符号 | 位置 |
 | --- | --- |
-| `evaluate` | `agent/src/generic/custom.ts:1` |
-| `eval(js)` 调用 | `agent/src/generic/custom.ts:3` |
+| `evaluate` | [`agent/src/generic/custom.ts:1`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/generic/custom.ts#L1) |
+| `eval(js)` 调用 | [`agent/src/generic/custom.ts:3`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/generic/custom.ts#L3) |
 
 ## 🔗 相关文档
 

@@ -144,9 +144,9 @@ sequenceDiagram
 
 | 内容 | 位置 |
 | --- | --- |
-| agent Job 类 | `agent/src/lib/jobs.ts:3` |
-| 撤销逻辑 | `agent/src/lib/jobs.ts:41` `killAll` |
-| 注册中心 | `agent/src/lib/jobs.ts:74` |
-| identifier 生成 | `agent/src/lib/jobs.ts:77` |
+| agent Job 类 | [`agent/src/lib/jobs.ts:3`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/lib/jobs.ts#L3) |
+| 撤销逻辑 | [`agent/src/lib/jobs.ts:41`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/lib/jobs.ts#L41) `killAll` |
+| 注册中心 | [`agent/src/lib/jobs.ts:74`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/lib/jobs.ts#L74) |
+| identifier 生成 | [`agent/src/lib/jobs.ts:77`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/lib/jobs.ts#L77) |
 | Python Job 状态 | `objection/state/jobs.py` |
-| 退出清理 | `objection/utils/agent.py:393` `teardown` |
+| 退出清理 | [`objection/utils/agent.py:393`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/agent.py#L393) `teardown` |

@@ -32,7 +32,7 @@
 
 ### `entries()` — 列出 KeyStore 条目
 
-源码：`objection/commands/android/keystore.py:8`
+源码：[`objection/commands/android/keystore.py:8`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/android/keystore.py#L8)
 
 无位置参数。调 `api.android_keystore_list()` 返回 `[{alias, is_key, is_certificate}, ...]`。JSON 模式返回 `result={'entries': ks, 'count': len(ks)}`；否则用 `tabulate` 渲染 Alias / Key / Certificate 三列。
 
@@ -53,7 +53,7 @@ click.secho(tabulate(output, headers=['Alias', 'Key', 'Certificate']))
 
 ### `detail()` — 列出条目详情
 
-源码：`objection/commands/android/keystore.py:30`
+源码：[`objection/commands/android/keystore.py:30`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/android/keystore.py#L30)
 
 调 `api.android_keystore_detail()` 返回更丰富的 dict 列表，字段含 `keystoreAlias`、`keyAlgorithm`、`keySize`、`blockModes`、`encryptionPaddings`、`digests`、`keyValidityStart`、`origin`、`purposes`、`signaturePaddings`、`isInsideSecureHardware`。列表型字段用 `','.join` 压成单格，11 列 tabulate。
 
@@ -79,7 +79,7 @@ output = [[
 
 ### `clear()` — 清空 KeyStore
 
-源码：`objection/commands/android/keystore.py:69`
+源码：[`objection/commands/android/keystore.py:69`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/android/keystore.py#L69)
 
 破坏性操作。**REPL 模式下用 `click.confirm` 二次确认**，输入非 yes 则中止；**JSON 模式跳过确认**（agent 无法回答交互 prompt），直接调 `api.android_keystore_clear()`。
 
@@ -96,7 +96,7 @@ api.android_keystore_clear()
 
 ### `watch()` — 监听 KeyStore 使用
 
-源码：`objection/commands/android/keystore.py:93`
+源码：[`objection/commands/android/keystore.py:93`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/android/keystore.py#L93)
 
 无参数。调 `api.android_keystore_watch()` 注册异步作业，hook `Cipher.init`/`Signature`/`Mac` 等 KeyStore 相关调用。命中数据通过异步消息到达，`CommandResult.warnings` 提示作业 id 需经 `agent state` 查询。
 
@@ -137,10 +137,10 @@ flowchart LR
 
 | 符号 | 位置 |
 | --- | --- |
-| `entries` | `objection/commands/android/keystore.py:8` |
-| `detail` | `objection/commands/android/keystore.py:30` |
-| `clear` | `objection/commands/android/keystore.py:69` |
-| `watch` | `objection/commands/android/keystore.py:93` |
+| `entries` | [`objection/commands/android/keystore.py:8`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/android/keystore.py#L8) |
+| `detail` | [`objection/commands/android/keystore.py:30`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/android/keystore.py#L30) |
+| `clear` | [`objection/commands/android/keystore.py:69`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/android/keystore.py#L69) |
+| `watch` | [`objection/commands/android/keystore.py:93`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/android/keystore.py#L93) |
 
 ## 相关文档
 

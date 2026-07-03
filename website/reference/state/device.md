@@ -18,7 +18,7 @@
 ## 🏗️ 核心结构
 
 ### `Device` / `Android` / `Ios` — 平台常量类
-源码：`objection/state/device.py:1`、`:6`、`:13`
+源码：[`objection/state/device.py:1`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/state/device.py#L1)、`:6`、`:13`
 
 ```python
 class Device(object):
@@ -37,7 +37,7 @@ class Ios(Device):
 `Android` / `Ios` 是带类属性的「枚举式」类型，用类本身（而非实例）作为 `device_state.platform` 的取值，命令层可用 `platform == Android` 做身份比较。
 
 ### `DeviceState` — 平台与版本容器
-源码：`objection/state/device.py:20`
+源码：[`objection/state/device.py:20`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/state/device.py#L20)
 
 ```python
 class DeviceState(object):
@@ -63,7 +63,7 @@ flowchart LR
 ```
 
 ### `__repr__`
-源码：`objection/state/device.py:46`
+源码：[`objection/state/device.py:46`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/state/device.py#L46)
 
 ```python
 def __repr__(self) -> str:
@@ -73,7 +73,7 @@ def __repr__(self) -> str:
 供 REPL 提示符与调试输出使用。
 
 ### 模块级单例
-源码：`objection/state/device.py:50`
+源码：[`objection/state/device.py:50`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/state/device.py#L50)
 
 ```python
 device_state = DeviceState()
@@ -87,14 +87,14 @@ device_state = DeviceState()
 ## 🔍 源码索引
 | 符号 | 位置 |
 | --- | --- |
-| `Device` | `objection/state/device.py:1` |
-| `Android` | `objection/state/device.py:6` |
-| `Ios` | `objection/state/device.py:13` |
-| `DeviceState` | `objection/state/device.py:20` |
-| `set_version` | `objection/state/device.py:26` |
-| `set_platform` | `objection/state/device.py:36` |
-| `__repr__` | `objection/state/device.py:46` |
-| `device_state`（单例） | `objection/state/device.py:50` |
+| `Device` | [`objection/state/device.py:1`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/state/device.py#L1) |
+| `Android` | [`objection/state/device.py:6`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/state/device.py#L6) |
+| `Ios` | [`objection/state/device.py:13`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/state/device.py#L13) |
+| `DeviceState` | [`objection/state/device.py:20`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/state/device.py#L20) |
+| `set_version` | [`objection/state/device.py:26`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/state/device.py#L26) |
+| `set_platform` | [`objection/state/device.py:36`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/state/device.py#L36) |
+| `__repr__` | [`objection/state/device.py:46`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/state/device.py#L46) |
+| `device_state`（单例） | [`objection/state/device.py:50`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/state/device.py#L50) |
 
 ## 🔗 相关文档
 - [整体架构](/guide/architecture)

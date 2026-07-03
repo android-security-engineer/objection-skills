@@ -33,7 +33,7 @@
 
 ### `analyze_implicit_intents()` — 分析隐式 Intent
 
-源码：`objection/commands/android/intents.py:21`
+源码：[`objection/commands/android/intents.py:21`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/android/intents.py#L21)
 
 无位置参数，仅看 `--dump-backtrace` 标志。调 `api.android_intent_analyze(should_backtrace)` 注册 hook，拦截 `Context.startActivity`/`startService` 等。命中数据异步到达。
 
@@ -46,7 +46,7 @@ api.android_intent_analyze(should_backtrace)
 
 ### `launch_activity()` — 启动 Activity
 
-源码：`objection/commands/android/intents.py:46`
+源码：[`objection/commands/android/intents.py:46`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/android/intents.py#L46)
 
 `args[0]` 为 Activity 全限定类名，调 `api.android_intent_start_activity(intent_class)`。agent 侧构造 `Intent` 并 `startActivity`。
 
@@ -59,7 +59,7 @@ api.android_intent_start_activity(intent_class)
 
 ### `launch_service()` — 启动 Service
 
-源码：`objection/commands/android/intents.py:76`
+源码：[`objection/commands/android/intents.py:76`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/android/intents.py#L76)
 
 同上，调 `api.android_intent_start_service(intent_class)`。
 
@@ -82,10 +82,10 @@ flowchart LR
 
 | 符号 | 位置 |
 | --- | --- |
-| `_should_dump_backtrace` | `objection/commands/android/intents.py:10` |
-| `analyze_implicit_intents` | `objection/commands/android/intents.py:21` |
-| `launch_activity` | `objection/commands/android/intents.py:46` |
-| `launch_service` | `objection/commands/android/intents.py:76` |
+| `_should_dump_backtrace` | [`objection/commands/android/intents.py:10`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/android/intents.py#L10) |
+| `analyze_implicit_intents` | [`objection/commands/android/intents.py:21`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/android/intents.py#L21) |
+| `launch_activity` | [`objection/commands/android/intents.py:46`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/android/intents.py#L46) |
+| `launch_service` | [`objection/commands/android/intents.py:76`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/android/intents.py#L76) |
 
 ## 相关文档
 

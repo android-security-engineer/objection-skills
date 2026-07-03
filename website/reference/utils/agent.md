@@ -19,7 +19,7 @@
 ## 🏗️ 核心结构
 
 ### `AgentConfig` — 注入配置数据类
-源码：`objection/utils/agent.py:19`
+源码：[`objection/utils/agent.py:19`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/agent.py#L19)
 
 ```python
 @dataclass
@@ -39,7 +39,7 @@ class AgentConfig(object):
 由 `console/cli.py` 在解析参数后构造，传入 `Agent(config=...)`。`spawn`/`pause` 的组合决定进程是「拉起后暂停等待 Hook 就绪」还是「直接放行」；`uid` 仅 Android 生效，用于以指定 uid 拉起进程。
 
 ### `OutputHandlers` — Frida 回调集合
-源码：`objection/utils/agent.py:35`
+源码：[`objection/utils/agent.py:35`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/agent.py#L35)
 
 三个回调：
 - `device_output()` / `device_lost()`：设备级事件占位（默认空实现）。
@@ -60,15 +60,15 @@ def script_on_message(message: dict, data):
         # ... 处理 payload 打印
 ```
 
-源码：`objection/utils/agent.py:78`。注意此处用函数内延迟导入 `from .events import record_event`，避免 `agent` ↔ `events` 模块循环依赖——`events` 反向依赖 `output.is_json_output`，而 `output` 不依赖 `agent`，这条延迟导入链是安全的。
+源码：[`objection/utils/agent.py:78`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/agent.py#L78)。注意此处用函数内延迟导入 `from .events import record_event`，避免 `agent` ↔ `events` 模块循环依赖——`events` 反向依赖 `output.is_json_output`，而 `output` 不依赖 `agent`，这条延迟导入链是安全的。
 
 ### `Agent` — 生命周期主体
-源码：`objection/utils/agent.py:116`
+源码：[`objection/utils/agent.py:116`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/agent.py#L116)
 
 类属性持有整条 Frida 句柄链：`device` → `session` → `script`，外加 `pid` 与 `resumed` 状态。
 
 #### `__init__` — 定位 agent.js 并注册退出清理
-源码：`objection/utils/agent.py:131`
+源码：[`objection/utils/agent.py:131`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/agent.py#L131)
 
 ```python
 self.agent_path = Path(__file__).parent.parent / 'agent.js'
@@ -79,7 +79,7 @@ if not self.agent_path.exists():
 `agent.js` 是预先编译好的 Frida 脚本（位于 objection 包根目录）。开发安装若未构建会在此抛错。`atexit.register(self.teardown)` 确保进程退出时统一卸载。
 
 #### `set_device` — 设备选择
-源码：`objection/utils/agent.py:159`
+源码：[`objection/utils/agent.py:159`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/agent.py#L159)
 
 按优先级解析目标设备：
 1. `device_id` 指定 → `frida.get_device(id)`。
@@ -90,7 +90,7 @@ if not self.agent_path.exists():
 并注册 `device.on('output')` / `device.on('lost')` 回调。
 
 #### `set_target_pid` — 进程定位（最复杂的方法）
-源码：`objection/utils/agent.py:194`
+源码：[`objection/utils/agent.py:194`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/agent.py#L194)
 
 按 `foremost` → `spawn` → 已有进程 的优先级解析 PID：
 
@@ -121,7 +121,7 @@ flowchart TD
 `spawn` 路径会把 `self.resumed = False`，等待后续 `resume()` 调用，给 Hook 装载留窗口。
 
 #### `attach` — 注入脚本
-源码：`objection/utils/agent.py:280`
+源码：[`objection/utils/agent.py:280`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/agent.py#L280)
 
 ```python
 self.session = self.device.attach(self.pid)
@@ -138,20 +138,20 @@ self.script.load()
 `debugger=True` 时强制 V8 runtime 并启用 Chrome DevTools 调试（`chrome://inspect`）。`_get_agent_source()` 把 `agent.js` 整文件读成字符串塞给 `create_script`。
 
 #### `attach_script` — 注入额外脚本作为 Job
-源码：`objection/utils/agent.py:308`
+源码：[`objection/utils/agent.py:308`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/agent.py#L308)
 
 为 `android heap invoke`、自定义脚本运行等场景提供独立 session+script，并注册进 `job_manager_state` 以便统一卸载。
 
 #### `update_device_state` — 推断平台
-源码：`objection/utils/agent.py:325`
+源码：[`objection/utils/agent.py:325`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/agent.py#L325)
 
 优先用 `device.query_system_parameters()['os']['id']` 判定 iOS/Android；若不是这两者（如 Windows/macOS 桌面进程），则回退调用 `self.exports().env_runtime()` 让 agent 自报运行时。结果写入 `device_state`，决定后续命令走 iOS 还是 Android 分支。
 
 #### `resume` / `exports` / `run` / `teardown`
-- `resume()`：`objection/utils/agent.py:350`，仅当 `resumed=False` 时 `device.resume(pid)`。
-- `exports()`：`objection/utils/agent.py:366`，返回 `script.exports_sync`，这是命令层调用 agent RPC 的入口。
-- `run()`：`objection/utils/agent.py:378`，编排 `set_device → set_target_pid → attach → update_device_state → (条件)resume`。
-- `teardown()`：`objection/utils/agent.py:397`，先 `job_manager_state.cleanup()` 让 Job 自停，再 `script.unload()`，捕获 `frida.InvalidOperationError`。
+- `resume()`：[`objection/utils/agent.py:350`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/agent.py#L350)，仅当 `resumed=False` 时 `device.resume(pid)`。
+- `exports()`：[`objection/utils/agent.py:366`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/agent.py#L366)，返回 `script.exports_sync`，这是命令层调用 agent RPC 的入口。
+- `run()`：[`objection/utils/agent.py:378`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/agent.py#L378)，编排 `set_device → set_target_pid → attach → update_device_state → (条件)resume`。
+- `teardown()`：[`objection/utils/agent.py:397`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/agent.py#L397)，先 `job_manager_state.cleanup()` 让 Job 自停，再 `script.unload()`，捕获 `frida.InvalidOperationError`。
 
 ```mermaid
 sequenceDiagram
@@ -182,22 +182,22 @@ sequenceDiagram
 ## 🔍 源码索引
 | 符号 | 位置 |
 | --- | --- |
-| `AgentConfig` | `objection/utils/agent.py:19` |
-| `OutputHandlers` | `objection/utils/agent.py:35` |
-| `OutputHandlers.session_on_detached` | `objection/utils/agent.py:44` |
-| `OutputHandlers.script_on_message` | `objection/utils/agent.py:78` |
-| `Agent` | `objection/utils/agent.py:116` |
-| `Agent.__init__` | `objection/utils/agent.py:131` |
-| `_get_agent_source` | `objection/utils/agent.py:147` |
-| `set_device` | `objection/utils/agent.py:159` |
-| `set_target_pid` | `objection/utils/agent.py:194` |
-| `attach` | `objection/utils/agent.py:280` |
-| `attach_script` | `objection/utils/agent.py:308` |
-| `update_device_state` | `objection/utils/agent.py:325` |
-| `resume` | `objection/utils/agent.py:350` |
-| `exports` | `objection/utils/agent.py:366` |
-| `run` | `objection/utils/agent.py:378` |
-| `teardown` | `objection/utils/agent.py:397` |
+| `AgentConfig` | [`objection/utils/agent.py:19`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/agent.py#L19) |
+| `OutputHandlers` | [`objection/utils/agent.py:35`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/agent.py#L35) |
+| `OutputHandlers.session_on_detached` | [`objection/utils/agent.py:44`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/agent.py#L44) |
+| `OutputHandlers.script_on_message` | [`objection/utils/agent.py:78`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/agent.py#L78) |
+| `Agent` | [`objection/utils/agent.py:116`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/agent.py#L116) |
+| `Agent.__init__` | [`objection/utils/agent.py:131`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/agent.py#L131) |
+| `_get_agent_source` | [`objection/utils/agent.py:147`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/agent.py#L147) |
+| `set_device` | [`objection/utils/agent.py:159`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/agent.py#L159) |
+| `set_target_pid` | [`objection/utils/agent.py:194`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/agent.py#L194) |
+| `attach` | [`objection/utils/agent.py:280`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/agent.py#L280) |
+| `attach_script` | [`objection/utils/agent.py:308`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/agent.py#L308) |
+| `update_device_state` | [`objection/utils/agent.py:325`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/agent.py#L325) |
+| `resume` | [`objection/utils/agent.py:350`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/agent.py#L350) |
+| `exports` | [`objection/utils/agent.py:366`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/agent.py#L366) |
+| `run` | [`objection/utils/agent.py:378`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/agent.py#L378) |
+| `teardown` | [`objection/utils/agent.py:397`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/agent.py#L397) |
 
 ## 🔗 相关文档
 - [整体架构](/guide/architecture)

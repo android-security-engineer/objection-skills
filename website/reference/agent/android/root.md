@@ -8,7 +8,7 @@
 | --- | --- |
 | 源码路径 | `agent/src/android/root.ts` |
 | 平台 | Android（Java 层） |
-| 导出的 RPC | `disable`（`agent/src/rpc/android.ts:90` → `androidRootDetectionDisable`）、`enable`（`agent/src/rpc/android.ts:91` → `androidRootDetectionEnable`） |
+| 导出的 RPC | `disable`（[`agent/src/rpc/android.ts:90`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/rpc/android.ts#L90) → `androidRootDetectionDisable`）、`enable`（[`agent/src/rpc/android.ts:91`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/rpc/android.ts#L91) → `androidRootDetectionEnable`） |
 | 依赖 | `../lib/jobs.js`、`../lib/color.js`、`./lib/libjava.js`、`./lib/types.js` |
 
 ## 🎯 解决的问题
@@ -27,7 +27,7 @@
 
 ### `rpc.disable` — 让检测返回“未 root”
 
-源码：`agent/src/android/root.ts:430`
+源码：[`agent/src/android/root.ts:430`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/root.ts#L430)
 
 `disable()` 对每个 helper 传入 `success=false`，表示“把检测结果标记为未 root”。所有 helper 在 `Java.perform` 内替换方法实现；RootBeer/JailMonkey 相关类不存在时返回 `null`，由 `Job.addImplementation` 跳过。
 
@@ -46,13 +46,13 @@ export const disable = async (): Promise<void> => {
 
 ### `rpc.enable` — 让检测返回“已 root”
 
-源码：`agent/src/android/root.ts:450`
+源码：[`agent/src/android/root.ts:450`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/root.ts#L450)
 
 `enable()` 用于反向验证：把检测结果强制为“已 root”，观察 App 是否因此触发额外行为，从而确认对应检测点已被 Hook 覆盖。注意 `rootBeerCheckSeLinux` 在 enable 分支里仍传 `false`（源码 `agent/src/root.ts` 第 466 行），与 disable 一致。
 
 ### 关键 helper：`testKeysCheck`
 
-源码：`agent/src/android/root.ts:30`
+源码：[`agent/src/android/root.ts:30`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/root.ts#L30)
 
 不直接 Hook `Build.TAGS`，而是 Hook `java.lang.String.contains`，仅在参数为 `"test-keys"` 时返回伪造结果，其余字符串走原实现，避免误伤业务逻辑。
 
@@ -66,19 +66,19 @@ JavaString.contains.implementation = function (name) {
 
 ### 关键 helper：`execSuCheck`
 
-源码：`agent/src/android/root.ts:52`
+源码：[`agent/src/android/root.ts:52`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/root.ts#L52)
 
 Hook `Runtime.exec(String)`，当命令以 `"su"` 结尾时：`success=true` 放行原调用，`success=false` 抛 `java.io.IOException("objection anti-root")`。
 
 ### 关键 helper：`fileExistsCheck`
 
-源码：`agent/src/android/root.ts:77`
+源码：[`agent/src/android/root.ts:77`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/root.ts#L77)
 
-Hook `java.io.File.exists()`，对 `commonPaths` 列表中的 13 条 su 路径返回伪造值，其余路径走原实现。`commonPaths` 定义在 `agent/src/android/root.ts:14`。
+Hook `java.io.File.exists()`，对 `commonPaths` 列表中的 13 条 su 路径返回伪造值，其余路径走原实现。`commonPaths` 定义在 [`agent/src/android/root.ts:14`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/root.ts#L14)。
 
 ### 关键 helper：`jailMonkeyBypass`
 
-源码：`agent/src/android/root.ts:378`
+源码：[`agent/src/android/root.ts:378`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/root.ts#L378)
 
 Hook `com.gantix.JailMonkey.JailMonkeyModule.getConstants()`，返回一个 `java.util.HashMap`，对 `isJailBroken`、`hookDetected`、`canMockLocation`、`isOnExternalStorage`、`AdbEnabled` 五个键统一填 `Boolean.TRUE` 或 `Boolean.FALSE`。
 
@@ -97,14 +97,14 @@ JavaJailMonkeyModule.getConstants.implementation = function () {
 
 | helper | 目标方法 | 位置 |
 | --- | --- | --- |
-| `rootBeerIsRooted` | `RootBeer.isRooted()` | `agent/src/android/root.ts:108` |
-| `rootBeerCheckForBinary` | `RootBeer.checkForBinary(String)` | `agent/src/android/root.ts:143` |
-| `rootBeerCheckForDangerousProps` | `RootBeer.checkForDangerousProps()` | `agent/src/android/root.ts:176` |
-| `rootBeerDetectRootCloakingApps` | `RootBeer.detectRootCloakingApps()` | `agent/src/android/root.ts:209` |
-| `rootBeerCheckSuExists` | `RootBeer.checkSuExists()` | `agent/src/android/root.ts:244` |
-| `rootBeerDetectTestKeys` | `RootBeer.detectTestKeys()` | `agent/src/android/root.ts:277` |
-| `rootBeerCheckSeLinux` | `com.scottyab.rootbeer.util.isSelinuxFlagInEnabled()` | `agent/src/android/root.ts:310` |
-| `rootBeerNative` | `RootBeerNative.checkForRoot([Ljava.lang.Object;)` | `agent/src/android/root.ts:343` |
+| `rootBeerIsRooted` | `RootBeer.isRooted()` | [`agent/src/android/root.ts:108`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/root.ts#L108) |
+| `rootBeerCheckForBinary` | `RootBeer.checkForBinary(String)` | [`agent/src/android/root.ts:143`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/root.ts#L143) |
+| `rootBeerCheckForDangerousProps` | `RootBeer.checkForDangerousProps()` | [`agent/src/android/root.ts:176`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/root.ts#L176) |
+| `rootBeerDetectRootCloakingApps` | `RootBeer.detectRootCloakingApps()` | [`agent/src/android/root.ts:209`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/root.ts#L209) |
+| `rootBeerCheckSuExists` | `RootBeer.checkSuExists()` | [`agent/src/android/root.ts:244`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/root.ts#L244) |
+| `rootBeerDetectTestKeys` | `RootBeer.detectTestKeys()` | [`agent/src/android/root.ts:277`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/root.ts#L277) |
+| `rootBeerCheckSeLinux` | `com.scottyab.rootbeer.util.isSelinuxFlagInEnabled()` | [`agent/src/android/root.ts:310`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/root.ts#L310) |
+| `rootBeerNative` | `RootBeerNative.checkForRoot([Ljava.lang.Object;)` | [`agent/src/android/root.ts:343`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/root.ts#L343) |
 
 ```mermaid
 flowchart TD
@@ -133,21 +133,21 @@ flowchart TD
 
 | 符号 | 位置 |
 | --- | --- |
-| `commonPaths` | `agent/src/android/root.ts:14` |
-| `testKeysCheck` | `agent/src/android/root.ts:30` |
-| `execSuCheck` | `agent/src/android/root.ts:52` |
-| `fileExistsCheck` | `agent/src/android/root.ts:77` |
-| `rootBeerIsRooted` | `agent/src/android/root.ts:108` |
-| `rootBeerCheckForBinary` | `agent/src/android/root.ts:143` |
-| `rootBeerCheckForDangerousProps` | `agent/src/android/root.ts:176` |
-| `rootBeerDetectRootCloakingApps` | `agent/src/android/root.ts:209` |
-| `rootBeerCheckSuExists` | `agent/src/android/root.ts:244` |
-| `rootBeerDetectTestKeys` | `agent/src/android/root.ts:277` |
-| `rootBeerCheckSeLinux` | `agent/src/android/root.ts:310` |
-| `rootBeerNative` | `agent/src/android/root.ts:343` |
-| `jailMonkeyBypass` | `agent/src/android/root.ts:378` |
-| `export const disable` | `agent/src/android/root.ts:430` |
-| `export const enable` | `agent/src/android/root.ts:450` |
+| `commonPaths` | [`agent/src/android/root.ts:14`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/root.ts#L14) |
+| `testKeysCheck` | [`agent/src/android/root.ts:30`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/root.ts#L30) |
+| `execSuCheck` | [`agent/src/android/root.ts:52`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/root.ts#L52) |
+| `fileExistsCheck` | [`agent/src/android/root.ts:77`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/root.ts#L77) |
+| `rootBeerIsRooted` | [`agent/src/android/root.ts:108`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/root.ts#L108) |
+| `rootBeerCheckForBinary` | [`agent/src/android/root.ts:143`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/root.ts#L143) |
+| `rootBeerCheckForDangerousProps` | [`agent/src/android/root.ts:176`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/root.ts#L176) |
+| `rootBeerDetectRootCloakingApps` | [`agent/src/android/root.ts:209`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/root.ts#L209) |
+| `rootBeerCheckSuExists` | [`agent/src/android/root.ts:244`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/root.ts#L244) |
+| `rootBeerDetectTestKeys` | [`agent/src/android/root.ts:277`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/root.ts#L277) |
+| `rootBeerCheckSeLinux` | [`agent/src/android/root.ts:310`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/root.ts#L310) |
+| `rootBeerNative` | [`agent/src/android/root.ts:343`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/root.ts#L343) |
+| `jailMonkeyBypass` | [`agent/src/android/root.ts:378`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/root.ts#L378) |
+| `export const disable` | [`agent/src/android/root.ts:430`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/root.ts#L430) |
+| `export const enable` | [`agent/src/android/root.ts:450`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/root.ts#L450) |
 
 ## 🔗 相关文档
 

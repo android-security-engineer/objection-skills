@@ -21,12 +21,12 @@
 ## 🏗️ 核心结构
 
 ### `AndroidGadget` — Android gadget 下载/管理
-源码：`objection/utils/patchers/android.py:19`
+源码：[`objection/utils/patchers/android.py:19`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/android.py#L19)
 
 继承 `BasePlatformGadget`。核心是架构映射表和下载流程。
 
 ### `AndroidGadget.architectures` — ABI 映射表
-源码：`objection/utils/patchers/android.py:27`
+源码：[`objection/utils/patchers/android.py:27`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/android.py#L27)
 
 ```python
 architectures = {
@@ -42,7 +42,7 @@ architectures = {
 键是 Android ABI 名（APK 的 `lib/` 子目录名），值是 Frida gadget 的 arch 命名。`armeabi`/`armeabi-v7a` 都映射到 `arm`，`arm64`/`arm64-v8a` 都映射到 `arm64`——Frida 不区分 v7a 与 v1，统一用 `arm`。
 
 ### `AndroidGadget._get_download_url` — 从 assets 里挑 URL
-源码：`objection/utils/patchers/android.py:131`
+源码：[`objection/utils/patchers/android.py:131`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/android.py#L131)
 
 ```python
 def _get_download_url(self) -> str:
@@ -64,12 +64,12 @@ def _get_download_url(self) -> str:
 匹配规则：asset 名以 `frida-gadget-` 开头、以 `android-<arch>.so.xz` 结尾。如 `frida-gadget-16.7.19-android-arm64.so.xz`。`.xz` 是压缩格式，`download()` 流式存盘后 `unpack()` 用 `lzma` 解压。
 
 ### `AndroidPatcher` — APK 改造器
-源码：`objection/utils/patchers/android.py:182`
+源码：[`objection/utils/patchers/android.py:182`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/android.py#L182)
 
 继承 `BasePlatformPatcher`。`required_commands` 声明 5 个外部依赖（`aapt`/`adb`/`apksigner`/`apktool`/`zipalign`）。构造时建临时目录、绑定 objection 自带 keystore 与 network_security_config 资产。
 
 ### `AndroidPatcher.required_commands` — 外部工具依赖
-源码：`objection/utils/patchers/android.py:185`
+源码：[`objection/utils/patchers/android.py:185`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/android.py#L185)
 
 ```python
 required_commands = {
@@ -84,7 +84,7 @@ required_commands = {
 基类 `_check_commands` 会用 `shutil.which` 探测每个命令，找不到时按 `installation` 文案提示用户安装。
 
 ### `AndroidPatcher.is_apktool_ready` — apktool 版本校验
-源码：`objection/utils/patchers/android.py:220`
+源码：[`objection/utils/patchers/android.py:220`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/android.py#L220)
 
 ```python
 def is_apktool_ready(self) -> bool:
@@ -114,7 +114,7 @@ def is_apktool_ready(self) -> bool:
 三重容错解析 apktool 版本号：取首行（Windows 的「Press any key」尾巴）、再取空格分隔第二段（`apktool v 2.x` 类输出）。用 `semver.compare` 比 `2.6.0`，低于则拒绝。最后跑一次 `empty-frameworks-dir` 清理框架缓存（避免旧 framework 污染本次 decode）。
 
 ### `AndroidPatcher._get_launchable_activity` — 定位启动 Activity
-源码：`objection/utils/patchers/android.py:328`
+源码：[`objection/utils/patchers/android.py:328`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/android.py#L328)
 
 ```python
 def _get_launchable_activity(self) -> str:
@@ -142,7 +142,7 @@ def _get_launchable_activity(self) -> str:
 两级回退：先 `aapt dump badging` 正则匹配 `launchable-activity: name='...'`；aapt 拿不到（如 `activity-alias` 启动）则手动解析 manifest 找带 `LAUNCHER` category 的 `activity-alias`，取其 `targetActivity`。
 
 ### `AndroidPatcher._patch_smali_with_load_library` — smali 注入核心
-源码：`objection/utils/patchers/android.py:704`
+源码：[`objection/utils/patchers/android.py:704`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/android.py#L704)
 
 按启动类是否已有 `<clinit>` 选两种注入模板：
 
@@ -170,7 +170,7 @@ else:
 两种模板都加载名为 `frida-gadget` 的共享库（对应 `libfrida-gadget.so`）。`full` 版自成完整方法，`partial` 版只插两行寄存器指令，落在已有方法体开头（`.locals`/annotation 之后）。
 
 ### `AndroidPatcher._revalue_locals_count` — 修正寄存器计数
-源码：`objection/utils/patchers/android.py:760`
+源码：[`objection/utils/patchers/android.py:760`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/android.py#L760)
 
 `partial_load_library` 用了 `v0` 寄存器，若原方法 `.locals 0` 会寄存器不足导致验证失败。本方法找到注入所在方法的第一个 `.locals N`，把 `N` 加 1：
 
@@ -186,12 +186,12 @@ patched_smali[locals_smali_offset] = patched_smali[locals_smali_offset].replace(
 失败只警告不中断（很多时候 `.locals` 不准也不致命，`--pause` 可手动修）。
 
 ### `AndroidPatcher.inject_load_library` — 注入主流程
-源码：`objection/utils/patchers/android.py:816`
+源码：[`objection/utils/patchers/android.py:816`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/android.py#L816)
 
 定位 smali 文件 → 读行 → 找 `# direct methods` 注入点 → `_patch_smali_with_load_library` → `_revalue_locals_count` → 写回。注入点选 `# direct methods` 注释下一行，确保注入的静态构造器落在直接方法区。
 
 ### `AndroidPatcher._determine_smali_path_for_class` — 多 dex 查找
-源码：`objection/utils/patchers/android.py:586`
+源码：[`objection/utils/patchers/android.py:586`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/android.py#L586)
 
 先查 `smali/<class>.smali`，找不到则遍历 `smali_classes2`~`smali_classes99`（multidex）。找不到抛 `Unable to find smali to patch!`。
 
@@ -237,34 +237,34 @@ flowchart TD
 ## 🔍 源码索引
 | 符号 | 位置 |
 | --- | --- |
-| `AndroidGadget` | `objection/utils/patchers/android.py:19` |
-| `AndroidGadget.architectures` | `objection/utils/patchers/android.py:27` |
-| `AndroidGadget.get_frida_library_path` | `objection/utils/patchers/android.py:81` |
-| `AndroidGadget.download` | `objection/utils/patchers/android.py:107` |
-| `AndroidGadget._get_download_url` | `objection/utils/patchers/android.py:131` |
-| `AndroidGadget.unpack` | `objection/utils/patchers/android.py:155` |
-| `AndroidPatcher` | `objection/utils/patchers/android.py:182` |
-| `AndroidPatcher.required_commands` | `objection/utils/patchers/android.py:185` |
-| `AndroidPatcher.is_apktool_ready` | `objection/utils/patchers/android.py:220` |
-| `AndroidPatcher._get_android_manifest` | `objection/utils/patchers/android.py:285` |
-| `AndroidPatcher._get_appt_output` | `objection/utils/patchers/android.py:305` |
-| `AndroidPatcher._get_launchable_activity` | `objection/utils/patchers/android.py:328` |
-| `AndroidPatcher.unpack_apk` | `objection/utils/patchers/android.py:400` |
-| `AndroidPatcher.inject_internet_permission` | `objection/utils/patchers/android.py:429` |
-| `AndroidPatcher.extract_native_libs_patch` | `objection/utils/patchers/android.py:463` |
-| `AndroidPatcher.flip_debug_flag_to_true` | `objection/utils/patchers/android.py:496` |
-| `AndroidPatcher.add_network_security_config` | `objection/utils/patchers/android.py:531` |
-| `AndroidPatcher._determine_smali_path_for_class` | `objection/utils/patchers/android.py:586` |
-| `AndroidPatcher._determine_end_of_smali_method_from_line` | `objection/utils/patchers/android.py:630` |
-| `AndroidPatcher._determine_first_inject_point_of_smali_method_from_line` | `objection/utils/patchers/android.py:665` |
-| `AndroidPatcher._patch_smali_with_load_library` | `objection/utils/patchers/android.py:704` |
-| `AndroidPatcher._revalue_locals_count` | `objection/utils/patchers/android.py:760` |
-| `AndroidPatcher.inject_load_library` | `objection/utils/patchers/android.py:816` |
-| `AndroidPatcher.add_gadget_to_apk` | `objection/utils/patchers/android.py:867` |
-| `AndroidPatcher.build_new_apk` | `objection/utils/patchers/android.py:892` |
-| `AndroidPatcher.zipalign_apk` | `objection/utils/patchers/android.py:918` |
-| `AndroidPatcher.sign_apk` | `objection/utils/patchers/android.py:942` |
-| `AndroidPatcher.__del__` | `objection/utils/patchers/android.py:974` |
+| `AndroidGadget` | [`objection/utils/patchers/android.py:19`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/android.py#L19) |
+| `AndroidGadget.architectures` | [`objection/utils/patchers/android.py:27`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/android.py#L27) |
+| `AndroidGadget.get_frida_library_path` | [`objection/utils/patchers/android.py:81`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/android.py#L81) |
+| `AndroidGadget.download` | [`objection/utils/patchers/android.py:107`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/android.py#L107) |
+| `AndroidGadget._get_download_url` | [`objection/utils/patchers/android.py:131`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/android.py#L131) |
+| `AndroidGadget.unpack` | [`objection/utils/patchers/android.py:155`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/android.py#L155) |
+| `AndroidPatcher` | [`objection/utils/patchers/android.py:182`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/android.py#L182) |
+| `AndroidPatcher.required_commands` | [`objection/utils/patchers/android.py:185`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/android.py#L185) |
+| `AndroidPatcher.is_apktool_ready` | [`objection/utils/patchers/android.py:220`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/android.py#L220) |
+| `AndroidPatcher._get_android_manifest` | [`objection/utils/patchers/android.py:285`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/android.py#L285) |
+| `AndroidPatcher._get_appt_output` | [`objection/utils/patchers/android.py:305`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/android.py#L305) |
+| `AndroidPatcher._get_launchable_activity` | [`objection/utils/patchers/android.py:328`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/android.py#L328) |
+| `AndroidPatcher.unpack_apk` | [`objection/utils/patchers/android.py:400`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/android.py#L400) |
+| `AndroidPatcher.inject_internet_permission` | [`objection/utils/patchers/android.py:429`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/android.py#L429) |
+| `AndroidPatcher.extract_native_libs_patch` | [`objection/utils/patchers/android.py:463`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/android.py#L463) |
+| `AndroidPatcher.flip_debug_flag_to_true` | [`objection/utils/patchers/android.py:496`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/android.py#L496) |
+| `AndroidPatcher.add_network_security_config` | [`objection/utils/patchers/android.py:531`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/android.py#L531) |
+| `AndroidPatcher._determine_smali_path_for_class` | [`objection/utils/patchers/android.py:586`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/android.py#L586) |
+| `AndroidPatcher._determine_end_of_smali_method_from_line` | [`objection/utils/patchers/android.py:630`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/android.py#L630) |
+| `AndroidPatcher._determine_first_inject_point_of_smali_method_from_line` | [`objection/utils/patchers/android.py:665`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/android.py#L665) |
+| `AndroidPatcher._patch_smali_with_load_library` | [`objection/utils/patchers/android.py:704`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/android.py#L704) |
+| `AndroidPatcher._revalue_locals_count` | [`objection/utils/patchers/android.py:760`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/android.py#L760) |
+| `AndroidPatcher.inject_load_library` | [`objection/utils/patchers/android.py:816`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/android.py#L816) |
+| `AndroidPatcher.add_gadget_to_apk` | [`objection/utils/patchers/android.py:867`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/android.py#L867) |
+| `AndroidPatcher.build_new_apk` | [`objection/utils/patchers/android.py:892`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/android.py#L892) |
+| `AndroidPatcher.zipalign_apk` | [`objection/utils/patchers/android.py:918`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/android.py#L918) |
+| `AndroidPatcher.sign_apk` | [`objection/utils/patchers/android.py:942`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/android.py#L942) |
+| `AndroidPatcher.__del__` | [`objection/utils/patchers/android.py:974`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/android.py#L974) |
 
 ## 🔗 相关文档
 - [整体架构](/guide/architecture)

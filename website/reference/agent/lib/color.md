@@ -50,11 +50,11 @@ flowchart LR
 ## 🔍 源码索引
 | 符号 | 位置 |
 | --- | --- |
-| `ansify` | `agent/src/lib/color.ts:7` |
-| `clog` | `agent/src/lib/color.ts:11` |
-| `log` | `agent/src/lib/color.ts:13` |
-| `qlog` | `agent/src/lib/color.ts:16` |
-| `black`..`whiteBright` | `agent/src/lib/color.ts:22-36` |
+| `ansify` | [`agent/src/lib/color.ts:7`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/lib/color.ts#L7) |
+| `clog` | [`agent/src/lib/color.ts:11`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/lib/color.ts#L11) |
+| `log` | [`agent/src/lib/color.ts:13`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/lib/color.ts#L13) |
+| `qlog` | [`agent/src/lib/color.ts:16`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/lib/color.ts#L16) |
+| `black`..`whiteBright` | [`agent/src/lib/color.ts:22-36`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/lib/color.ts#L22) |
 
 ## 🔗 相关文档
 - [Frida 与 Agent](/guide/frida-agent)

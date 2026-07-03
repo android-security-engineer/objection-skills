@@ -30,9 +30,9 @@ Python 层职责：`clazz` 纯本地——拼接模板绝对路径并读取；`s
 
 ### `clazz()` — 回显 Hook Manager 模板
 
-源码：`objection/commands/ios/generate.py:10`
+源码：[`objection/commands/ios/generate.py:10`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/ios/generate.py#L10)
 
-模板路径基于本文件位置向上一级再进入 `utils/assets`，见 `objection/commands/ios/generate.py:19-22`：
+模板路径基于本文件位置向上一级再进入 `utils/assets`，见 [`objection/commands/ios/generate.py:19-22`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/ios/generate.py#L19)：
 
 ```python
 js_path = os.path.join(
@@ -44,15 +44,15 @@ js_path = os.path.join(
 
 ### `simple()` — 为类方法生成 hook 骨架
 
-源码：`objection/commands/ios/generate.py:37`
+源码：[`objection/commands/ios/generate.py:37`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/ios/generate.py#L37)
 
-流程：校验类名 → `ios_hooking_get_class_methods(classname, False)` 拿方法列表 → 空则报错 → 否则打印 `var target = ObjC.classes.<class>;` 并对每个方法套模板。方法枚举调用见 `objection/commands/ios/generate.py:57`：
+流程：校验类名 → `ios_hooking_get_class_methods(classname, False)` 拿方法列表 → 空则报错 → 否则打印 `var target = ObjC.classes.<class>;` 并对每个方法套模板。方法枚举调用见 [`objection/commands/ios/generate.py:57`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/ios/generate.py#L57)：
 
 ```python
 methods = api.ios_hooking_get_class_methods(classname, False)
 ```
 
-单方法 hook 模板见 `objection/commands/ios/generate.py:73-82`，用 `.replace('{method}', method)` 替换方法名：
+单方法 hook 模板见 [`objection/commands/ios/generate.py:73-82`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/ios/generate.py#L73)，用 `.replace('{method}', method)` 替换方法名：
 
 ```python
 hook = """
@@ -67,7 +67,7 @@ Interceptor.attach(target['{method}'].implementation, {{
 """.replace('{method}', method)
 ```
 
-JSON 模式把所有 hook 字符串收集进 `hooks` 列表返回（`objection/commands/ios/generate.py:88-92`）。
+JSON 模式把所有 hook 字符串收集进 `hooks` 列表返回（[`objection/commands/ios/generate.py:88-92`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/ios/generate.py#L88)）。
 
 ```mermaid
 flowchart LR
@@ -86,14 +86,14 @@ flowchart LR
 ## JSON 模式行为
 
 - `clazz()`：JSON 模式返回 `{'source': 模板全文, 'asset': 'objchookmanager.js'}`，命令名 `ios hooking generate class`。
-- `simple()`：缺类名或类不存在时返回 `status='error'` 的 `CommandResult`（`objection/commands/ios/generate.py:48-51`、`objection/commands/ios/generate.py:61-65`）；成功时返回 `{'class', 'methods', 'hooks'}`，命令名 `ios hooking generate simple`。注意第二个参数 `include_parents` 固定为 `False`。
+- `simple()`：缺类名或类不存在时返回 `status='error'` 的 `CommandResult`（[`objection/commands/ios/generate.py:48-51`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/ios/generate.py#L48)、[`objection/commands/ios/generate.py:61-65`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/ios/generate.py#L61)）；成功时返回 `{'class', 'methods', 'hooks'}`，命令名 `ios hooking generate simple`。注意第二个参数 `include_parents` 固定为 `False`。
 
 ## 源码索引
 
 | 符号 | 位置 |
 | --- | --- |
-| `clazz` | `objection/commands/ios/generate.py:10` |
-| `simple` | `objection/commands/ios/generate.py:37` |
+| `clazz` | [`objection/commands/ios/generate.py:10`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/ios/generate.py#L10) |
+| `simple` | [`objection/commands/ios/generate.py:37`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/ios/generate.py#L37) |
 
 ## 相关文档
 

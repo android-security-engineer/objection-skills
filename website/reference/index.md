@@ -28,6 +28,33 @@ flowchart TD
     AG --> ALIB[lib/<br/>公共工具]
 ```
 
+### 仓库目录与文档对照
+
+```
+objection-skills/
+├── objection/                      ← Python 包（宿主侧）
+│   ├── commands/                   命令实现（每个 .py = 一篇文档）
+│   │   ├── android/                android hooking/heap/keystore/...  → reference/commands/android/
+│   │   ├── ios/                    ios keychain/hooking/heap/...      → reference/commands/ios/
+│   │   └── *.py                    memory/filemanager/jobs/...        → reference/commands/
+│   ├── console/                    CLI 入口 + REPL                    → reference/console/
+│   ├── state/                      连接/设备/作业状态单例              → reference/state/
+│   ├── utils/                      agent 注入/输出/插件/patcher       → reference/utils/
+│   │   └── patchers/               APK/IPA 重打包                     → reference/utils/patchers/
+│   ├── api/                        HTTP 端点                          → reference/api/
+│   └── agent.js                    ← 编译产物（gitignore），由 agent/ 编译
+├── agent/src/                      ← TypeScript Agent（注入目标进程）
+│   ├── index.ts                    RPC 总入口                          → reference/agent/index
+│   ├── android/ + lib/             Android 实现                        → reference/agent/android/
+│   ├── ios/ + lib/                 iOS 实现                            → reference/agent/ios/
+│   ├── generic/                    平台无关（memory/env/ping）         → reference/agent/generic/
+│   ├── rpc/                        RPC 聚合层                          → reference/agent/rpc/
+│   └── lib/                        公共库                              → reference/agent/lib/
+├── tests/                          ← pytest 测试（每个 test_*.py 一篇）→ reference/tests/
+├── plugins/                        ← 示例插件
+└── website/                        ← 本文档站（VitePress）
+```
+
 ## 📂 分区入口
 
 | 分区 | 内容 | 入口 |

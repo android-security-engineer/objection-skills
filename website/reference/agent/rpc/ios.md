@@ -41,7 +41,7 @@
 
 ### `ios` — 聚合对象
 
-源码：`agent/src/rpc/ios.ts:30`
+源码：[`agent/src/rpc/ios.ts:30`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/rpc/ios.ts#L30)
 
 整个模块导出一个对象字面量 `ios`，键为 RPC 方法名，值为箭头函数。下例展示 binary、cookie、credential、文件系统四类典型包装：
 
@@ -67,7 +67,7 @@ export const ios = {
 
 ### 钥匙串子集 — 增删改查集合
 
-源码：`agent/src/rpc/ios.ts:97`
+源码：[`agent/src/rpc/ios.ts:97`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/rpc/ios.ts#L97)
 
 `ioskeychain` 是 iOS 安全测试的核心，聚合层把 `add`/`remove`/`update`/`empty`/`list`/`listRaw` 全部暴露，并对 `list` 给出默认参数 `smartDecode: boolean = false`，由调用方决定是否智能解码。
 
@@ -85,7 +85,7 @@ iosKeychainListRaw: (): void => ioskeychain.listRaw(),
 
 ### Bundle 枚举 — 常量注入示例
 
-源码：`agent/src/rpc/ios.ts:93`
+源码：[`agent/src/rpc/ios.ts:93`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/rpc/ios.ts#L93)
 
 `iosBundlesGetBundles` 与 `iosBundlesGetFrameworks` 共用 `bundles.getBundles`，差别仅在传入的 `BundleType` 常量。聚合层在此处把“枚举所有 Bundle”与“仅枚举 Framework”固化为两个独立 RPC，调用方无需接触 `BundleType`。
 
@@ -133,22 +133,22 @@ flowchart TB
 
 | 符号 | 位置 |
 | --- | --- |
-| `ios` 导出对象 | `agent/src/rpc/ios.ts:30` |
-| `iosBinaryInfo` | `agent/src/rpc/ios.ts:32` |
-| `iosCookiesGet` | `agent/src/rpc/ios.ts:35` |
-| `iosCredentialStorage` | `agent/src/rpc/ios.ts:38` |
-| `iosFile*` 文件系统组 | `agent/src/rpc/ios.ts:41` |
-| `iosHeapEvaluateJs` | `agent/src/rpc/ios.ts:52` |
-| `iosHookingGetClassMethods` | `agent/src/rpc/ios.ts:60` |
-| `iosMonitorCryptoEnable` | `agent/src/rpc/ios.ts:71` |
-| `iosJailbreakDisable` | `agent/src/rpc/ios.ts:74` |
-| `iosPlistRead` | `agent/src/rpc/ios.ts:78` |
-| `iosUi*` UI 组 | `agent/src/rpc/ios.ts:81` |
-| `iosPinningDisable` | `agent/src/rpc/ios.ts:87` |
-| `iosMonitorPasteboard` | `agent/src/rpc/ios.ts:90` |
-| `iosBundlesGetBundles`/`GetFrameworks` | `agent/src/rpc/ios.ts:93` |
-| `iosKeychain*` 钥匙串组 | `agent/src/rpc/ios.ts:97` |
-| `iosNsuserDefaultsGet` | `agent/src/rpc/ios.ts:107` |
+| `ios` 导出对象 | [`agent/src/rpc/ios.ts:30`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/rpc/ios.ts#L30) |
+| `iosBinaryInfo` | [`agent/src/rpc/ios.ts:32`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/rpc/ios.ts#L32) |
+| `iosCookiesGet` | [`agent/src/rpc/ios.ts:35`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/rpc/ios.ts#L35) |
+| `iosCredentialStorage` | [`agent/src/rpc/ios.ts:38`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/rpc/ios.ts#L38) |
+| `iosFile*` 文件系统组 | [`agent/src/rpc/ios.ts:41`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/rpc/ios.ts#L41) |
+| `iosHeapEvaluateJs` | [`agent/src/rpc/ios.ts:52`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/rpc/ios.ts#L52) |
+| `iosHookingGetClassMethods` | [`agent/src/rpc/ios.ts:60`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/rpc/ios.ts#L60) |
+| `iosMonitorCryptoEnable` | [`agent/src/rpc/ios.ts:71`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/rpc/ios.ts#L71) |
+| `iosJailbreakDisable` | [`agent/src/rpc/ios.ts:74`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/rpc/ios.ts#L74) |
+| `iosPlistRead` | [`agent/src/rpc/ios.ts:78`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/rpc/ios.ts#L78) |
+| `iosUi*` UI 组 | [`agent/src/rpc/ios.ts:81`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/rpc/ios.ts#L81) |
+| `iosPinningDisable` | [`agent/src/rpc/ios.ts:87`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/rpc/ios.ts#L87) |
+| `iosMonitorPasteboard` | [`agent/src/rpc/ios.ts:90`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/rpc/ios.ts#L90) |
+| `iosBundlesGetBundles`/`GetFrameworks` | [`agent/src/rpc/ios.ts:93`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/rpc/ios.ts#L93) |
+| `iosKeychain*` 钥匙串组 | [`agent/src/rpc/ios.ts:97`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/rpc/ios.ts#L97) |
+| `iosNsuserDefaultsGet` | [`agent/src/rpc/ios.ts:107`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/rpc/ios.ts#L107) |
 
 ## 🔗 相关文档
 

@@ -33,7 +33,7 @@
 
 ### `patch_ios_ipa()` — IPA 重打包
 
-源码：`objection/commands/mobile_packages.py:13`
+源码：[`objection/commands/mobile_packages.py:13`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/mobile_packages.py#L13)
 
 取/校验 gadget 版本：手动指定或 `github.get_latest_version()`，与本地版本对比，过期则下载解包更新（`:40-61`）：
 
@@ -50,7 +50,7 @@ if Version(github_version) != Version(local_version) or not ios_gadget.gadget_ex
 
 ### `patch_android_apk()` — APK 重打包
 
-源码：`objection/commands/mobile_packages.py:99`
+源码：[`objection/commands/mobile_packages.py:99`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/mobile_packages.py#L99)
 
 参数极多（架构、pause、skip_cleanup、enable_debug、gadget_version、skip_resources、network_security_config、target_class、use_aapt2、gadget_config、script_source、ignore_nativelibs、manifest、skip_signing、only_main_classes、fix_concurrency_to）。
 
@@ -75,7 +75,7 @@ patcher.add_gadget_to_apk(architecture, android_gadget.get_frida_library_path(),
 
 ### `sign_android_apk()` — 仅签名
 
-源码：`objection/commands/mobile_packages.py:239`
+源码：[`objection/commands/mobile_packages.py:239`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/mobile_packages.py#L239)
 
 最简流程：`are_requirements_met` → `set_apk_source` → `zipalign_apk` → `sign_apk` → 拷贝 `<原名>.objection.apk`（`:249-264`）。用于已打好但未签名的 APK。
 
@@ -113,15 +113,66 @@ flowchart TD
 - 所有输出走 `click.secho`，进度信息直接打印。
 - `pause` 用 `input()` 阻塞，仅在交互式 CLI 下可用。
 
+## 🔬 技术细节
+
+### Android patch 端到端时序
+
+```mermaid
+sequenceDiagram
+    participant U as 测试者
+    participant MP as mobile_packages
+    participant AP as AndroidPatcher
+    participant GH as patchers/github
+    participant FS as 文件系统
+    U->>MP: patchapk -s app.apk
+    MP->>AP: AndroidPatcher(...)
+    AP->>GH: 查/下载 frida-gadget.so
+    GH-->>AP: gadget 二进制
+    AP->>FS: unpack_apk（apktool 解包）
+    AP->>AP: 注入 manifest 权限 + smali clinit
+    AP->>FS: 拷贝 gadget 到 lib/<abi>/
+    AP->>FS: build_new_apk（apktool 回编译）
+    AP->>FS: zipalign + apksigner 签名
+    AP-->>MP: app.objection.apk
+    MP-->>U: 输出路径
+```
+
+### patch 产物结构
+
+```
+app.objection.apk（重打包后）
+├── AndroidManifest.xml      ← 已注入 INTERNET / debuggable / usesCleartextTraffic
+├── classes.dex              ← smali <clinit> 注入 System.loadLibrary("frida-gadget")
+├── lib/
+│   ├── arm64-v8a/
+│   │   └── libfrida-gadget.so   ← 从 GitHub 下载的 gadget（与宿主 frida 同版本）
+│   ├── armeabi-v7a/
+│   │   └── libfrida-gadget.so
+│   └── x86_64/
+│       └── libfrida-gadget.so
+└── META-INF/                ← apksigner 重签名产物
+```
+
+### 边界情况
+
+- **架构推断**：未指定 `--architecture` 时用 `adb getprop ro.product.cpu.abi` 推断；无连接设备则失败。
+- **`--skip-resources`**：传给 apktool 跳过资源解析，加速但 manifest 保留为二进制 AXML，无法再 ElementTree 改（与权限注入互斥）。
+- **gadget 版本一致性**：下载的 gadget 大版本必须与宿主 `frida` 库一致，否则 App 启动后连不上。
+- **签名密钥**：默认用 objection 内置调试密钥；生产测试应传 `--skip-resources` 之外的独立 keystore。
+- **iOS 仅限 macOS**：`patchipa` 依赖 `codesign`/`applesign`，非 macOS 不可用。
+
 ## 🔍 源码索引
 
 | 符号 | 位置 |
 | --- | --- |
-| `patch_ios_ipa` | `objection/commands/mobile_packages.py:13` |
-| `patch_android_apk` | `objection/commands/mobile_packages.py:99` |
-| `sign_android_apk` | `objection/commands/mobile_packages.py:239` |
+| `patch_ios_ipa` | [`objection/commands/mobile_packages.py:13`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/mobile_packages.py#L13) |
+| `patch_android_apk` | [`objection/commands/mobile_packages.py:99`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/mobile_packages.py#L99) |
+| `sign_android_apk` | [`objection/commands/mobile_packages.py:239`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/mobile_packages.py#L239) |
 
 ## 🔗 相关文档
 
+- [APK Patch 功能详解](/features/patcher)
+- [源码：utils/patchers/android](/reference/utils/patchers/android)
+- [安装与依赖](/guide/installation)
 - [RPC 通信机制](/guide/rpc)
 - [REPL 与命令](/guide/repl)

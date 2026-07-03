@@ -67,7 +67,7 @@ return "";
 
 `arrayBufferToHex` / `hexToString` 被 `crypto.ts` 复用：前者把 `readByteArray` 结果转 hex 给密钥/IV/密文，后者把 hex 还原为可读明文（解密输出场景，`:158-163`）。
 
-`getNSFileManager` 被 `filesystem.ts:22` 缓存复用，`getNSMainBundle` 提供主 bundle 访问入口。
+`getNSFileManager` 被 [`agent/src/ios/filesystem.ts:22`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/filesystem.ts#L22) 缓存复用，`getNSMainBundle` 提供主 bundle 访问入口。
 
 ## 📐 调用关系
 
@@ -84,14 +84,14 @@ flowchart LR
 ## 🔍 源码索引
 | 符号 | 位置 |
 | --- | --- |
-| `unArchiveDataAndGetString` | `agent/src/ios/lib/helpers.ts:13` |
-| `smartDataToString` | `agent/src/ios/lib/helpers.ts:54` |
-| `bytesToUTF8` | `agent/src/ios/lib/helpers.ts:98` |
-| `bytesToHexString` | `agent/src/ios/lib/helpers.ts:122` |
-| `getNSFileManager` | `agent/src/ios/lib/helpers.ts:131` |
-| `getNSMainBundle` | `agent/src/ios/lib/helpers.ts:136` |
-| `arrayBufferToHex` | `agent/src/ios/lib/helpers.ts:141` |
-| `hexToString` | `agent/src/ios/lib/helpers.ts:158` |
+| `unArchiveDataAndGetString` | [`agent/src/ios/lib/helpers.ts:13`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/lib/helpers.ts#L13) |
+| `smartDataToString` | [`agent/src/ios/lib/helpers.ts:54`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/lib/helpers.ts#L54) |
+| `bytesToUTF8` | [`agent/src/ios/lib/helpers.ts:98`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/lib/helpers.ts#L98) |
+| `bytesToHexString` | [`agent/src/ios/lib/helpers.ts:122`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/lib/helpers.ts#L122) |
+| `getNSFileManager` | [`agent/src/ios/lib/helpers.ts:131`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/lib/helpers.ts#L131) |
+| `getNSMainBundle` | [`agent/src/ios/lib/helpers.ts:136`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/lib/helpers.ts#L136) |
+| `arrayBufferToHex` | [`agent/src/ios/lib/helpers.ts:141`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/lib/helpers.ts#L141) |
+| `hexToString` | [`agent/src/ios/lib/helpers.ts:158`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/lib/helpers.ts#L158) |
 
 ## 🔗 相关文档
 - [Frida 与 Agent](/guide/frida-agent)

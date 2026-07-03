@@ -29,7 +29,7 @@
 
 ### `android_proxy_set()` — 设置代理
 
-源码：`objection/commands/android/proxy.py:9`
+源码：[`objection/commands/android/proxy.py:9`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/android/proxy.py#L9)
 
 `len(args) != 2` 即报错（不限于缺失，多给参数也拒）。JSON 模式缺参返回 `status='error'`、`exit_code=1`、含 `human_text`。成功返回 `result={'action': 'proxy_set', 'host', 'port'}`。
 
@@ -71,7 +71,7 @@ flowchart LR
 
 | 符号 | 位置 |
 | --- | --- |
-| `android_proxy_set` | `objection/commands/android/proxy.py:9` |
+| `android_proxy_set` | [`objection/commands/android/proxy.py:9`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/android/proxy.py#L9) |
 
 ## 相关文档
 

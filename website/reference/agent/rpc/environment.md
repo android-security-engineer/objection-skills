@@ -31,7 +31,7 @@
 
 ### `env` — 聚合对象
 
-源码：`agent/src/rpc/environment.ts:3`
+源码：[`agent/src/rpc/environment.ts:3`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/rpc/environment.ts#L3)
 
 整个文件就是一张“RPC 名 → 箭头函数”的映射表，每个箭头函数调用 `environment` 命名空间下的对应函数并返回其结果。注释按语义分组（`// environment`），无任何额外逻辑。
 
@@ -80,13 +80,13 @@ flowchart LR
 
 | 符号 | 位置 |
 | --- | --- |
-| `env` 导出对象 | `agent/src/rpc/environment.ts:3` |
-| `envAndroid` | `agent/src/rpc/environment.ts:5` |
-| `envAndroidPaths` | `agent/src/rpc/environment.ts:6` |
-| `envFrida` | `agent/src/rpc/environment.ts:7` |
-| `envIos` | `agent/src/rpc/environment.ts:8` |
-| `envIosPaths` | `agent/src/rpc/environment.ts:9` |
-| `envRuntime` | `agent/src/rpc/environment.ts:10` |
+| `env` 导出对象 | [`agent/src/rpc/environment.ts:3`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/rpc/environment.ts#L3) |
+| `envAndroid` | [`agent/src/rpc/environment.ts:5`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/rpc/environment.ts#L5) |
+| `envAndroidPaths` | [`agent/src/rpc/environment.ts:6`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/rpc/environment.ts#L6) |
+| `envFrida` | [`agent/src/rpc/environment.ts:7`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/rpc/environment.ts#L7) |
+| `envIos` | [`agent/src/rpc/environment.ts:8`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/rpc/environment.ts#L8) |
+| `envIosPaths` | [`agent/src/rpc/environment.ts:9`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/rpc/environment.ts#L9) |
+| `envRuntime` | [`agent/src/rpc/environment.ts:10`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/rpc/environment.ts#L10) |
 
 ## 🔗 相关文档
 

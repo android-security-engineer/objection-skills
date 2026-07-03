@@ -69,11 +69,11 @@ flowchart LR
 ## 🔍 源码索引
 | 符号 | 位置 |
 | --- | --- |
-| `kSec` | `agent/src/ios/lib/constants.ts:3` |
-| `NSSearchPaths` | `agent/src/ios/lib/constants.ts:80` |
-| `NSUserDomainMask` | `agent/src/ios/lib/constants.ts:97` |
-| `NSUTF8StringEncoding` | `agent/src/ios/lib/constants.ts:98` |
-| `BundleType` | `agent/src/ios/lib/constants.ts:100` |
+| `kSec` | [`agent/src/ios/lib/constants.ts:3`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/lib/constants.ts#L3) |
+| `NSSearchPaths` | [`agent/src/ios/lib/constants.ts:80`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/lib/constants.ts#L80) |
+| `NSUserDomainMask` | [`agent/src/ios/lib/constants.ts:97`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/lib/constants.ts#L97) |
+| `NSUTF8StringEncoding` | [`agent/src/ios/lib/constants.ts:98`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/lib/constants.ts#L98) |
+| `BundleType` | [`agent/src/ios/lib/constants.ts:100`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/lib/constants.ts#L100) |
 
 ## 🔗 相关文档
 - [Frida 与 Agent](/guide/frida-agent)

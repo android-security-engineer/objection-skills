@@ -22,7 +22,7 @@
 | `iosPinningDisable` | 注册 `ios-sslpinning-disable` 任务，挂框架 Hook + 底层 replace |
 
 ### `rpc.iosPinningDisable` — 一次性挂全部绕过
-源码：`agent/src/ios/pinning.ts:500`
+源码：[`agent/src/ios/pinning.ts:500`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/pinning.ts#L500)
 
 `disable(q)` 先按 `q` 设 `quiet` 标志，再建任务，依次挂框架 Hook 与底层 replace：
 ```ts
@@ -45,7 +45,7 @@ export const disable = (q: boolean): void => {
 ```
 
 ### `afNetworking` — 改 pinning 模式为 None
-源码：`agent/src/ios/pinning.ts:51`
+源码：[`agent/src/ios/pinning.ts:51`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/pinning.ts#L51)
 
 Hook `-[AFSecurityPolicy setSSLPinningMode:]` 等 4 个方法，`onEnter` 把 `args[2]` 改成 `0x0`（`AFSSLPinningModeNone`）：
 ```ts
@@ -57,7 +57,7 @@ if (!args[2].isNull()) {
 `setAllowInvalidCertificates:` 则把 `0x0` 改成 `0x1`（`:100-109`）。AFNetworking 不存在时返回空数组。
 
 ### `nsUrlSession` — 替换 completionHandler
-源码：`agent/src/ios/pinning.ts:181`
+源码：[`agent/src/ios/pinning.ts:181`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/pinning.ts#L181)
 
 用 `ApiResolver` 搜 `-[* URLSession:didReceiveChallenge:completionHandler:]`，对每个匹配 `Interceptor.attach`，`onEnter` 把 args[4] 的 block 实现替换成"用 serverTrust 建 credential 并调 `useCredential` + disposition 0"：
 ```ts
@@ -70,12 +70,12 @@ completionHandler.implementation = () => {
 ```
 
 ### `sSLCreateContext` / `sSLHandshake` — 底层 replace
-源码：`agent/src/ios/pinning.ts:345`、`:370`
+源码：[`agent/src/ios/pinning.ts:345`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/pinning.ts#L345)、`:370`
 
 `SSLCreateContext` 替换为先调原函数拿 context，再立即 `SSLSetSessionOption(ctx, 0, 1)` 关闭服务端证书校验（`:350-356`）。`SSLHandshake` 替换为：返回 `-9481`（errSSLServerAuthCompared）时再调一次跳过校验（`:374-385`）。
 
 ### `sSLCtxSetCustomVerify` — BoringSSL 回调替换
-源码：`agent/src/ios/pinning.ts:451`
+源码：[`agent/src/ios/pinning.ts:451`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/pinning.ts#L451)
 
 替换 `SSL_set_custom_verify`（iOS 13+，回退 `SSL_CTX_set_custom_verify`），把传入的回调换成永远返回 `0`（`SSL_VERIFY_NONE`）的 `NativeCallback`；同时替换 `SSL_get_psk_identity` 返回假 PSK 标识（`:464-491`）。
 
@@ -115,17 +115,17 @@ flowchart TD
 ## 🔍 源码索引
 | 符号 | 位置 |
 | --- | --- |
-| `afNetworking` | `agent/src/ios/pinning.ts:51` |
-| `nsUrlSession` | `agent/src/ios/pinning.ts:181` |
-| `trustKit` | `agent/src/ios/pinning.ts:257` |
-| `cordovaCustomURLConnectionDelegate` | `agent/src/ios/pinning.ts:288` |
-| `sSLSetSessionOption` | `agent/src/ios/pinning.ts:320` |
-| `sSLCreateContext` | `agent/src/ios/pinning.ts:345` |
-| `sSLHandshake` | `agent/src/ios/pinning.ts:370` |
-| `tlsHelperCreatePeerTrust` | `agent/src/ios/pinning.ts:393` |
-| `nwTlsCreatePeerTrust` | `agent/src/ios/pinning.ts:415` |
-| `sSLCtxSetCustomVerify` | `agent/src/ios/pinning.ts:451` |
-| `disable` | `agent/src/ios/pinning.ts:500` |
+| `afNetworking` | [`agent/src/ios/pinning.ts:51`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/pinning.ts#L51) |
+| `nsUrlSession` | [`agent/src/ios/pinning.ts:181`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/pinning.ts#L181) |
+| `trustKit` | [`agent/src/ios/pinning.ts:257`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/pinning.ts#L257) |
+| `cordovaCustomURLConnectionDelegate` | [`agent/src/ios/pinning.ts:288`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/pinning.ts#L288) |
+| `sSLSetSessionOption` | [`agent/src/ios/pinning.ts:320`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/pinning.ts#L320) |
+| `sSLCreateContext` | [`agent/src/ios/pinning.ts:345`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/pinning.ts#L345) |
+| `sSLHandshake` | [`agent/src/ios/pinning.ts:370`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/pinning.ts#L370) |
+| `tlsHelperCreatePeerTrust` | [`agent/src/ios/pinning.ts:393`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/pinning.ts#L393) |
+| `nwTlsCreatePeerTrust` | [`agent/src/ios/pinning.ts:415`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/pinning.ts#L415) |
+| `sSLCtxSetCustomVerify` | [`agent/src/ios/pinning.ts:451`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/pinning.ts#L451) |
+| `disable` | [`agent/src/ios/pinning.ts:500`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/pinning.ts#L500) |
 
 ## 🔗 相关文档
 - [Frida 与 Agent](/guide/frida-agent)

@@ -31,7 +31,7 @@ Python 层职责极轻：调用 `ios_cookies_get()` 拿到 Cookie 列表，JSON 
 
 ### `get()` — 读取 Cookie
 
-源码：`objection/commands/ios/cookies.py:10`
+源码：[`objection/commands/ios/cookies.py:10`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/ios/cookies.py#L10)
 
 关键代码：
 
@@ -41,7 +41,7 @@ api = state_connection.get_api()
 cookies = api.ios_cookies_get()
 ```
 
-空列表短路见 `objection/commands/ios/cookies.py:28-30`：
+空列表短路见 [`objection/commands/ios/cookies.py:28-30`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/ios/cookies.py#L28)：
 
 ```python
 if len(cookies) <= 0:
@@ -49,7 +49,7 @@ if len(cookies) <= 0:
     return None
 ```
 
-表格列定义在 `objection/commands/ios/cookies.py:41`：`['Name', 'Value', 'Expires', 'Domain', 'Path', 'Secure', 'HTTPOnly']`。
+表格列定义在 [`objection/commands/ios/cookies.py:41`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/ios/cookies.py#L41)：`['Name', 'Value', 'Expires', 'Domain', 'Path', 'Secure', 'HTTPOnly']`。
 
 ```mermaid
 flowchart LR
@@ -69,7 +69,7 @@ JSON 模式直接在拿到 Cookie 后返回 `CommandResult(result={'cookies': co
 
 | 符号 | 位置 |
 | --- | --- |
-| `get` | `objection/commands/ios/cookies.py:10` |
+| `get` | [`objection/commands/ios/cookies.py:10`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/ios/cookies.py#L10) |
 
 ## 相关文档
 

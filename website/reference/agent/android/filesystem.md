@@ -28,7 +28,7 @@
 | `androidFileLs(path)` | 列目录，返回 `IAndroidFilesystem` |
 
 ### `rpc.androidFileLs` — 列目录
-源码：`agent/src/android/filesystem.ts:115`
+源码：[`agent/src/android/filesystem.ts:115`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/filesystem.ts#L115)
 
 ```ts
 // agent/src/android/filesystem.ts:129-162
@@ -53,7 +53,7 @@ return wrapJavaPerform(() => {
 ```
 
 ### `rpc.androidFileDownload` / `androidFileUpload`
-源码：`agent/src/android/filesystem.ts:83` / `:90`
+源码：[`agent/src/android/filesystem.ts:83`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/filesystem.ts#L83) / `:90`
 
 读写绕开 Java，直接用 `frida-fs`：
 ```ts
@@ -92,15 +92,15 @@ flowchart LR
 ## 🔍 源码索引
 | 符号 | 位置 |
 | --- | --- |
-| `exists` | `agent/src/android/filesystem.ts:15` |
-| `readable` | `agent/src/android/filesystem.ts:29` |
-| `writable` | `agent/src/android/filesystem.ts:43` |
-| `pathIsFile` | `agent/src/android/filesystem.ts:57` |
-| `pwd` | `agent/src/android/filesystem.ts:71` |
-| `readFile` | `agent/src/android/filesystem.ts:83` |
-| `writeFile` | `agent/src/android/filesystem.ts:90` |
-| `deleteFile` | `agent/src/android/filesystem.ts:101` |
-| `ls` | `agent/src/android/filesystem.ts:115` |
+| `exists` | [`agent/src/android/filesystem.ts:15`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/filesystem.ts#L15) |
+| `readable` | [`agent/src/android/filesystem.ts:29`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/filesystem.ts#L29) |
+| `writable` | [`agent/src/android/filesystem.ts:43`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/filesystem.ts#L43) |
+| `pathIsFile` | [`agent/src/android/filesystem.ts:57`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/filesystem.ts#L57) |
+| `pwd` | [`agent/src/android/filesystem.ts:71`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/filesystem.ts#L71) |
+| `readFile` | [`agent/src/android/filesystem.ts:83`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/filesystem.ts#L83) |
+| `writeFile` | [`agent/src/android/filesystem.ts:90`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/filesystem.ts#L90) |
+| `deleteFile` | [`agent/src/android/filesystem.ts:101`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/filesystem.ts#L101) |
+| `ls` | [`agent/src/android/filesystem.ts:115`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/filesystem.ts#L115) |
 
 ## 🔗 相关文档
 - [Frida 与 Agent](/guide/frida-agent)

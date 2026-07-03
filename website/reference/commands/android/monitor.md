@@ -29,7 +29,7 @@
 
 ### `string_canary()` — 监听字符串金丝雀
 
-源码：`objection/commands/android/monitor.py:9`
+源码：[`objection/commands/android/monitor.py:9`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/android/monitor.py#L9)
 
 无参数报错退出。取 `args[0]` 后直接 RPC。JSON 模式返回 `result={'action': 'monitoring_canary', 'value': ...}`，`warnings` 提示命中走异步消息、作业 id 需经 `agent state` 查。
 
@@ -72,7 +72,7 @@ flowchart LR
 
 | 符号 | 位置 |
 | --- | --- |
-| `string_canary` | `objection/commands/android/monitor.py:9` |
+| `string_canary` | [`objection/commands/android/monitor.py:9`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/android/monitor.py#L9) |
 
 ## 相关文档
 

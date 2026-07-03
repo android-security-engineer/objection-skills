@@ -60,8 +60,8 @@ flowchart LR
 ## 🔍 源码索引
 | 符号 | 位置 |
 | --- | --- |
-| `NSDictionary` 等 10 个别名 | `agent/src/ios/lib/types.ts:3` |
-| `CFDictionaryRef` / `CFTypeRef` | `agent/src/ios/lib/types.ts:14` |
+| `NSDictionary` 等 10 个别名 | [`agent/src/ios/lib/types.ts:3`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/lib/types.ts#L3) |
+| `CFDictionaryRef` / `CFTypeRef` | [`agent/src/ios/lib/types.ts:14`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/lib/types.ts#L14) |
 
 ## 🔗 相关文档
 - [Frida 与 Agent](/guide/frida-agent)

@@ -26,7 +26,7 @@
 
 ### `ping` — 存活探针
 
-源码：`agent/src/generic/ping.ts:1`
+源码：[`agent/src/generic/ping.ts:1`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/generic/ping.ts#L1)
 
 函数体为 `() => true`，无参数、无副作用，调用即返回 `true`。其存在本身就是目的——只要宿主能拿到 `true` 回包，说明 Agent 已注入且 RPC 通道工作正常。
 
@@ -54,7 +54,7 @@ sequenceDiagram
 
 | 符号 | 位置 |
 | --- | --- |
-| `ping` | `agent/src/generic/ping.ts:1` |
+| `ping` | [`agent/src/generic/ping.ts:1`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/generic/ping.ts#L1) |
 
 ## 🔗 相关文档
 

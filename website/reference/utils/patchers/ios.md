@@ -20,12 +20,12 @@
 ## 🏗️ 核心结构
 
 ### `IosGadget` — iOS gadget 下载/管理
-源码：`objection/utils/patchers/ios.py:17`
+源码：[`objection/utils/patchers/ios.py:17`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/ios.py#L17)
 
 继承 `BasePlatformGadget`。固定路径 `~/.objection/ios/FridaGadget.dylib`（及 `.xz` 压缩包）。无架构概念——Frida 发布的是 `ios-universal.dylib.xz`，单一二进制覆盖 arm64/arm64e。
 
 ### `IosGadget._get_download_url` — 挑 ios-universal asset
-源码：`objection/utils/patchers/ios.py:83`
+源码：[`objection/utils/patchers/ios.py:83`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/ios.py#L83)
 
 ```python
 def _get_download_url(self) -> str:
@@ -41,12 +41,12 @@ def _get_download_url(self) -> str:
 与 Android 按架构挑不同，iOS 只匹配名字含 `ios-universal.dylib.xz` 的 asset。下载后 `unpack()` 用 `lzma` 解压成 `FridaGadget.dylib`。
 
 ### `IosPatcher` — IPA 改造器
-源码：`objection/utils/patchers/ios.py:136`
+源码：[`objection/utils/patchers/ios.py:136`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/ios.py#L136)
 
 继承 `BasePlatformPatcher`。`required_commands` 声明 8 个依赖，其中 5 个是 macOS 系统自带。
 
 ### `IosPatcher.required_commands` — 外部工具依赖
-源码：`objection/utils/patchers/ios.py:139`
+源码：[`objection/utils/patchers/ios.py:139`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/ios.py#L139)
 
 ```python
 required_commands = {
@@ -64,7 +64,7 @@ required_commands = {
 `applesign`（npm 包）做最终 IPA 重签；`insert_dylib`（第三方工具）给 Mach-O 注入 `LC_LOAD_DYLIB`；其余 6 个是 macOS/Xcode 自带。这就是为什么 iOS patch 只能在 macOS 跑。
 
 ### `IosPatcher.set_provsioning_profile` — provisioning profile 选取
-源码：`objection/utils/patchers/ios.py:192`
+源码：[`objection/utils/patchers/ios.py:192`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/ios.py#L192)
 
 ```python
 def set_provsioning_profile(self, provision_file: str = None, bundle_id: str = None) -> None:
@@ -99,7 +99,7 @@ def set_provsioning_profile(self, provision_file: str = None, bundle_id: str = N
 用户提供 profile 则直接用；否则扫 `~/Library/Developer/Xcode/DerivedData/` 下所有 `embedded.mobileprovision`，用 `security cms -D` 解码、`plistlib` 读 `ExpirationDate`，挑剩余天数最多的。bundle id 优先用用户给的，否则从 profile 抽。
 
 ### `IosPatcher._set_bundle_id_from_profile` — 从 profile 抽 bundle id
-源码：`objection/utils/patchers/ios.py:450`
+源码：[`objection/utils/patchers/ios.py:450`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/ios.py#L450)
 
 ```python
 def _set_bundle_id_from_profile(self):
@@ -119,7 +119,7 @@ def _set_bundle_id_from_profile(self):
 profile 的 `application-identifier` 格式是 `<TeamID>.<bundle.id>`（如 `ABCDE12345.com.example.app`），用 sed 去掉 `TeamID.` 前缀得到纯 bundle id。四段管道 `cat | plutil | grep | sed` 用 delegator 的 `.pipe()` 串联。
 
 ### `IosPatcher.extract_ipa` — 解压 IPA
-源码：`objection/utils/patchers/ios.py:269`
+源码：[`objection/utils/patchers/ios.py:269`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/ios.py#L269)
 
 ```python
 def extract_ipa(self, unzip_unicode, ipa_source: str) -> None:
@@ -143,12 +143,12 @@ def extract_ipa(self, unzip_unicode, ipa_source: str) -> None:
 `unzip_unicode` 模式：`zipfile` 默认把非 ASCII 文件名按 cp437 解码，这里先 `encode('cp437')` 还原字节再 `decode('utf-8')` 修正成真实文件名。然后定位 `Payload/<App>.app` 目录（若有多个 `.app`，`''.join` 会拼成无效路径——这是已知限制，正常 IPA 只有一个）。
 
 ### `IosPatcher.set_application_binary` — 定位主二进制
-源码：`objection/utils/patchers/ios.py:304`
+源码：[`objection/utils/patchers/ios.py:304`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/ios.py#L304)
 
 用户可指定二进制名，否则解析 `Info.plist` 的 `CFBundleExecutable` 拿主二进制名，拼到 `app_folder` 下。
 
 ### `IosPatcher.patch_and_codesign_binary` — 注入 + 签 dylib
-源码：`objection/utils/patchers/ios.py:330`
+源码：[`objection/utils/patchers/ios.py:330`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/ios.py#L330)
 
 ```python
 def patch_and_codesign_binary(self, frida_gadget, codesign_signature, gadget_config):
@@ -177,7 +177,7 @@ def patch_and_codesign_binary(self, frida_gadget, codesign_signature, gadget_con
 三步：拷 gadget 到 `Frameworks/`、`insert_dylib --inplace` 改主二进制（加 `@executable_path/Frameworks/FridaGadget.dylib` 加载命令，`--strip-codesig` 去掉主二进制原签名避免冲突）、遍历 `.app` 内所有 `.dylib` 用 `codesign -f -v -s <sig>` 强制重签。
 
 ### `IosPatcher.archive_and_codesign` — 打包 + applesign 重签
-源码：`objection/utils/patchers/ios.py:395`
+源码：[`objection/utils/patchers/ios.py:395`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/ios.py#L395)
 
 ```python
 def archive_and_codesign(self, original_name, codesign_signature):
@@ -231,25 +231,25 @@ flowchart TD
 ## 🔍 源码索引
 | 符号 | 位置 |
 | --- | --- |
-| `IosGadget` | `objection/utils/patchers/ios.py:17` |
-| `IosGadget.get_gadget_path` | `objection/utils/patchers/ios.py:38` |
-| `IosGadget.gadget_exists` | `objection/utils/patchers/ios.py:48` |
-| `IosGadget.download` | `objection/utils/patchers/ios.py:57` |
-| `IosGadget._get_download_url` | `objection/utils/patchers/ios.py:83` |
-| `IosGadget.unpack` | `objection/utils/patchers/ios.py:103` |
-| `IosGadget.cleanup` | `objection/utils/patchers/ios.py:124` |
-| `IosPatcher` | `objection/utils/patchers/ios.py:136` |
-| `IosPatcher.required_commands` | `objection/utils/patchers/ios.py:139` |
-| `IosPatcher.__init__` | `objection/utils/patchers/ios.py:167` |
-| `IosPatcher.set_provsioning_profile` | `objection/utils/patchers/ios.py:192` |
-| `IosPatcher.extract_ipa` | `objection/utils/patchers/ios.py:269` |
-| `IosPatcher.set_application_binary` | `objection/utils/patchers/ios.py:304` |
-| `IosPatcher.patch_and_codesign_binary` | `objection/utils/patchers/ios.py:330` |
-| `IosPatcher.archive_and_codesign` | `objection/utils/patchers/ios.py:395` |
-| `IosPatcher.get_patched_ipa_path` | `objection/utils/patchers/ios.py:441` |
-| `IosPatcher._set_bundle_id_from_profile` | `objection/utils/patchers/ios.py:450` |
-| `IosPatcher._cleanup_extracted_data` | `objection/utils/patchers/ios.py:493` |
-| `IosPatcher.__del__` | `objection/utils/patchers/ios.py:504` |
+| `IosGadget` | [`objection/utils/patchers/ios.py:17`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/ios.py#L17) |
+| `IosGadget.get_gadget_path` | [`objection/utils/patchers/ios.py:38`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/ios.py#L38) |
+| `IosGadget.gadget_exists` | [`objection/utils/patchers/ios.py:48`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/ios.py#L48) |
+| `IosGadget.download` | [`objection/utils/patchers/ios.py:57`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/ios.py#L57) |
+| `IosGadget._get_download_url` | [`objection/utils/patchers/ios.py:83`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/ios.py#L83) |
+| `IosGadget.unpack` | [`objection/utils/patchers/ios.py:103`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/ios.py#L103) |
+| `IosGadget.cleanup` | [`objection/utils/patchers/ios.py:124`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/ios.py#L124) |
+| `IosPatcher` | [`objection/utils/patchers/ios.py:136`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/ios.py#L136) |
+| `IosPatcher.required_commands` | [`objection/utils/patchers/ios.py:139`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/ios.py#L139) |
+| `IosPatcher.__init__` | [`objection/utils/patchers/ios.py:167`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/ios.py#L167) |
+| `IosPatcher.set_provsioning_profile` | [`objection/utils/patchers/ios.py:192`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/ios.py#L192) |
+| `IosPatcher.extract_ipa` | [`objection/utils/patchers/ios.py:269`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/ios.py#L269) |
+| `IosPatcher.set_application_binary` | [`objection/utils/patchers/ios.py:304`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/ios.py#L304) |
+| `IosPatcher.patch_and_codesign_binary` | [`objection/utils/patchers/ios.py:330`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/ios.py#L330) |
+| `IosPatcher.archive_and_codesign` | [`objection/utils/patchers/ios.py:395`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/ios.py#L395) |
+| `IosPatcher.get_patched_ipa_path` | [`objection/utils/patchers/ios.py:441`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/ios.py#L441) |
+| `IosPatcher._set_bundle_id_from_profile` | [`objection/utils/patchers/ios.py:450`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/ios.py#L450) |
+| `IosPatcher._cleanup_extracted_data` | [`objection/utils/patchers/ios.py:493`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/ios.py#L493) |
+| `IosPatcher.__del__` | [`objection/utils/patchers/ios.py:504`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/ios.py#L504) |
 
 ## 🔗 相关文档
 - [整体架构](/guide/architecture)

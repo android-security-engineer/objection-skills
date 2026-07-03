@@ -22,7 +22,7 @@
 | `androidIntentAnalyze(backtrace)` | Hook 隐式 Intent 相关方法做分析 |
 
 ### `rpc.androidIntentStartActivity` — 启动 Activity
-源码：`agent/src/android/intent.ts:18`
+源码：[`agent/src/android/intent.ts:18`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/intent.ts#L18)
 
 ```ts
 // agent/src/android/intent.ts:25-41
@@ -39,7 +39,7 @@ return wrapJavaPerform(() => {
 ```
 
 ### `rpc.androidIntentAnalyze` — 隐式 Intent 分析
-源码：`agent/src/android/intent.ts:73`
+源码：[`agent/src/android/intent.ts:73`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/intent.ts#L73)
 
 Hook 一组组件入口，对每个 Intent 参数调 `analyseIntent`：
 
@@ -99,10 +99,10 @@ flowchart TD
 ## 🔍 源码索引
 | 符号 | 位置 |
 | --- | --- |
-| `FLAG_ACTIVITY_NEW_TASK` | `agent/src/android/intent.ts:13` |
-| `startActivity` | `agent/src/android/intent.ts:18` |
-| `startService` | `agent/src/android/intent.ts:45` |
-| `analyzeImplicits` | `agent/src/android/intent.ts:73` |
+| `FLAG_ACTIVITY_NEW_TASK` | [`agent/src/android/intent.ts:13`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/intent.ts#L13) |
+| `startActivity` | [`agent/src/android/intent.ts:18`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/intent.ts#L18) |
+| `startService` | [`agent/src/android/intent.ts:45`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/intent.ts#L45) |
+| `analyzeImplicits` | [`agent/src/android/intent.ts:73`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/intent.ts#L73) |
 
 ## 🔗 相关文档
 - [Frida 与 Agent](/guide/frida-agent)

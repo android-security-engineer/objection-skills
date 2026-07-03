@@ -68,12 +68,12 @@ flowchart LR
 ## 🔍 源码索引
 | 符号 | 位置 |
 | --- | --- |
-| `reverseEnumLookup` | `agent/src/lib/helpers.ts:6` |
-| `hexStringToBytes` | `agent/src/lib/helpers.ts:18` |
-| `qsend` | `agent/src/lib/helpers.ts:28` |
-| `fsend` | `agent/src/lib/helpers.ts:35` |
-| `debugDump` | `agent/src/lib/helpers.ts:44` |
-| `printArgs` | `agent/src/lib/helpers.ts:51` |
+| `reverseEnumLookup` | [`agent/src/lib/helpers.ts:6`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/lib/helpers.ts#L6) |
+| `hexStringToBytes` | [`agent/src/lib/helpers.ts:18`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/lib/helpers.ts#L18) |
+| `qsend` | [`agent/src/lib/helpers.ts:28`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/lib/helpers.ts#L28) |
+| `fsend` | [`agent/src/lib/helpers.ts:35`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/lib/helpers.ts#L35) |
+| `debugDump` | [`agent/src/lib/helpers.ts:44`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/lib/helpers.ts#L44) |
+| `printArgs` | [`agent/src/lib/helpers.ts:51`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/lib/helpers.ts#L51) |
 
 ## 🔗 相关文档
 - [Frida 与 Agent](/guide/frida-agent)

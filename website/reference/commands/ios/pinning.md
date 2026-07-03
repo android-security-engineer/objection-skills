@@ -29,7 +29,7 @@ Python 层极简：解析 `--quiet` 标志，调用一次 `ios_pinning_disable(q
 
 ### `_should_be_quiet()` — 静默开关
 
-源码：`objection/commands/ios/pinning.py:7`，靠 `--quiet` 触发：
+源码：[`objection/commands/ios/pinning.py:7`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/ios/pinning.py#L7)，靠 `--quiet` 触发：
 
 ```python
 # objection/commands/ios/pinning.py:16
@@ -38,7 +38,7 @@ return '--quiet' in args
 
 ### `ios_disable()` — 绕过 pinning
 
-源码：`objection/commands/ios/pinning.py:19`
+源码：[`objection/commands/ios/pinning.py:19`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/ios/pinning.py#L19)
 
 ```python
 # objection/commands/ios/pinning.py:28-29
@@ -46,7 +46,7 @@ api = state_connection.get_api()
 api.ios_pinning_disable(_should_be_quiet(args))
 ```
 
-JSON 模式返回见 `objection/commands/ios/pinning.py:31-38`：
+JSON 模式返回见 [`objection/commands/ios/pinning.py:31-38`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/ios/pinning.py#L31)：
 
 ```python
 CommandResult(
@@ -71,8 +71,8 @@ flowchart LR
 
 | 符号 | 位置 |
 | --- | --- |
-| `_should_be_quiet` | `objection/commands/ios/pinning.py:7` |
-| `ios_disable` | `objection/commands/ios/pinning.py:19` |
+| `_should_be_quiet` | [`objection/commands/ios/pinning.py:7`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/ios/pinning.py#L7) |
+| `ios_disable` | [`objection/commands/ios/pinning.py:19`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/ios/pinning.py#L19) |
 
 ## 相关文档
 

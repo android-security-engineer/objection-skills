@@ -46,8 +46,8 @@ flowchart LR
 ## 🔍 源码索引
 | 符号 | 位置 |
 | --- | --- |
-| `namespace monitor` | `agent/src/android/monitor.ts:3` |
-| `stringCanary` | `agent/src/android/monitor.ts:4` |
+| `namespace monitor` | [`agent/src/android/monitor.ts:3`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/monitor.ts#L3) |
+| `stringCanary` | [`agent/src/android/monitor.ts:4`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/monitor.ts#L4) |
 
 ## 🔗 相关文档
 - [Frida 与 Agent](/guide/frida-agent)

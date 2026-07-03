@@ -124,15 +124,138 @@ flowchart LR
 - **服务端风控**：检测结果若上报服务器做风控决策，本地绕过不改变服务端判定；
 - **强度校验**：部分 App 用 SafetyNet/Play Integrity 这类**远程证明**，本地 Hook 无法伪造，需其他手段。
 
+## 🔬 边界情况与失败模式
+
+### `String.contains` Hook 的全局副作用
+
+`testKeysCheck` Hook 的是 `java.lang.String.contains`（[`root.ts:34`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/root.ts#L34)）——这是**全进程所有字符串**的 `contains` 调用。实现里做了精确短路：参数不是 `"test-keys"` 时走原实现（`this.contains.call(this, name)`），否则翻转返回值。这意味着：
+
+- 命中频率极高（App 内任何 `str.contains("test-keys")` 都触发回调）；
+- 必须保持原实现的尾调用，否则 `String.contains` 的其他语义会被破坏，App 可能崩；
+- 这是把双刃剑：能挡住 RootBeer 的 `detectTestKeys`，但也会让任何恰好用 `contains("test-keys")` 做无关判断的代码被误改返回值（极少见，但存在）。
+
+### `File.exists` 同理的"路径白名单"
+
+`fileExistsCheck` Hook `java.io.File.exists`（[`root.ts:80`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/root.ts#L80)）。短路条件是 `this.getAbsolutePath()` 落在 `commonPaths` 12 条路径里。不在表里的路径走原 `this.exists.call(this)`——文件操作不受影响。注意 `commonPaths` 里有的路径带尾斜杠（`/dev/com.koushikdutta.superuser.daemon/`），App 拼路径时若不一致就匹配不上、绕过失效。
+
+### `Runtime.exec` 的命令尾匹配
+
+`execSuCheck` 判定条件是 `command.endsWith("su")`（[`root.ts:59`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/root.ts#L59)）。`disable` 时抛 `IOException("objection anti-root")`，`enable`(simulate) 时放行真实执行。坑：命令是 `"su -c ..."` 也匹配；但 `"psu"`、`"musu"` 这类后缀也是 `su` 结尾——会误伤。代价可接受，因为 App 真 root 检测基本只 exec `su`。
+
+### iOS `fopen` 的 Frida 版本兼容
+
+`fopen` Hook 用了 `Module.findGlobalExportByName`，并在不存在时打补丁回退到老 API `findExportByName(null, name)`（[`jailbreak.ts:120`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/jailbreak.ts#L120)）。这是为了兼容 Frida < 16.7。若 `fopen` 导出没找到（极罕见，如静态链接进二进制），返回 `null`，`Job.addInvocation` 会跳过——不致命。
+
+### JailMonkey 的"HashMap 全量伪造"
+
+`jailMonkeyBypass`（Android 侧，[`root.ts:387`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/root.ts#L387)）替换 `JailMonkeyModule.getConstants()`，返回一个全新 `HashMap`，5 个键全置 true/false。**注意 `success` 分支里把 `hookDetected` 也置 true**——simulate 模式会让 JailMonkey 自报"检测到 Hook"，这对测 App 反 Hook 分支有用；但 disable 分支置 false 时连 `hookDetected` 一起否掉，等于顺手藏住了 objection 自己。
+
+### iOS `enable`(simulate) 的 fork 强制失败
+
+`libSystemBFork`（[`jailbreak.ts:248`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/jailbreak.ts#L248)）Hook `libSystem.B.dylib::fork`。`success=false`（disable）时把 fork 返回值改 0（伪装 fork 失败），挡掉"fork 自身检测调试器"这类越狱检测。源码 `TODO: Hook vfork` 注明 vfork 还没覆盖——这是已知缺口。
+
+## 🔧 与底层 Frida/系统 API 的交互细节
+
+### Java 层 vs ObjC/Native 层 Hook 的混用
+
+Android root 绕过**全部用 Java 层 Hook**（`Java.use` + `implementation =`），因为检测点都在 Java API 上。iOS 越狱绕过则**混用 ObjC 与 Native**：
+
+- `fileExistsAtPath:` / `canOpenURL:` 走 ObjC（`ObjC.classes.X["- method"]`）；
+- `fopen` / `fork` 走 Native Interceptor（`Module.findGlobalExportByName` + `Interceptor.attach`）。
+
+差异原因：iOS 越狱检测常直接 C 层 `fopen`/`fork`，纯 ObjC Hook 挡不住。Android 反例——`su` 检测基本走 `Runtime.exec` 或 `File.exists`，Java 层够用；Native `access()` 检测没覆盖（见局限）。
+
+### `onEnter` 记录 `this` 状态、`onLeave` 翻转返回值
+
+iOS 三个 `Interceptor.attach` Hook 都用同一套模式：`onEnter` 读参数（路径/URL）、判定是否目标、把布尔标记挂在 `this`（Frida 的 per-invocation 上下文对象）上；`onLeave` 读标记决定是否 `retval.replace`。这样避免在 `onLeave` 重新解析参数（参数寄存器此时已变），是 Frida Interceptor 的标准写法。
+
+### `retval.replace(NativePointer(0x01))` 的 BOOL 语义
+
+ObjC `fileExistsAtPath:` 返回 `BOOL`（ARM64 上是 `w0` 寄存器低字节）。`retval.replace(new NativePointer(0x01))` 把整个返回寄存器写 1——对 BOOL 而言等价 `YES`。iOS ABI 下 BOOL 是 `signed char`，写 0x01 而非 0xff 是对的，避免有 App 用 `== YES` 严格比较时穿帮。
+
+## ⚡ 性能与并发考量
+
+- **`String.contains` / `File.exists` 是热点路径**：前者每次字符串搜索都进 Frida JS 回调，后者每次文件 stat 都进。App 启动期可能有上千次 `contains` 调用，会显著拖慢启动。Hook 的精确短路（非目标参数立刻走原实现）是性能命脉；
+- **iOS `Interceptor.attach` 比 Java Hook 轻**：Native 层 attach 不涉及 ART/GC 桥接，单次开销低一个数量级。这也是 iOS 侧能放心 Hook `fopen`/`fork` 的原因；
+- **多 Job 并存的标记隔离**：每个 Hook 闭包捕获 `ident`，日志带 `[N]` 前缀。`disable` 和 `simulate` 可同时跑（不同 Job ID），但两者会互相覆盖返回值——后触发的 Hook 在 `onLeave` 翻转的结果会被先注册的 Job 再次翻转，最终值取决于 Hook 链顺序。实际别同时开两个反向 Job。
+
+## 📊 Android root 检测函数返回值翻转状态机
+
+```mermaid
+stateDiagram-v2
+    direction LR
+    [*] --> DetectedTrue: App 调检测, 真实返回 true
+    [*] --> DetectedFalse: App 调检测, 真实返回 false
+
+    DetectedTrue --> FlippedFalse: disable Job 在线<br/>onLeave replace(0x00)
+    DetectedFalse --> StayFalse: disable Job 在线<br/>短路(已是false)
+
+    DetectedTrue --> StayTrue: enable(simulate) 在线<br/>短路(已是true)
+    DetectedFalse --> FlippedTrue: enable(simulate) 在线<br/>onLeave replace(0x01)
+
+    FlippedFalse --> RestoredTrue: jobs kill disable
+    FlippedTrue --> RestoredFalse: jobs kill enable
+    RestoredTrue --> [*]
+    RestoredFalse --> [*]
+```
+
+## 📊 iOS 越狱绕过完整调用时序
+
+```mermaid
+sequenceDiagram
+    participant App as App 越狱检测
+    participant FM as NSFileManager<br/>fileExistsAtPath:
+    participant Hook as objection Interceptor
+    participant Sys as 内核 stat
+
+    App->>FM: fileExistsAtPath("/Applications/Cydia.app")
+    FM->>Sys: stat()
+    Sys-->>FM: 文件真实存在(真越狱残留) → YES
+    FM->>Hook: onEnter 记录 path, is_common_path=true
+    Note over Hook: onEnter 标记命中
+    FM->>Hook: onLeave(retval=YES)
+    Hook->>Hook: is_common_path? 翻转
+    Hook-->>FM: retval.replace(0x00) → NO
+    FM-->>App: 返回 NO ✅ 伪装未越狱
+```
+
+## 🧱 iOS 越狱绕过的 Hook 层次布局
+
+```text
++-------------------------------------------------------------+
+|  App 检测代码 (Swift/ObjC)                                  |
+|     isJailBroken = fileExists("/Applications/Cydia.app")    |
+|                || canOpenURL("cydia://")                    |
+|                || fopen("/bin/bash","r") != NULL            |
++-----------------------+-------------------------------------+
+                        |  各检测 API
+            +-----------+-----------+-----------+
+            v           v           v           v
++----------------+ +--------------+ +--------+ +-----------+
+| NSFileManager  | | UIApplication| | fopen  | | fork()    |
+| fileExists:    | | canOpenURL:  | | (libc) | | libSystem |
+|  [ObjC Hook]   | |  [ObjC Hook] | |[Native]| |  [Native] |
++-------+--------+ +------+-------+ +---+----+ +-----+-----+
+        |                 |             |             |
+        +-----------------+-------------+-------------+
+                          |
+                          v
++-------------------------------------------------------------+
+|  objection Interceptor.onLeave                              |
+|  - 读 this.is_common_path / this.is_flagged                 |
+|  - retval.replace(NativePointer(0x00 or 0x01))              |
++-------------------------------------------------------------+
+```
+
 ## 源码索引
 
 | 内容 | 位置 |
 | --- | --- |
 | Android 命令 | `objection/commands/android/root.py` |
-| Android agent | `agent/src/android/root.ts:430` |
-| commonPaths | `agent/src/android/root.ts:14` |
+| Android agent | [`agent/src/android/root.ts:430`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/root.ts#L430) |
+| commonPaths | [`agent/src/android/root.ts:14`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/root.ts#L14) |
 | RootBeer 绕过 | `agent/src/android/root.ts`（rootBeerCheck*） |
 | iOS 命令 | `objection/commands/ios/jailbreak.py` |
 | iOS agent | `agent/src/ios/jailbreak.ts` |
-| jailbreakPaths | `agent/src/ios/jailbreak.ts:9` |
-| fileExistsAtPath Hook | `agent/src/ios/jailbreak.ts:47` |
+| jailbreakPaths | [`agent/src/ios/jailbreak.ts:9`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/jailbreak.ts#L9) |
+| fileExistsAtPath Hook | [`agent/src/ios/jailbreak.ts:47`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/jailbreak.ts#L47) |

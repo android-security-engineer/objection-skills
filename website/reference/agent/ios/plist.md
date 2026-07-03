@@ -21,7 +21,7 @@
 | `iosPlistRead` | 读指定路径 plist，返回 `toString()` 字符串 |
 
 ### `rpc.iosPlistRead` — NSMutableDictionary 反序列化
-源码：`agent/src/ios/plist.ts:5`
+源码：[`agent/src/ios/plist.ts:5`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/plist.ts#L5)
 
 `ObjC.classes.NSMutableDictionary` 的 `alloc().initWithContentsOfFile_(path)` 同时支持 XML 与二进制 plist，返回的字典直接 `toString()`：
 ```ts
@@ -48,8 +48,8 @@ flowchart TD
 ## 🔍 源码索引
 | 符号 | 位置 |
 | --- | --- |
-| `read` | `agent/src/ios/plist.ts:5` |
-| `write` | `agent/src/ios/plist.ts:14` |
+| `read` | [`agent/src/ios/plist.ts:5`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/plist.ts#L5) |
+| `write` | [`agent/src/ios/plist.ts:14`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/plist.ts#L14) |
 
 ## 🔗 相关文档
 - [Frida 与 Agent](/guide/frida-agent)

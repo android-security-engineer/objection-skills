@@ -19,7 +19,7 @@
 ## 🏗️ 核心结构
 
 ### `Plugin(ABC)` — 插件抽象基类
-源码：`objection/utils/plugin.py:9`
+源码：[`objection/utils/plugin.py:9`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/plugin.py#L9)
 
 不可直接实例化（`ABC`），子类实例化时传入插件文件路径、命名空间、实现字典。构造函数把三个脚本相关字段做「未设置则置 None」的兜底，然后 `_prepare_source()` 解析脚本源码、`_append_to_api()` 注册 HTTP 蓝图。
 
@@ -52,7 +52,7 @@ class Plugin(ABC):
 `hasattr` 兜底允许子类在类体里直接声明 `script_src = "..."` 而不被 `__init__` 覆盖。
 
 ### `_prepare_source` — 解析脚本源码
-源码：`objection/utils/plugin.py:41`
+源码：[`objection/utils/plugin.py:41`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/plugin.py#L41)
 
 按三级优先级解析 Frida 脚本源码：
 
@@ -81,7 +81,7 @@ def _prepare_source(self):
 三级回退：内联 `script_src` → 指定 `script_path` → 插件文件同目录的 `index.js`。三级都失败仅打 debug 警告（不抛异常），因为有些插件可能只扩展 HTTP API 而不注入脚本——`inject()` 时才检查 `script_src` 非空。
 
 ### `inject` — 注入脚本到新 Frida 会话
-源码：`objection/utils/plugin.py:77`
+源码：[`objection/utils/plugin.py:77`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/plugin.py#L77)
 
 把脚本源码注入一个新的 Frida 会话，绑定消息处理器，加载脚本并取出 RPC exports：
 
@@ -108,7 +108,7 @@ def inject(self) -> None:
 关键点：插件注入的是**独立会话**（`device.attach(self.agent.pid)`），与 objection 主 agent 的会话并存；`self.api = self.script.exports` 让插件子类可直接调用自己脚本里 `rpc.exports` 暴露的方法。
 
 ### `_append_to_api` — 注册插件 HTTP 蓝图
-源码：`objection/utils/plugin.py:101`
+源码：[`objection/utils/plugin.py:101`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/plugin.py#L101)
 
 若子类定义了 `http_api` 方法（且可调用），调用它拿到 Flask Blueprint，追加到 `api_state`：
 
@@ -149,11 +149,11 @@ flowchart TD
 ## 🔍 源码索引
 | 符号 | 位置 |
 | --- | --- |
-| `Plugin` | `objection/utils/plugin.py:9` |
-| `Plugin.__init__` | `objection/utils/plugin.py:12` |
-| `Plugin._prepare_source` | `objection/utils/plugin.py:41` |
-| `Plugin.inject` | `objection/utils/plugin.py:77` |
-| `Plugin._append_to_api` | `objection/utils/plugin.py:101` |
+| `Plugin` | [`objection/utils/plugin.py:9`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/plugin.py#L9) |
+| `Plugin.__init__` | [`objection/utils/plugin.py:12`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/plugin.py#L12) |
+| `Plugin._prepare_source` | [`objection/utils/plugin.py:41`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/plugin.py#L41) |
+| `Plugin.inject` | [`objection/utils/plugin.py:77`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/plugin.py#L77) |
+| `Plugin._append_to_api` | [`objection/utils/plugin.py:101`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/plugin.py#L101) |
 
 ## 🔗 相关文档
 - [整体架构](/guide/architecture)

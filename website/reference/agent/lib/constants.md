@@ -45,7 +45,7 @@ flowchart LR
 ## 🔍 源码索引
 | 符号 | 位置 |
 | --- | --- |
-| `DeviceType` enum | `agent/src/lib/constants.ts:1` |
+| `DeviceType` enum | [`agent/src/lib/constants.ts:1`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/lib/constants.ts#L1) |
 
 ## 🔗 相关文档
 - [Frida 与 Agent](/guide/frida-agent)

@@ -33,7 +33,7 @@
 
 ### `listModules` / `listExports` / `listRanges` — 枚举类
 
-源码：`agent/src/generic/memory.ts:3` / `:7` / `:15`
+源码：[`agent/src/generic/memory.ts:3`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/generic/memory.ts#L3) / `:7` / `:15`
 
 三者都是对 Frida `Process` 枚举 API 的薄封装。`listExports` 先按模块名过滤 `enumerateModules()` 结果，再对该模块调 `enumerateExports()`；找不到模块则返回空数组。`listRanges` 默认保护属性为 `"rw-"`。
 
@@ -58,7 +58,7 @@ export const listRanges = (protection: string = "rw-"): RangeDetails[] => {
 
 ### `dump` — 字节读取
 
-源码：`agent/src/generic/memory.ts:19`
+源码：[`agent/src/generic/memory.ts:19`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/generic/memory.ts#L19)
 
 注释说明该能力原属 Frida ≤11，在 12 中被移除，因此这里用 `NativePointer(address).readByteArray(size)` 自行实现。读取失败时返回空 `ArrayBuffer`，保证调用方不会拿到 `null`。
 
@@ -77,7 +77,7 @@ export const dump = (address: string, size: number): ArrayBuffer => {
 
 ### `search` — 模式搜索
 
-源码：`agent/src/generic/memory.ts:31`
+源码：[`agent/src/generic/memory.ts:31`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/generic/memory.ts#L31)
 
 先取所有 `rw-` 范围，对每个范围调 `Memory.scanSync` 搜索模式；若 `onlyOffsets` 为假，则用 `colors.log(hexdump(...))` 在 Agent 控制台打印 48 字节的 hexdump；最后把所有命中的地址字符串扁平化返回。
 
@@ -102,7 +102,7 @@ export const search = (pattern: string, onlyOffsets: boolean = false): string[] 
 
 ### `replace` / `write` — 改写类
 
-源码：`agent/src/generic/memory.ts:54` / `:61`
+源码：[`agent/src/generic/memory.ts:54`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/generic/memory.ts#L54) / `:61`
 
 `replace` 复用 `search(pattern, true)`（仅返回地址、不打印 hexdump），对每个命中地址调 `write` 写入新字节；`write` 直接用 `NativePointer(address).writeByteArray(value)` 落盘。
 
@@ -150,13 +150,13 @@ flowchart LR
 
 | 符号 | 位置 |
 | --- | --- |
-| `listModules` | `agent/src/generic/memory.ts:3` |
-| `listExports` | `agent/src/generic/memory.ts:7` |
-| `listRanges` | `agent/src/generic/memory.ts:15` |
-| `dump` | `agent/src/generic/memory.ts:19` |
-| `search` | `agent/src/generic/memory.ts:31` |
-| `replace` | `agent/src/generic/memory.ts:54` |
-| `write` | `agent/src/generic/memory.ts:61` |
+| `listModules` | [`agent/src/generic/memory.ts:3`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/generic/memory.ts#L3) |
+| `listExports` | [`agent/src/generic/memory.ts:7`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/generic/memory.ts#L7) |
+| `listRanges` | [`agent/src/generic/memory.ts:15`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/generic/memory.ts#L15) |
+| `dump` | [`agent/src/generic/memory.ts:19`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/generic/memory.ts#L19) |
+| `search` | [`agent/src/generic/memory.ts:31`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/generic/memory.ts#L31) |
+| `replace` | [`agent/src/generic/memory.ts:54`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/generic/memory.ts#L54) |
+| `write` | [`agent/src/generic/memory.ts:61`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/generic/memory.ts#L61) |
 
 ## 🔗 相关文档
 

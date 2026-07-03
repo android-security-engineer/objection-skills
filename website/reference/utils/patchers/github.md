@@ -19,7 +19,7 @@
 ## 🏗️ 核心结构
 
 ### `Github` 类与端点常量
-源码：`objection/utils/patchers/github.py:4`
+源码：[`objection/utils/patchers/github.py:4`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/github.py#L4)
 
 ```python
 class Github(object):
@@ -42,7 +42,7 @@ class Github(object):
 - `request_cache`：实例级字典，key 是 endpoint URL，value 是 `requests.get().json()` 结果。
 
 ### `_call` — 带缓存的请求
-源码：`objection/utils/patchers/github.py:23`
+源码：[`objection/utils/patchers/github.py:23`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/github.py#L23)
 
 ```python
 def _call(self, endpoint: str) -> dict:
@@ -63,7 +63,7 @@ def _call(self, endpoint: str) -> dict:
 三步：查缓存 → 发请求 → 存缓存并返回。缓存粒度是完整 endpoint URL 字符串，所以 latest 和某 tag 各占一个缓存槽。
 
 ### `get_latest_version` — 取最新版本号
-源码：`objection/utils/patchers/github.py:44`
+源码：[`objection/utils/patchers/github.py:44`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/github.py#L44)
 
 ```python
 def get_latest_version(self) -> str:
@@ -74,7 +74,7 @@ def get_latest_version(self) -> str:
 调 latest endpoint，取 `tag_name`（如 `16.7.19`），同时把它存到 `self.gadget_version`——这样后续 `get_assets` 就能按这个 tag 去查 assets。副作用明显：调用一次后实例「锁定」到最新版。
 
 ### `get_assets` — 取某版本的 assets 列表
-源码：`objection/utils/patchers/github.py:56`
+源码：[`objection/utils/patchers/github.py:56`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/github.py#L56)
 
 ```python
 def get_assets(self) -> dict:
@@ -115,13 +115,13 @@ flowchart LR
 ## 🔍 源码索引
 | 符号 | 位置 |
 | --- | --- |
-| `Github` | `objection/utils/patchers/github.py:4` |
-| `Github.GITHUB_LATEST_RELEASE` | `objection/utils/patchers/github.py:7` |
-| `Github.GITHUB_TAGGED_RELEASE` | `objection/utils/patchers/github.py:8` |
-| `Github.__init__` | `objection/utils/patchers/github.py:13` |
-| `Github._call` | `objection/utils/patchers/github.py:23` |
-| `Github.get_latest_version` | `objection/utils/patchers/github.py:44` |
-| `Github.get_assets` | `objection/utils/patchers/github.py:56` |
+| `Github` | [`objection/utils/patchers/github.py:4`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/github.py#L4) |
+| `Github.GITHUB_LATEST_RELEASE` | [`objection/utils/patchers/github.py:7`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/github.py#L7) |
+| `Github.GITHUB_TAGGED_RELEASE` | [`objection/utils/patchers/github.py:8`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/github.py#L8) |
+| `Github.__init__` | [`objection/utils/patchers/github.py:13`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/github.py#L13) |
+| `Github._call` | [`objection/utils/patchers/github.py:23`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/github.py#L23) |
+| `Github.get_latest_version` | [`objection/utils/patchers/github.py:44`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/github.py#L44) |
+| `Github.get_assets` | [`objection/utils/patchers/github.py:56`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/github.py#L56) |
 
 ## 🔗 相关文档
 - [整体架构](/guide/architecture)

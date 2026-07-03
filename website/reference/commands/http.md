@@ -2,7 +2,7 @@
 
 本模块在注入目标设备上启停一个 HTTP 服务器，借以通过 HTTP 暴露设备文件系统。命令组为 `http start/stop/status`。
 
-> ⚠️ **可用性说明**：Agent 侧实现 `agent/src/generic/http.ts` 当前被注释/标记为 `httpServer module not currently available`（见 `agent/src/generic/http.ts:43`）。Python 层命令本身完整，但运行时实际不会真正起 HTTP 服务。请如实知悉。
+> ⚠️ **可用性说明**：Agent 侧实现 `agent/src/generic/http.ts` 当前被注释/标记为 `httpServer module not currently available`（见 [`agent/src/generic/http.ts:43`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/generic/http.ts#L43)）。Python 层命令本身完整，但运行时实际不会真正起 HTTP 服务。请如实知悉。
 
 ## 📋 模块概览
 
@@ -33,7 +33,7 @@
 
 ### `start()` — 启动
 
-源码：`objection/commands/http.py:10`
+源码：[`objection/commands/http.py:10`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/http.py#L10)
 
 ```python
 # objection/commands/http.py:18-26
@@ -47,19 +47,19 @@ api = state_connection.get_api()
 api.http_server_start(pwd(), port)
 ```
 
-JSON 模式返回 `{'action': 'http_start', 'port': port, 'root': pwd()}`（`objection/commands/http.py:28-32`）。
+JSON 模式返回 `{'action': 'http_start', 'port': port, 'root': pwd()}`（[`objection/commands/http.py:28-32`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/http.py#L28)）。
 
 ### `stop()` — 停止
 
-源码：`objection/commands/http.py:36`
+源码：[`objection/commands/http.py:36`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/http.py#L36)
 
-调用 `api.http_server_stop()`，JSON 模式返回 `{'action': 'http_stop'}`（`objection/commands/http.py:44-51`）。
+调用 `api.http_server_stop()`，JSON 模式返回 `{'action': 'http_stop'}`（[`objection/commands/http.py:44-51`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/http.py#L44)）。
 
 ### `status()` — 状态
 
-源码：`objection/commands/http.py:55`
+源码：[`objection/commands/http.py:55`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/http.py#L55)
 
-调用 `api.http_server_status()`，JSON 模式返回 `{'action': 'http_status'}`（`objection/commands/http.py:63-70`）。注意 Python 层**不**接收状态细节，Agent 端的状态输出（若启用）走异步消息。
+调用 `api.http_server_status()`，JSON 模式返回 `{'action': 'http_status'}`（[`objection/commands/http.py:63-70`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/http.py#L63)）。注意 Python 层**不**接收状态细节，Agent 端的状态输出（若启用）走异步消息。
 
 ```mermaid
 flowchart TD
@@ -90,9 +90,52 @@ flowchart TD
 
 | 符号 | 位置 |
 | --- | --- |
-| `start` | `objection/commands/http.py:10` |
-| `stop` | `objection/commands/http.py:36` |
-| `status` | `objection/commands/http.py:55` |
+| `start` | [`objection/commands/http.py:10`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/http.py#L10) |
+| `stop` | [`objection/commands/http.py:36`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/http.py#L36) |
+| `status` | [`objection/commands/http.py:55`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/http.py#L55) |
+
+## 📐 服务器状态机与禁用现状
+
+```mermaid
+stateDiagram-v2
+    [*] --> 未运行
+    未运行 --> 未运行: http start\n(agent 打印 not currently available)\n实际不监听
+    未运行 --> 未运行: http stop / status\n(打印 not running)
+    note right of 未运行: agent 侧 httpServer 永不赋值\n所有"已运行"分支为死代码
+```
+
+```mermaid
+sequenceDiagram
+    participant U as 测试者
+    participant Py as commands/http.py
+    participant API as state.api
+    participant AG as generic/http.ts
+    U->>Py: http start 9000
+    Py->>Py: pwd() 取根目录
+    Py->>API: http_server_start(pwd, 9000)
+    API->>AG: rpc.httpServerStart(pwd, 9000)
+    AG-->>AG: log("not currently available")  ⚠️ 核心逻辑被注释
+    AG-->>API: void（无监听）
+    API-->>Py: 返回
+    Py-->>U: JSON {action:http_start, port, root}
+    Note over U,AG: 命令"成功"返回但无服务实际启动
+```
+
+### 调用栈与禁用边界
+
+```
+Python 宿主                          目标进程
+┌────────────────────┐              ┌────────────────────────────┐
+│ commands/http.py   │              │ generic/http.ts            │
+│  start()           │──RPC──────▶ │  start():                  │
+│   api.http_server_ │              │   log("not available")  ◀──│ 禁用点
+│     start(pwd,port)│              │   if(httpServer) return    │
+│                    │              │   // createServer 注释掉   │
+│                    │              │   // listen 注释掉         │
+│                    │◀──void──────│   (httpServer 永不赋值)    │
+│  output_result()   │              │                            │
+└────────────────────┘              └────────────────────────────┘
+```
 
 ## 🔗 相关文档
 

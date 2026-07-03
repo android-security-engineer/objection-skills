@@ -25,7 +25,7 @@
 | `androidHeapEvaluateHandleMethod(handle, js)` | 在实例上下文 eval |
 
 ### `rpc.androidHeapGetLiveClassInstances` — 枚举活实例
-源码：`agent/src/android/heap.ts:46`
+源码：[`agent/src/android/heap.ts:46`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/heap.ts#L46)
 
 ```ts
 // agent/src/android/heap.ts:49-74
@@ -42,7 +42,7 @@ return handles[clazz].map((h): IHeapNormalised => ({
 ```
 
 ### `getInstance` — 按 hashcode 找回句柄
-源码：`agent/src/android/heap.ts:16`
+源码：[`agent/src/android/heap.ts:16`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/heap.ts#L16)
 
 模块级 `handles` 字典缓存每次 `getInstances` 的结果，后续 `methods/execute/fields/evaluate` 都靠 hashcode 反查：
 ```ts
@@ -62,7 +62,7 @@ const getInstance = (hashcode: number): JavaTypes.Wrapper | null => {
 ```
 
 ### `rpc.androidHeapPrintFields` — 读字段
-源码：`agent/src/android/heap.ts:109`
+源码：[`agent/src/android/heap.ts:109`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/heap.ts#L109)
 
 ```ts
 // agent/src/android/heap.ts:117-134
@@ -101,13 +101,13 @@ flowchart TD
 ## 🔍 源码索引
 | 符号 | 位置 |
 | --- | --- |
-| `handles` | `agent/src/android/heap.ts:12` |
-| `getInstance` | `agent/src/android/heap.ts:16` |
-| `getInstances` | `agent/src/android/heap.ts:46` |
-| `methods` | `agent/src/android/heap.ts:77` |
-| `execute` | `agent/src/android/heap.ts:90` |
-| `fields` | `agent/src/android/heap.ts:109` |
-| `evaluate` | `agent/src/android/heap.ts:137` |
+| `handles` | [`agent/src/android/heap.ts:12`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/heap.ts#L12) |
+| `getInstance` | [`agent/src/android/heap.ts:16`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/heap.ts#L16) |
+| `getInstances` | [`agent/src/android/heap.ts:46`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/heap.ts#L46) |
+| `methods` | [`agent/src/android/heap.ts:77`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/heap.ts#L77) |
+| `execute` | [`agent/src/android/heap.ts:90`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/heap.ts#L90) |
+| `fields` | [`agent/src/android/heap.ts:109`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/heap.ts#L109) |
+| `evaluate` | [`agent/src/android/heap.ts:137`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/heap.ts#L137) |
 
 ## 🔗 相关文档
 - [Frida 与 Agent](/guide/frida-agent)

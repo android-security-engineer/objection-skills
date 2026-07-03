@@ -29,7 +29,7 @@
 | `iosFileDelete` | `removeItemAtPath:error:` 删除 |
 
 ### `rpc.iosFileLs` — 带属性的目录列举
-源码：`agent/src/ios/filesystem.ts:121`
+源码：[`agent/src/ios/filesystem.ts:121`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/filesystem.ts#L121)
 
 `ls` 先建响应骨架并填入当前目录读写权限，不可读则早退；可读时 `contentsOfDirectoryAtPath:error:` 取文件名数组，逐项拼全路径再取属性：
 ```ts
@@ -47,7 +47,7 @@ const fileCount: number = pathContents.count();
 属性字典用 `keyEnumerator` 遍历，全部 `toString()` 存入 `pathFileData.attributes`（`:181-190`）。
 
 ### `rpc.iosFileDownload` / `iosFileUpload` — frida-fs 读写
-源码：`agent/src/ios/filesystem.ts:92`、`:99`
+源码：[`agent/src/ios/filesystem.ts:92`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/filesystem.ts#L92)、`:99`
 
 读走 `frida-fs.statSync` 判空后 `readFileSync`，0 字节文件返回空 `Buffer`：
 ```ts
@@ -60,7 +60,7 @@ export const readFile = (path: string): string | Buffer => {
 写走 `createWriteStream`，Python 侧传 hex，`hexStringToBytes` 还原为字节后写入（`:99-108`）。
 
 ### `rpc.iosFilePathIsFile` — isDir 指针解引用
-源码：`agent/src/ios/filesystem.ts:67`
+源码：[`agent/src/ios/filesystem.ts:67`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/filesystem.ts#L67)
 
 `fileExistsAtPath:isDirectory:` 的第二参数是 `BOOL*`，模块 `Memory.alloc` 一个指针传入，再 `readInt()` 解引用判断是否目录（`*isDir === 1` 表示目录，故 `readInt() === 0` 即文件）：
 ```ts
@@ -94,16 +94,16 @@ flowchart TD
 ## 🔍 源码索引
 | 符号 | 位置 |
 | --- | --- |
-| `getFileManager` | `agent/src/ios/filesystem.ts:20` |
-| `exists` | `agent/src/ios/filesystem.ts:29` |
-| `readable` | `agent/src/ios/filesystem.ts:43` |
-| `writable` | `agent/src/ios/filesystem.ts:55` |
-| `pathIsFile` | `agent/src/ios/filesystem.ts:67` |
-| `pwd` | `agent/src/ios/filesystem.ts:82` |
-| `readFile` | `agent/src/ios/filesystem.ts:92` |
-| `writeFile` | `agent/src/ios/filesystem.ts:99` |
-| `deleteFile` | `agent/src/ios/filesystem.ts:110` |
-| `ls` | `agent/src/ios/filesystem.ts:121` |
+| `getFileManager` | [`agent/src/ios/filesystem.ts:20`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/filesystem.ts#L20) |
+| `exists` | [`agent/src/ios/filesystem.ts:29`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/filesystem.ts#L29) |
+| `readable` | [`agent/src/ios/filesystem.ts:43`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/filesystem.ts#L43) |
+| `writable` | [`agent/src/ios/filesystem.ts:55`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/filesystem.ts#L55) |
+| `pathIsFile` | [`agent/src/ios/filesystem.ts:67`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/filesystem.ts#L67) |
+| `pwd` | [`agent/src/ios/filesystem.ts:82`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/filesystem.ts#L82) |
+| `readFile` | [`agent/src/ios/filesystem.ts:92`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/filesystem.ts#L92) |
+| `writeFile` | [`agent/src/ios/filesystem.ts:99`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/filesystem.ts#L99) |
+| `deleteFile` | [`agent/src/ios/filesystem.ts:110`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/filesystem.ts#L110) |
+| `ls` | [`agent/src/ios/filesystem.ts:121`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/filesystem.ts#L121) |
 
 ## 🔗 相关文档
 - [Frida 与 Agent](/guide/frida-agent)

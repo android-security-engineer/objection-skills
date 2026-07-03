@@ -24,7 +24,7 @@
 | `androidKeystoreWatch` | Hook `KeyStore.load` 与 `getKey` |
 
 ### `rpc.androidKeystoreList` — 列出 alias
-源码：`agent/src/android/keystore.ts:22`
+源码：[`agent/src/android/keystore.ts:22`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/keystore.ts#L22)
 
 ```ts
 // agent/src/android/keystore.ts:32-56
@@ -43,7 +43,7 @@ while (aliases.hasMoreElements()) {
 ```
 
 ### `rpc.androidKeystoreDetail` — 详细属性
-源码：`agent/src/android/keystore.ts:64`
+源码：[`agent/src/android/keystore.ts:64`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/keystore.ts#L64)
 
 内嵌 `keystore_info(alias)` 用 `KeyFactory.getKeySpec(key, KeyInfo.class)` 拿 `KeyInfo`，逐字段读取：
 ```ts
@@ -59,7 +59,7 @@ r.isUserAuthenticationRequired = keyInfo['isUserAuthenticationRequired'].call(ke
 `SecretKeyFactory` 作为 `KeyFactory` 失败时的回退（`:88-90`），兼容密钥类型差异。
 
 ### `rpc.androidKeystoreWatch` — 监听 load / getKey
-源码：`agent/src/android/keystore.ts:245`
+源码：[`agent/src/android/keystore.ts:245`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/keystore.ts#L245)
 
 ```ts
 // agent/src/android/keystore.ts:245-252
@@ -98,13 +98,13 @@ flowchart TD
 ## 🔍 源码索引
 | 符号 | 位置 |
 | --- | --- |
-| `list` | `agent/src/android/keystore.ts:22` |
-| `detail` | `agent/src/android/keystore.ts:64` |
-| `keystore_info` | `agent/src/android/keystore.ts:67` |
-| `clear` | `agent/src/android/keystore.ts:152` |
-| `keystoreLoad` | `agent/src/android/keystore.ts:186` |
-| `keystoreGetKey` | `agent/src/android/keystore.ts:215` |
-| `watchKeystore` | `agent/src/android/keystore.ts:245` |
+| `list` | [`agent/src/android/keystore.ts:22`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/keystore.ts#L22) |
+| `detail` | [`agent/src/android/keystore.ts:64`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/keystore.ts#L64) |
+| `keystore_info` | [`agent/src/android/keystore.ts:67`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/keystore.ts#L67) |
+| `clear` | [`agent/src/android/keystore.ts:152`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/keystore.ts#L152) |
+| `keystoreLoad` | [`agent/src/android/keystore.ts:186`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/keystore.ts#L186) |
+| `keystoreGetKey` | [`agent/src/android/keystore.ts:215`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/keystore.ts#L215) |
+| `watchKeystore` | [`agent/src/android/keystore.ts:245`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/keystore.ts#L245) |
 
 ## 🔗 相关文档
 - [Frida 与 Agent](/guide/frida-agent)

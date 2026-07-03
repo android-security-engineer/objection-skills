@@ -18,7 +18,7 @@
 ## 🏗️ 核心结构
 
 ### `bp` — script 蓝图
-源码：`objection/api/script.py:5`
+源码：[`objection/api/script.py:5`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/api/script.py#L5)
 
 ```python
 bp = Blueprint('script', __name__, url_prefix='/script')
@@ -27,7 +27,7 @@ bp = Blueprint('script', __name__, url_prefix='/script')
 蓝图名 `script`，前缀 `/script`。
 
 ### `runonce` — 一次性脚本执行端点
-源码：`objection/api/script.py:8`
+源码：[`objection/api/script.py:8`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/api/script.py#L8)
 
 ```python
 @bp.route('/runonce', methods=('POST',))
@@ -79,8 +79,8 @@ flowchart TD
 ## 🔍 源码索引
 | 符号 | 位置 |
 | --- | --- |
-| `bp` | `objection/api/script.py:5` |
-| `runonce` | `objection/api/script.py:8` |
+| `bp` | [`objection/api/script.py:5`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/api/script.py#L5) |
+| `runonce` | [`objection/api/script.py:8`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/api/script.py#L8) |
 
 ## 🔗 相关文档
 - [整体架构](/guide/architecture)

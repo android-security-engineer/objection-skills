@@ -29,7 +29,7 @@ Python 层职责极轻：调用 `ios_credential_storage()` 拿到凭据列表，
 
 ### `dump()` — dump 凭据
 
-源码：`objection/commands/ios/nsurlcredentialstorage.py:10`
+源码：[`objection/commands/ios/nsurlcredentialstorage.py:10`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/ios/nsurlcredentialstorage.py#L10)
 
 关键代码：
 
@@ -39,7 +39,7 @@ api = state_connection.get_api()
 cookies = api.ios_credential_storage()
 ```
 
-表格列定义在 `objection/commands/ios/nsurlcredentialstorage.py:27-37`，`authMethod` 做了字符串裁剪去掉 `NSURLAuthenticationMethod` 前缀：
+表格列定义在 [`objection/commands/ios/nsurlcredentialstorage.py:27-37`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/ios/nsurlcredentialstorage.py#L27)，`authMethod` 做了字符串裁剪去掉 `NSURLAuthenticationMethod` 前缀：
 
 ```python
 entry['authMethod'].replace('NSURLAuthenticationMethod', ''),
@@ -63,7 +63,7 @@ JSON 模式直接返回 `CommandResult(result={'credentials': cookies, 'count': 
 
 | 符号 | 位置 |
 | --- | --- |
-| `dump` | `objection/commands/ios/nsurlcredentialstorage.py:10` |
+| `dump` | [`objection/commands/ios/nsurlcredentialstorage.py:10`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/ios/nsurlcredentialstorage.py#L10) |
 
 ## 相关文档
 

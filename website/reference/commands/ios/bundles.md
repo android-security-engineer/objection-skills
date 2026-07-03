@@ -30,9 +30,9 @@ Python 层做三件事：调用对应 RPC、按 `--include-apple-frameworks` 决
 
 ### `_should_include_apple_bundles()` — 是否保留 Apple bundle
 
-源码：`objection/commands/ios/bundles.py:11`
+源码：[`objection/commands/ios/bundles.py:11`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/ios/bundles.py#L11)
 
-检测 `--include-apple-frameworks` 标志。逻辑见 `objection/commands/ios/bundles.py:19`：
+检测 `--include-apple-frameworks` 标志。逻辑见 [`objection/commands/ios/bundles.py:19`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/ios/bundles.py#L19)：
 
 ```python
 return len(args) > 0 and '--include-apple-frameworks' in args
@@ -40,11 +40,11 @@ return len(args) > 0 and '--include-apple-frameworks' in args
 
 ### `_should_print_full_path()` — 是否完整打印路径
 
-源码：`objection/commands/ios/bundles.py:22`，靠 `--full-path` 触发。
+源码：[`objection/commands/ios/bundles.py:22`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/ios/bundles.py#L22)，靠 `--full-path` 触发。
 
 ### `_is_apple_bundle()` — 判定 Apple 私有 bundle
 
-源码：`objection/commands/ios/bundles.py:33`，依据是 bundle id 以 `com.apple` 开头：
+源码：[`objection/commands/ios/bundles.py:33`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/ios/bundles.py#L33)，依据是 bundle id 以 `com.apple` 开头：
 
 ```python
 # objection/commands/ios/bundles.py:47-49
@@ -55,7 +55,7 @@ return False
 
 ### `show_frameworks()` — 列出 framework bundle
 
-源码：`objection/commands/ios/bundles.py:53`
+源码：[`objection/commands/ios/bundles.py:53`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/ios/bundles.py#L53)
 
 流程：取 API → `ios_bundles_get_frameworks()` → 若未带 `--include-apple-frameworks` 则过滤掉 Apple bundle → JSON 或表格。关键代码：
 
@@ -67,7 +67,7 @@ if not _should_include_apple_bundles(args):
     frameworks = [f for f in frameworks if not _is_apple_bundle(f['bundle'])]
 ```
 
-路径列按标志截断，见 `objection/commands/ios/bundles.py:85`：
+路径列按标志截断，见 [`objection/commands/ios/bundles.py:85`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/ios/bundles.py#L85)：
 
 ```python
 entry['path'] if _should_print_full_path(args) else pretty_concat(entry['path'], 40, True),
@@ -75,7 +75,7 @@ entry['path'] if _should_print_full_path(args) else pretty_concat(entry['path'],
 
 ### `show_bundles()` — 列出非 framework bundle
 
-源码：`objection/commands/ios/bundles.py:92`
+源码：[`objection/commands/ios/bundles.py:92`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/ios/bundles.py#L92)
 
 与 `show_frameworks()` 几乎一致，区别：调用 `ios_bundles_get_bundles()`，不对 Apple bundle 做过滤，命令名为 `ios bundles list bundles`。
 
@@ -95,17 +95,17 @@ flowchart LR
 
 ## JSON 模式行为
 
-两个函数在 JSON 模式都返回 `CommandResult`。`show_frameworks()` 额外带 `include_apple` 字段反映是否包含 Apple bundle（`objection/commands/ios/bundles.py:73-74`）；`show_bundles()` 仅含 `bundles` 与 `count`。命令名分别固定为 `ios bundles list frameworks` / `ios bundles list bundles`。
+两个函数在 JSON 模式都返回 `CommandResult`。`show_frameworks()` 额外带 `include_apple` 字段反映是否包含 Apple bundle（[`objection/commands/ios/bundles.py:73-74`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/ios/bundles.py#L73)）；`show_bundles()` 仅含 `bundles` 与 `count`。命令名分别固定为 `ios bundles list frameworks` / `ios bundles list bundles`。
 
 ## 源码索引
 
 | 符号 | 位置 |
 | --- | --- |
-| `_should_include_apple_bundles` | `objection/commands/ios/bundles.py:11` |
-| `_should_print_full_path` | `objection/commands/ios/bundles.py:22` |
-| `_is_apple_bundle` | `objection/commands/ios/bundles.py:33` |
-| `show_frameworks` | `objection/commands/ios/bundles.py:53` |
-| `show_bundles` | `objection/commands/ios/bundles.py:92` |
+| `_should_include_apple_bundles` | [`objection/commands/ios/bundles.py:11`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/ios/bundles.py#L11) |
+| `_should_print_full_path` | [`objection/commands/ios/bundles.py:22`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/ios/bundles.py#L22) |
+| `_is_apple_bundle` | [`objection/commands/ios/bundles.py:33`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/ios/bundles.py#L33) |
+| `show_frameworks` | [`objection/commands/ios/bundles.py:53`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/ios/bundles.py#L53) |
+| `show_bundles` | [`objection/commands/ios/bundles.py:92`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/ios/bundles.py#L92) |
 
 ## 相关文档
 

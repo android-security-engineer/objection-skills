@@ -38,16 +38,16 @@ Python 层职责：解析 `--smart / --data / --service / --account / --newdata 
 
 | 函数 | 行号 | 作用 |
 | --- | --- | --- |
-| `_should_do_smart_decode` | `objection/commands/ios/keychain.py:11` | `--smart` |
-| `_data_flag_has_identifier` | `objection/commands/ios/keychain.py:23` | `--data` 时需同时有 `--service` 或 `--account` |
-| `_get_flag_value` | `objection/commands/ios/keychain.py:38` | 取标志后的值 |
-| `_get_json_destination` | `objection/commands/ios/keychain.py:50` | 取 `--json` 后的文件名 |
+| `_should_do_smart_decode` | [`objection/commands/ios/keychain.py:11`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/ios/keychain.py#L11) | `--smart` |
+| `_data_flag_has_identifier` | [`objection/commands/ios/keychain.py:23`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/ios/keychain.py#L23) | `--data` 时需同时有 `--service` 或 `--account` |
+| `_get_flag_value` | [`objection/commands/ios/keychain.py:38`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/ios/keychain.py#L38) | 取标志后的值 |
+| `_get_json_destination` | [`objection/commands/ios/keychain.py:50`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/ios/keychain.py#L50) | 取 `--json` 后的文件名 |
 
 ### `dump()` — 解析式 dump
 
-源码：`objection/commands/ios/keychain.py:63`
+源码：[`objection/commands/ios/keychain.py:63`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/ios/keychain.py#L63)
 
-先提示用户可能需 TouchID/密码认证（`objection/commands/ios/keychain.py:71`），再调用：
+先提示用户可能需 TouchID/密码认证（[`objection/commands/ios/keychain.py:71`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/ios/keychain.py#L71)），再调用：
 
 ```python
 # objection/commands/ios/keychain.py:77-78
@@ -55,19 +55,19 @@ api = state_connection.get_api()
 keychain = api.ios_keychain_list(_should_do_smart_decode(args))
 ```
 
-JSON 模式分两条路径（`objection/commands/ios/keychain.py:80-99`）：`--json <file>` 写文件返回 `dumped_to`；全局 JSON 返回 `{entries, count, smart_decoded}`。非 JSON 模式用 `tabulate` 渲染七列（`objection/commands/ios/keychain.py:102-113`）：`Created, Accessible, ACL, Type, Account, Service, Data`，其中 `accessible_attribute` 与 `item_class` 做了字符串裁剪去掉 `kSecAttrAccessible` / `kSecClassGeneric` 前缀。
+JSON 模式分两条路径（[`objection/commands/ios/keychain.py:80-99`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/ios/keychain.py#L80)）：`--json <file>` 写文件返回 `dumped_to`；全局 JSON 返回 `{entries, count, smart_decoded}`。非 JSON 模式用 `tabulate` 渲染七列（[`objection/commands/ios/keychain.py:102-113`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/ios/keychain.py#L102)）：`Created, Accessible, ACL, Type, Account, Service, Data`，其中 `accessible_attribute` 与 `item_class` 做了字符串裁剪去掉 `kSecAttrAccessible` / `kSecClassGeneric` 前缀。
 
 ### `dump_raw()` — 原始 dump
 
-源码：`objection/commands/ios/keychain.py:117`
+源码：[`objection/commands/ios/keychain.py:117`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/ios/keychain.py#L117)
 
-调用 `api.ios_keychain_list_raw()`，**不接收返回值**——原始条目由 Agent 以异步消息发出，Python 层在 JSON 模式仅返回 `{'action': 'dumped_raw'}` 并带 warning 提示轮询 `agent state` 或 HTTP `/events`（`objection/commands/ios/keychain.py:131-138`）。
+调用 `api.ios_keychain_list_raw()`，**不接收返回值**——原始条目由 Agent 以异步消息发出，Python 层在 JSON 模式仅返回 `{'action': 'dumped_raw'}` 并带 warning 提示轮询 `agent state` 或 HTTP `/events`（[`objection/commands/ios/keychain.py:131-138`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/ios/keychain.py#L131)）。
 
 ### `clear()` — 清空
 
-源码：`objection/commands/ios/keychain.py:142`
+源码：[`objection/commands/ios/keychain.py:142`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/ios/keychain.py#L142)
 
-破坏性操作。交互模式必须 `click.confirm`（`objection/commands/ios/keychain.py:151-153`）；JSON 模式跳过确认直接执行（Agent 无法回答 confirm）：
+破坏性操作。交互模式必须 `click.confirm`（[`objection/commands/ios/keychain.py:151-153`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/ios/keychain.py#L151)）；JSON 模式跳过确认直接执行（Agent 无法回答 confirm）：
 
 ```python
 # objection/commands/ios/keychain.py:151-153
@@ -76,25 +76,25 @@ if not should_output_json(args):
         return None
 ```
 
-随后 `api.ios_keychain_empty()`（`objection/commands/ios/keychain.py:158`）。
+随后 `api.ios_keychain_empty()`（[`objection/commands/ios/keychain.py:158`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/ios/keychain.py#L158)）。
 
 ### `remove()` — 删除匹配项
 
-源码：`objection/commands/ios/keychain.py:170`
+源码：[`objection/commands/ios/keychain.py:170`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/ios/keychain.py#L170)
 
-必须同时提供 `--account` 与 `--service`，否则报错（`objection/commands/ios/keychain.py:181-192`）。调用 `api.ios_keychain_remove(account, service)`（`objection/commands/ios/keychain.py:199`）。
+必须同时提供 `--account` 与 `--service`，否则报错（[`objection/commands/ios/keychain.py:181-192`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/ios/keychain.py#L181)）。调用 `api.ios_keychain_remove(account, service)`（[`objection/commands/ios/keychain.py:199`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/ios/keychain.py#L199)）。
 
 ### `update()` — 更新匹配项
 
-源码：`objection/commands/ios/keychain.py:210`
+源码：[`objection/commands/ios/keychain.py:210`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/ios/keychain.py#L210)
 
-三个标志全都要：`--account / --service / --newdata`，缺一报错（`objection/commands/ios/keychain.py:222-233`）。调用 `api.ios_keychain_update(account, service, newdata)`（`objection/commands/ios/keychain.py:241`）。
+三个标志全都要：`--account / --service / --newdata`，缺一报错（[`objection/commands/ios/keychain.py:222-233`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/ios/keychain.py#L222)）。调用 `api.ios_keychain_update(account, service, newdata)`（[`objection/commands/ios/keychain.py:241`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/ios/keychain.py#L241)）。
 
 ### `add()` — 新增条目
 
-源码：`objection/commands/ios/keychain.py:252`
+源码：[`objection/commands/ios/keychain.py:252`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/ios/keychain.py#L252)
 
-先校验「`--data` 时必须有 `--account` 或 `--service`」（`objection/commands/ios/keychain.py:260-272`），调用 `api.ios_keychain_add(account, service, data)` 返回布尔成功值（`objection/commands/ios/keychain.py:284`），据此设置 `status` 与 `exit_code`：
+先校验「`--data` 时必须有 `--account` 或 `--service`」（[`objection/commands/ios/keychain.py:260-272`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/ios/keychain.py#L260)），调用 `api.ios_keychain_add(account, service, data)` 返回布尔成功值（[`objection/commands/ios/keychain.py:284`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/ios/keychain.py#L284)），据此设置 `status` 与 `exit_code`：
 
 ```python
 # objection/commands/ios/keychain.py:287-293
@@ -126,7 +126,7 @@ flowchart TD
 
 ## JSON 模式行为
 
-- `dump()`：`--json <file>` 走文件路径，全局 JSON 走 stdout，二者互斥判断见 `objection/commands/ios/keychain.py:81-99`。
+- `dump()`：`--json <file>` 走文件路径，全局 JSON 走 stdout，二者互斥判断见 [`objection/commands/ios/keychain.py:81-99`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/ios/keychain.py#L81)。
 - `dump_raw()`：原始条目异步发出，返回仅含 action，必须轮询 `agent state` / `/events`。
 - `clear()`：JSON 模式跳过 `click.confirm`，直接执行——这是 Agent 友好化的关键差异。
 - `remove()/update()`：缺标志返回 `status='error'`、`exit_code=1`。
@@ -136,16 +136,16 @@ flowchart TD
 
 | 符号 | 位置 |
 | --- | --- |
-| `_should_do_smart_decode` | `objection/commands/ios/keychain.py:11` |
-| `_data_flag_has_identifier` | `objection/commands/ios/keychain.py:23` |
-| `_get_flag_value` | `objection/commands/ios/keychain.py:38` |
-| `_get_json_destination` | `objection/commands/ios/keychain.py:50` |
-| `dump` | `objection/commands/ios/keychain.py:63` |
-| `dump_raw` | `objection/commands/ios/keychain.py:117` |
-| `clear` | `objection/commands/ios/keychain.py:142` |
-| `remove` | `objection/commands/ios/keychain.py:170` |
-| `update` | `objection/commands/ios/keychain.py:210` |
-| `add` | `objection/commands/ios/keychain.py:252` |
+| `_should_do_smart_decode` | [`objection/commands/ios/keychain.py:11`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/ios/keychain.py#L11) |
+| `_data_flag_has_identifier` | [`objection/commands/ios/keychain.py:23`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/ios/keychain.py#L23) |
+| `_get_flag_value` | [`objection/commands/ios/keychain.py:38`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/ios/keychain.py#L38) |
+| `_get_json_destination` | [`objection/commands/ios/keychain.py:50`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/ios/keychain.py#L50) |
+| `dump` | [`objection/commands/ios/keychain.py:63`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/ios/keychain.py#L63) |
+| `dump_raw` | [`objection/commands/ios/keychain.py:117`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/ios/keychain.py#L117) |
+| `clear` | [`objection/commands/ios/keychain.py:142`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/ios/keychain.py#L142) |
+| `remove` | [`objection/commands/ios/keychain.py:170`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/ios/keychain.py#L170) |
+| `update` | [`objection/commands/ios/keychain.py:210`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/ios/keychain.py#L210) |
+| `add` | [`objection/commands/ios/keychain.py:252`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/ios/keychain.py#L252) |
 
 ## 相关文档
 

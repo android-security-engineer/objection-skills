@@ -25,7 +25,7 @@
 | `iosUiBiometricsBypass` | Hook `LAContext evaluatePolicy:` 与 `evaluateAccessControl:` |
 
 ### `rpc.iosUiScreenshot` — frida-screenshot
-源码：`agent/src/ios/userinterface.ts:9`
+源码：[`agent/src/ios/userinterface.ts:9`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/userinterface.ts#L9)
 
 直接委托 `frida-screenshot` 库，传 `null` 表示当前屏幕：
 ```ts
@@ -36,7 +36,7 @@ export const take = (): any => {
 ```
 
 ### `rpc.iosUiWindowDump` — UI 树
-源码：`agent/src/ios/userinterface.ts:15`
+源码：[`agent/src/ios/userinterface.ts:15`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/userinterface.ts#L15)
 
 `UIWindow.keyWindow().recursiveDescription()` 返回描述整个视图层级的字符串：
 ```ts
@@ -47,7 +47,7 @@ export const dump = (): string => {
 ```
 
 ### `rpc.iosUiAlert` — 主线程弹窗
-源码：`agent/src/ios/userinterface.ts:19`
+源码：[`agent/src/ios/userinterface.ts:19`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/userinterface.ts#L19)
 
 用 `ObjC.schedule(ObjC.mainQueue, ...)` 切到主线程，建 `UIAlertController`（style=1 警告样式）与 OK 按钮（`ObjC.Block` 作 handler），通过 `UIApplication.sharedApplication().keyWindow().rootViewController()` 弹出：
 ```ts
@@ -63,7 +63,7 @@ ObjC.schedule(ObjC.mainQueue, () => {
 ```
 
 ### `rpc.iosUiBiometricsBypass` — 改写 LAContext 回调
-源码：`agent/src/ios/userinterface.ts:48`
+源码：[`agent/src/ios/userinterface.ts:48`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/userinterface.ts#L48)
 
 建两个任务，分别 Hook `-[LAContext evaluatePolicy:localizedReason:reply:]` 与 `-[LAContext evaluateAccessControl:operation:localizedReason:reply:]`。`onEnter` 保存原始 reply block，替换成"OS 返回 false 时改成 true 再调原 block"：
 ```ts
@@ -108,10 +108,10 @@ flowchart TD
 ## 🔍 源码索引
 | 符号 | 位置 |
 | --- | --- |
-| `take` | `agent/src/ios/userinterface.ts:9` |
-| `dump` | `agent/src/ios/userinterface.ts:15` |
-| `alert` | `agent/src/ios/userinterface.ts:19` |
-| `biometricsBypass` | `agent/src/ios/userinterface.ts:48` |
+| `take` | [`agent/src/ios/userinterface.ts:9`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/userinterface.ts#L9) |
+| `dump` | [`agent/src/ios/userinterface.ts:15`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/userinterface.ts#L15) |
+| `alert` | [`agent/src/ios/userinterface.ts:19`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/userinterface.ts#L19) |
+| `biometricsBypass` | [`agent/src/ios/userinterface.ts:48`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/userinterface.ts#L48) |
 
 ## 🔗 相关文档
 - [Frida 与 Agent](/guide/frida-agent)

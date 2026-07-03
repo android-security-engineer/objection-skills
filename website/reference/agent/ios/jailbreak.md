@@ -24,7 +24,7 @@
 | `iosJailbreakEnable` | 注册 `ios-jailbreak-enable` 任务，反向翻转检测为"已越狱" |
 
 ### `rpc.iosJailbreakDisable` — 注册一组翻转 Hook
-源码：`agent/src/ios/jailbreak.ts:308`
+源码：[`agent/src/ios/jailbreak.ts:308`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/jailbreak.ts#L308)
 
 `disable()` 建一个任务，依次挂 5 个 Hook（`success=false` 表示把成功探测改成失败）：
 ```ts
@@ -42,7 +42,7 @@ export const disable = (): void => {
 `enable()` 结构相同，传入 `true`（`:320-330`）。
 
 ### `fileExistsAtPath` — 路径探测翻转
-源码：`agent/src/ios/jailbreak.ts:52`
+源码：[`agent/src/ios/jailbreak.ts:52`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/jailbreak.ts#L52)
 
 Hook `-[NSFileManager fileExistsAtPath:]`，`onEnter` 取 args[2] 路径字符串，若命中 `jailbreakPaths` 列表则标记 `is_common_path`，`onLeave` 按 `success` 翻转 `retval`：
 ```ts
@@ -55,12 +55,12 @@ if (jailbreakPaths.indexOf(this.path) >= 0) {
 `onLeave` 中 `success=false` 时把非空 retval 改成 0（`:96-108`），`success=true` 时把空 retval 改成 1（`:82-94`）。
 
 ### `canOpenURL` — Cydia 深链翻转
-源码：`agent/src/ios/jailbreak.ts:191`
+源码：[`agent/src/ios/jailbreak.ts:191`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/jailbreak.ts#L191)
 
 Hook `-[UIApplication canOpenURL:]`，按 `cydia` / `Cydia` 前缀判断是否目标深链（`:202-204`），命中则按 `success` 翻转 retval。
 
 ### `jailMonkeyBypass` — 第三方库特判
-源码：`agent/src/ios/jailbreak.ts:294`
+源码：[`agent/src/ios/jailbreak.ts:294`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/jailbreak.ts#L294)
 
 针对 Gantix JailMonkey 库，直接 Hook `-[JailMonkey isJailBroken]`，`onLeave` 强制 `retval.replace(0x00)`（`:298-305`）。类不存在返回 `null`，由 `addInvocation` 跳过。
 
@@ -91,14 +91,14 @@ flowchart TD
 ## 🔍 源码索引
 | 符号 | 位置 |
 | --- | --- |
-| `jailbreakPaths` | `agent/src/ios/jailbreak.ts:14` |
-| `fileExistsAtPath` | `agent/src/ios/jailbreak.ts:52` |
-| `fopen` | `agent/src/ios/jailbreak.ts:117` |
-| `canOpenURL` | `agent/src/ios/jailbreak.ts:191` |
-| `libSystemBFork` | `agent/src/ios/jailbreak.ts:248` |
-| `jailMonkeyBypass` | `agent/src/ios/jailbreak.ts:294` |
-| `disable` | `agent/src/ios/jailbreak.ts:308` |
-| `enable` | `agent/src/ios/jailbreak.ts:320` |
+| `jailbreakPaths` | [`agent/src/ios/jailbreak.ts:14`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/jailbreak.ts#L14) |
+| `fileExistsAtPath` | [`agent/src/ios/jailbreak.ts:52`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/jailbreak.ts#L52) |
+| `fopen` | [`agent/src/ios/jailbreak.ts:117`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/jailbreak.ts#L117) |
+| `canOpenURL` | [`agent/src/ios/jailbreak.ts:191`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/jailbreak.ts#L191) |
+| `libSystemBFork` | [`agent/src/ios/jailbreak.ts:248`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/jailbreak.ts#L248) |
+| `jailMonkeyBypass` | [`agent/src/ios/jailbreak.ts:294`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/jailbreak.ts#L294) |
+| `disable` | [`agent/src/ios/jailbreak.ts:308`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/jailbreak.ts#L308) |
+| `enable` | [`agent/src/ios/jailbreak.ts:320`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/jailbreak.ts#L320) |
 
 ## 🔗 相关文档
 - [Frida 与 Agent](/guide/frida-agent)

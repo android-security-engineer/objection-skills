@@ -33,7 +33,7 @@
 
 ### `memory` — 聚合对象
 
-源码：`agent/src/rpc/memory.ts:3`
+源码：[`agent/src/rpc/memory.ts:3`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/rpc/memory.ts#L3)
 
 整个文件是一张“RPC 名 → 箭头函数”映射表，每行把参数按位置透传给 `m`（`generic/memory` 命名空间）的对应函数，并标注返回类型。
 
@@ -86,14 +86,14 @@ flowchart LR
 
 | 符号 | 位置 |
 | --- | --- |
-| `memory` 导出对象 | `agent/src/rpc/memory.ts:3` |
-| `memoryDump` | `agent/src/rpc/memory.ts:5` |
-| `memoryListExports` | `agent/src/rpc/memory.ts:6` |
-| `memoryListModules` | `agent/src/rpc/memory.ts:7` |
-| `memoryListRanges` | `agent/src/rpc/memory.ts:8` |
-| `memorySearch` | `agent/src/rpc/memory.ts:9` |
-| `memoryReplace` | `agent/src/rpc/memory.ts:10` |
-| `memoryWrite` | `agent/src/rpc/memory.ts:11` |
+| `memory` 导出对象 | [`agent/src/rpc/memory.ts:3`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/rpc/memory.ts#L3) |
+| `memoryDump` | [`agent/src/rpc/memory.ts:5`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/rpc/memory.ts#L5) |
+| `memoryListExports` | [`agent/src/rpc/memory.ts:6`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/rpc/memory.ts#L6) |
+| `memoryListModules` | [`agent/src/rpc/memory.ts:7`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/rpc/memory.ts#L7) |
+| `memoryListRanges` | [`agent/src/rpc/memory.ts:8`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/rpc/memory.ts#L8) |
+| `memorySearch` | [`agent/src/rpc/memory.ts:9`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/rpc/memory.ts#L9) |
+| `memoryReplace` | [`agent/src/rpc/memory.ts:10`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/rpc/memory.ts#L10) |
+| `memoryWrite` | [`agent/src/rpc/memory.ts:11`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/rpc/memory.ts#L11) |
 
 ## 🔗 相关文档
 

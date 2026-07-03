@@ -32,7 +32,7 @@
 
 ### `_bootstrap_agent()` — 会话准备
 
-源码：`objection/console/agent_cli.py:30`
+源码：[`objection/console/agent_cli.py:30`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/console/agent_cli.py#L30)
 
 所有需要连接设备的子命令（`exec`/`rpc`/`state`）都先调用它：复用 `cli.get_agent` 拿到注入的 agent，并 **`set_json_output(True)`** 打开全局 JSON 输出开关。
 
@@ -55,7 +55,7 @@ flowchart LR
 
 ### `agent_exec()` — 执行 objection 命令
 
-源码：`objection/console/agent_cli.py:65`
+源码：[`objection/console/agent_cli.py:65`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/console/agent_cli.py#L65)
 
 把 Agent 传入的命令字符串交给 `Repl().run_command()` 分派。因为已 `set_json_output(True)`，**已改造的命令走 JSON 路径，未改造的仍打印人类文本**——Agent 可据此判断哪些命令尚未 Agent 化。
 
@@ -69,7 +69,7 @@ repl.run_command(command_str)
 
 ### `agent_rpc()` — 直调底层 RPC
 
-源码：`objection/console/agent_cli.py:113`
+源码：[`objection/console/agent_cli.py:113`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/console/agent_cli.py#L113)
 
 这是给 Agent 的"逃生舱"：当人类命令层不够用时，直接调 agent 的 `rpc.exports`。方法名用 `to_snake_case` 归一化（蛇形/驼峰均可），`--args` 是 JSON 数组作位置参数。
 
@@ -93,7 +93,7 @@ flowchart LR
 
 ### `agent_state()` — 会话状态快照
 
-源码：`objection/console/agent_cli.py:178`
+源码：[`objection/console/agent_cli.py:178`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/console/agent_cli.py#L178)
 
 收集连接信息、PID、运行中的 Job 列表，供 Agent 感知"我现在连了什么、装了哪些 Hook/Job"：
 
@@ -107,13 +107,13 @@ state = {
 
 ### `agent_capabilities()` — 能力枚举（不连设备）
 
-源码：`objection/console/agent_cli.py:230`
+源码：[`objection/console/agent_cli.py:230`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/console/agent_cli.py#L230)
 
 递归遍历 `COMMANDS` 注册表，输出扁平命令树。**不需要连接设备**——这是命令注册表的静态快照，是 Agent 自发现能力的入口。
 
 ### `_enumerate_capabilities()` — 递归遍历注册表
 
-源码：`objection/console/agent_cli.py:247`
+源码：[`objection/console/agent_cli.py:247`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/console/agent_cli.py#L247)
 
 递归 `COMMANDS` 字典，对每个节点输出 `{name, meta, has_exec, subcommands}`：
 
@@ -149,13 +149,13 @@ sequenceDiagram
 
 | 符号 | 位置 |
 | --- | --- |
-| `_bootstrap_agent` | `objection/console/agent_cli.py:30` |
-| `agent` (group) | `objection/console/agent_cli.py:48` |
-| `agent_exec` | `objection/console/agent_cli.py:65` |
-| `agent_rpc` | `objection/console/agent_cli.py:113` |
-| `agent_state` | `objection/console/agent_cli.py:178` |
-| `agent_capabilities` | `objection/console/agent_cli.py:230` |
-| `_enumerate_capabilities` | `objection/console/agent_cli.py:247` |
+| `_bootstrap_agent` | [`objection/console/agent_cli.py:30`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/console/agent_cli.py#L30) |
+| `agent` (group) | [`objection/console/agent_cli.py:48`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/console/agent_cli.py#L48) |
+| `agent_exec` | [`objection/console/agent_cli.py:65`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/console/agent_cli.py#L65) |
+| `agent_rpc` | [`objection/console/agent_cli.py:113`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/console/agent_cli.py#L113) |
+| `agent_state` | [`objection/console/agent_cli.py:178`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/console/agent_cli.py#L178) |
+| `agent_capabilities` | [`objection/console/agent_cli.py:230`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/console/agent_cli.py#L230) |
+| `_enumerate_capabilities` | [`objection/console/agent_cli.py:247`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/console/agent_cli.py#L247) |
 
 ## 🔗 相关文档
 

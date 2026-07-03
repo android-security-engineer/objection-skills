@@ -34,7 +34,7 @@
 | `androidHookingSetMethodReturn(fqClazz, filterOverload, ret)` | 篡改返回值 |
 
 ### `rpc.androidHookingWatch` — 监听方法
-源码：`agent/src/android/hooking.ts:258`
+源码：[`agent/src/android/hooking.ts:258`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/hooking.ts#L258)
 
 按 pattern 类型分流：不含 `!` 视为类名（watch 整个类），含 `!` 视为正则（`Java.enumerateMethods` 后逐方法 watch）：
 
@@ -65,7 +65,7 @@ return new Promise((resolve, reject) => {
 ```
 
 ### `watchMethod` — 单方法 Hook
-源码：`agent/src/android/hooking.ts:342`
+源码：[`agent/src/android/hooking.ts:342`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/hooking.ts#L342)
 
 对每个 overload 替换 `implementation`，按标志位 dump 参数/调用栈/返回值：
 
@@ -96,7 +96,7 @@ targetClass[method].overloads.forEach((m: any) => {
 ```
 
 ### `rpc.androidHookingSetMethodReturn` — 篡改返回值
-源码：`agent/src/android/hooking.ts:535`
+源码：[`agent/src/android/hooking.ts:535`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/hooking.ts#L535)
 
 ```ts
 // agent/src/android/hooking.ts:550-575
@@ -116,7 +116,7 @@ targetClazz[method].overloads.forEach((m: any) => {
 ```
 
 ### `rpc.androidHookingGetCurrentActivity` — 当前 Activity
-源码：`agent/src/android/hooking.ts:421`
+源码：[`agent/src/android/hooking.ts:421`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/hooking.ts#L421)
 
 ```ts
 // agent/src/android/hooking.ts:427-448
@@ -164,26 +164,26 @@ flowchart TD
 ## 🔍 源码索引
 | 符号 | 位置 |
 | --- | --- |
-| `PatternType` enum | `agent/src/android/hooking.ts:22` |
-| `isClassNotFoundError` | `agent/src/android/hooking.ts:27` |
-| `splitClassMethod` | `agent/src/android/hooking.ts:32` |
-| `getClasses` | `agent/src/android/hooking.ts:42` |
-| `getClassLoaders` | `agent/src/android/hooking.ts:48` |
-| `getPatternType` | `agent/src/android/hooking.ts:65` |
-| `lazyWatchForPattern` | `agent/src/android/hooking.ts:73` |
-| `javaEnumerate` | `agent/src/android/hooking.ts:124` |
-| `getClassMethods` | `agent/src/android/hooking.ts:135` |
-| `getClassHandle` | `agent/src/android/hooking.ts:157` |
-| `getClassHandleWithLoaderClassName` | `agent/src/android/hooking.ts:182` |
-| `getClassMethodsOverloads` | `agent/src/android/hooking.ts:210` |
-| `watch` | `agent/src/android/hooking.ts:258` |
-| `watchClass` | `agent/src/android/hooking.ts:296` |
-| `watchMethod` | `agent/src/android/hooking.ts:342` |
-| `getCurrentActivity` | `agent/src/android/hooking.ts:421` |
-| `getActivities` | `agent/src/android/hooking.ts:457` |
-| `getServices` | `agent/src/android/hooking.ts:472` |
-| `getBroadcastReceivers` | `agent/src/android/hooking.ts:502` |
-| `setReturnValue` | `agent/src/android/hooking.ts:535` |
+| `PatternType` enum | [`agent/src/android/hooking.ts:22`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/hooking.ts#L22) |
+| `isClassNotFoundError` | [`agent/src/android/hooking.ts:27`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/hooking.ts#L27) |
+| `splitClassMethod` | [`agent/src/android/hooking.ts:32`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/hooking.ts#L32) |
+| `getClasses` | [`agent/src/android/hooking.ts:42`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/hooking.ts#L42) |
+| `getClassLoaders` | [`agent/src/android/hooking.ts:48`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/hooking.ts#L48) |
+| `getPatternType` | [`agent/src/android/hooking.ts:65`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/hooking.ts#L65) |
+| `lazyWatchForPattern` | [`agent/src/android/hooking.ts:73`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/hooking.ts#L73) |
+| `javaEnumerate` | [`agent/src/android/hooking.ts:124`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/hooking.ts#L124) |
+| `getClassMethods` | [`agent/src/android/hooking.ts:135`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/hooking.ts#L135) |
+| `getClassHandle` | [`agent/src/android/hooking.ts:157`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/hooking.ts#L157) |
+| `getClassHandleWithLoaderClassName` | [`agent/src/android/hooking.ts:182`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/hooking.ts#L182) |
+| `getClassMethodsOverloads` | [`agent/src/android/hooking.ts:210`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/hooking.ts#L210) |
+| `watch` | [`agent/src/android/hooking.ts:258`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/hooking.ts#L258) |
+| `watchClass` | [`agent/src/android/hooking.ts:296`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/hooking.ts#L296) |
+| `watchMethod` | [`agent/src/android/hooking.ts:342`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/hooking.ts#L342) |
+| `getCurrentActivity` | [`agent/src/android/hooking.ts:421`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/hooking.ts#L421) |
+| `getActivities` | [`agent/src/android/hooking.ts:457`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/hooking.ts#L457) |
+| `getServices` | [`agent/src/android/hooking.ts:472`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/hooking.ts#L472) |
+| `getBroadcastReceivers` | [`agent/src/android/hooking.ts:502`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/hooking.ts#L502) |
+| `setReturnValue` | [`agent/src/android/hooking.ts:535`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/hooking.ts#L535) |
 
 ## 🔗 相关文档
 - [Frida 与 Agent](/guide/frida-agent)

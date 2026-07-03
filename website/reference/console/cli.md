@@ -22,7 +22,7 @@
 
 ### `cli` 顶层命令组 — 全局选项与状态初始化
 
-源码：`objection/console/cli.py:45-115`
+源码：[`objection/console/cli.py:45-115`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/console/cli.py#L45)
 
 ```python
 @click.group()
@@ -61,7 +61,7 @@ flowchart LR
 
 ### `get_agent()` — 注入并启动 Frida agent
 
-源码：`objection/console/cli.py:20-41`
+源码：[`objection/console/cli.py:20-41`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/console/cli.py#L20)
 
 用 `state_connection` 中的字段构造 `AgentConfig`，创建 `Agent` 并 `agent.run()`。若 Frida server/gadget 未运行，捕获 `frida.ServerNotRunningError` 红字提示后 `exit(1)`。
 
@@ -107,7 +107,7 @@ def get_agent() -> Agent:
 
 ### `start` 命令 — 完整会话编排
 
-源码：`objection/console/cli.py:131-204`
+源码：[`objection/console/cli.py:131-204`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/console/cli.py#L131)
 
 选项：`--plugin-folder/-P`、`--quiet/-q`、`--startup-command/-s`（可多次）、`--file-commands/-c`（文件）、`--startup-script/-S`（文件）、`--enable-api/-a`。
 
@@ -138,7 +138,7 @@ sequenceDiagram
 
 ### `run` 命令 — 单命令执行
 
-源码：`objection/console/cli.py:234-257`
+源码：[`objection/console/cli.py:234-257`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/console/cli.py#L234)
 
 接受可变参数 `command`，join 后交给 `Repl().run_command`。`--hook-debug/-d` 把 `app_state.debug_hooks` 置位，使编译后的 hook 同时打印到屏幕与日志。
 
@@ -162,18 +162,18 @@ sequenceDiagram
 
 | 符号 | 位置 |
 | --- | --- |
-| `get_agent()` | `objection/console/cli.py:20` |
-| `cli`（command group） | `objection/console/cli.py:45` |
-| `api` 命令 | `objection/console/cli.py:118` |
-| `start` 命令 | `objection/console/cli.py:131` |
-| `explore` 命令 | `objection/console/cli.py:207` |
-| `run` 命令 | `objection/console/cli.py:234` |
-| `version` 命令 | `objection/console/cli.py:260` |
-| `cli.add_command(agent_group)` | `objection/console/cli.py:270` |
-| `patchipa` 命令 | `objection/console/cli.py:273` |
-| `patchapk` 命令 | `objection/console/cli.py:304` |
-| `signapk` 命令 | `objection/console/cli.py:365` |
-| `__main__` 入口 | `objection/console/cli.py:377` |
+| `get_agent()` | [`objection/console/cli.py:20`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/console/cli.py#L20) |
+| `cli`（command group） | [`objection/console/cli.py:45`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/console/cli.py#L45) |
+| `api` 命令 | [`objection/console/cli.py:118`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/console/cli.py#L118) |
+| `start` 命令 | [`objection/console/cli.py:131`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/console/cli.py#L131) |
+| `explore` 命令 | [`objection/console/cli.py:207`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/console/cli.py#L207) |
+| `run` 命令 | [`objection/console/cli.py:234`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/console/cli.py#L234) |
+| `version` 命令 | [`objection/console/cli.py:260`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/console/cli.py#L260) |
+| `cli.add_command(agent_group)` | [`objection/console/cli.py:270`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/console/cli.py#L270) |
+| `patchipa` 命令 | [`objection/console/cli.py:273`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/console/cli.py#L273) |
+| `patchapk` 命令 | [`objection/console/cli.py:304`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/console/cli.py#L304) |
+| `signapk` 命令 | [`objection/console/cli.py:365`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/console/cli.py#L365) |
+| `__main__` 入口 | [`objection/console/cli.py:377`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/console/cli.py#L377) |
 
 ## 🔗 相关文档
 

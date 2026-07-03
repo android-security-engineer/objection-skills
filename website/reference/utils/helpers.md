@@ -19,7 +19,7 @@
 ## 🏗️ 核心结构
 
 ### `debug_print` — 调试日志
-源码：`objection/utils/helpers.py:10`
+源码：[`objection/utils/helpers.py:10`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/helpers.py#L10)
 
 ```python
 def debug_print(message: str) -> None:
@@ -30,17 +30,17 @@ def debug_print(message: str) -> None:
 全模块统一的调试输出闸门，`dim=True` 让其在终端里视觉弱化。被 `agent.py`、`patchers/android.py` 等广泛调用。
 
 ### `pretty_concat` — 截断加省略号
-源码：`objection/utils/helpers.py:23`
+源码：[`objection/utils/helpers.py:23`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/helpers.py#L23)
 
 截断字符串到 `at_most` 长度，尾部或头部加 `...`。`left=True` 时保留尾部（适合显示文件路径末段）。用于命令输出中对长字符串的展示控制。
 
 ### `sizeof_fmt` — 字节可读化
-源码：`objection/utils/helpers.py:47`
+源码：[`objection/utils/helpers.py:47`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/helpers.py#L47)
 
 按 1024 进制把字节数格式化为 `3.1 KiB`、`12.5 MiB` 等。用于 `memory list` 等命令展示内存区段大小。
 
 ### `get_tokens` — shell 风格分词
-源码：`objection/utils/helpers.py:59`
+源码：[`objection/utils/helpers.py:59`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/helpers.py#L59)
 
 ```python
 def get_tokens(text: str) -> list:
@@ -54,12 +54,12 @@ def get_tokens(text: str) -> list:
 REPL 输入分词。`shlex` 在遇到未闭合引号时抛 `ValueError`（用户正在输入带引号的参数中途），这里捕获后返回一个随机占位串，避免 REPL 在半输入态崩掉。
 
 ### `clean_argument_flags` — 去除 `--` 标志
-源码：`objection/utils/helpers.py:83`
+源码：[`objection/utils/helpers.py:83`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/helpers.py#L83)
 
 过滤掉以 `--` 开头的参数，返回纯位置参数列表。供命令解析时区分 flag 与 value。
 
 ### `to_snake_case` — 驼峰转下划线
-源码：`objection/utils/helpers.py:97`
+源码：[`objection/utils/helpers.py:97`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/helpers.py#L97)
 
 ```python
 def to_snake_case(w: str) -> str:
@@ -70,12 +70,12 @@ def to_snake_case(w: str) -> str:
 两步正则实现 camelCase → snake_case。`api/rpc.py` 与 `api/agent_endpoints.py` 用它把 URL 里的方法名（如 `androidHookingListClasses`）归一化为 agent exports 的下划线命名（`android_hooking_list_classes`），让 HTTP 调用对大小写不敏感。
 
 ### `print_frida_connection_help` — 连接排错指引
-源码：`objection/utils/helpers.py:109`
+源码：[`objection/utils/helpers.py:109`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/helpers.py#L109)
 
 在连接失败时打印多色帮助文本：提示 root/越狱设备用 `--gadget`，非 root 设备跑 patched 应用并保持前台，多设备用 `--serial`，并指向 wiki。被 CLI 启动失败路径调用。
 
 ### `warn_about_older_operating_systems` — 版本告警
-源码：`objection/utils/helpers.py:129`
+源码：[`objection/utils/helpers.py:129`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/helpers.py#L129)
 
 ```python
 android_supported = '5'
@@ -108,14 +108,14 @@ flowchart LR
 ## 🔍 源码索引
 | 符号 | 位置 |
 | --- | --- |
-| `debug_print` | `objection/utils/helpers.py:10` |
-| `pretty_concat` | `objection/utils/helpers.py:23` |
-| `sizeof_fmt` | `objection/utils/helpers.py:47` |
-| `get_tokens` | `objection/utils/helpers.py:59` |
-| `clean_argument_flags` | `objection/utils/helpers.py:83` |
-| `to_snake_case` | `objection/utils/helpers.py:97` |
-| `print_frida_connection_help` | `objection/utils/helpers.py:109` |
-| `warn_about_older_operating_systems` | `objection/utils/helpers.py:129` |
+| `debug_print` | [`objection/utils/helpers.py:10`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/helpers.py#L10) |
+| `pretty_concat` | [`objection/utils/helpers.py:23`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/helpers.py#L23) |
+| `sizeof_fmt` | [`objection/utils/helpers.py:47`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/helpers.py#L47) |
+| `get_tokens` | [`objection/utils/helpers.py:59`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/helpers.py#L59) |
+| `clean_argument_flags` | [`objection/utils/helpers.py:83`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/helpers.py#L83) |
+| `to_snake_case` | [`objection/utils/helpers.py:97`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/helpers.py#L97) |
+| `print_frida_connection_help` | [`objection/utils/helpers.py:109`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/helpers.py#L109) |
+| `warn_about_older_operating_systems` | [`objection/utils/helpers.py:129`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/helpers.py#L129) |
 
 ## 🔗 相关文档
 - [整体架构](/guide/architecture)

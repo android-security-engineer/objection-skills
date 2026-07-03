@@ -29,7 +29,7 @@ Python 把所有位置参数用空格拼成单条命令字符串，调用 `api.a
 
 ### `execute()` — 执行 shell 命令
 
-源码：`objection/commands/android/command.py:9`
+源码：[`objection/commands/android/command.py:9`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/android/command.py#L9)
 
 先把 `args` 拼成命令串；非 JSON 模式下用 `click.secho` 灰字回显命令本身。调 RPC 拿到 `response` dict 后，对 `stdOut` 用粗体、`stdErr` 用红色粗体分别打印。JSON 模式则把 `command`/`stdout`/`stderr` 打包进 `CommandResult`。
 
@@ -79,7 +79,7 @@ JSON 模式下跳过命令回显与彩色打印，直接返回 `CommandResult(re
 
 | 符号 | 位置 |
 | --- | --- |
-| `execute` | `objection/commands/android/command.py:9` |
+| `execute` | [`objection/commands/android/command.py:9`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/android/command.py#L9) |
 
 ## 相关文档
 

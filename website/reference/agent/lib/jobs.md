@@ -71,18 +71,18 @@ flowchart TD
 ## 🔍 源码索引
 | 符号 | 位置 |
 | --- | --- |
-| `class Job` | `agent/src/lib/jobs.ts:3` |
-| `addInvocation` | `agent/src/lib/jobs.ts:15` |
-| `addImplementation` | `agent/src/lib/jobs.ts:25` |
-| `addReplacement` | `agent/src/lib/jobs.ts:36` |
-| `killAll` | `agent/src/lib/jobs.ts:41` |
-| `currentJobs` | `agent/src/lib/jobs.ts:75` |
-| `identifier` | `agent/src/lib/jobs.ts:77` |
-| `all` | `agent/src/lib/jobs.ts:78` |
-| `add` | `agent/src/lib/jobs.ts:80` |
-| `hasIdent` | `agent/src/lib/jobs.ts:87` |
-| `hasType` | `agent/src/lib/jobs.ts:99` |
-| `kill` | `agent/src/lib/jobs.ts:112` |
+| `class Job` | [`agent/src/lib/jobs.ts:3`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/lib/jobs.ts#L3) |
+| `addInvocation` | [`agent/src/lib/jobs.ts:15`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/lib/jobs.ts#L15) |
+| `addImplementation` | [`agent/src/lib/jobs.ts:25`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/lib/jobs.ts#L25) |
+| `addReplacement` | [`agent/src/lib/jobs.ts:36`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/lib/jobs.ts#L36) |
+| `killAll` | [`agent/src/lib/jobs.ts:41`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/lib/jobs.ts#L41) |
+| `currentJobs` | [`agent/src/lib/jobs.ts:75`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/lib/jobs.ts#L75) |
+| `identifier` | [`agent/src/lib/jobs.ts:77`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/lib/jobs.ts#L77) |
+| `all` | [`agent/src/lib/jobs.ts:78`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/lib/jobs.ts#L78) |
+| `add` | [`agent/src/lib/jobs.ts:80`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/lib/jobs.ts#L80) |
+| `hasIdent` | [`agent/src/lib/jobs.ts:87`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/lib/jobs.ts#L87) |
+| `hasType` | [`agent/src/lib/jobs.ts:99`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/lib/jobs.ts#L99) |
+| `kill` | [`agent/src/lib/jobs.ts:112`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/lib/jobs.ts#L112) |
 
 ## 🔗 相关文档
 - [Frida 与 Agent](/guide/frida-agent)

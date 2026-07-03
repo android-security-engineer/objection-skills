@@ -35,7 +35,7 @@
 
 ### `instances()` — 搜索活实例
 
-源码：`objection/commands/android/heap.py:36`
+源码：[`objection/commands/android/heap.py:36`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/android/heap.py#L36)
 
 参数取 `args[0]` 作为类名，调 `api.android_heap_get_live_class_instances(target_class)` 返回 list of dict。空列表直接返回 `None`（无输出）；非空用 `tabulate` 渲染 hashcode / classname / tostring 三列。
 
@@ -47,7 +47,7 @@ instance_results = api.android_heap_get_live_class_instances(target_class)
 
 ### `methods()` — 列实例方法
 
-源码：`objection/commands/android/heap.py:82`
+源码：[`objection/commands/android/heap.py:82`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/android/heap.py#L82)
 
 `args[0]` 转 int 作为 handle，调 `api.android_heap_print_methods(target_handle)`。返回的 `method_results` 是 `[类名, [方法...]]` 二元组。`--without-arguments` 标志会用 `filter(lambda x: '()' in x, ...)` 只留无参方法。
 
@@ -63,7 +63,7 @@ if _should_ignore_methods_with_arguments(args):
 
 ### `execute()` — 调用实例方法
 
-源码：`objection/commands/android/heap.py:131`
+源码：[`objection/commands/android/heap.py:131`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/android/heap.py#L131)
 
 取 handle 与方法名，`_should_return_as_string(args)` 控制 `--return-string`，传给 `api.android_heap_execute_handle_method(target_handle, method, as_string)`。结果若为 dict 用 `pprint.pformat`，否则 `str()`。
 
@@ -78,13 +78,13 @@ exec_results = api.android_heap_execute_handle_method(target_handle, method,
 
 ### `fields()` — 列实例字段
 
-源码：`objection/commands/android/heap.py:178`
+源码：[`objection/commands/android/heap.py:178`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/android/heap.py#L178)
 
 handle 转 int，调 `api.android_heap_print_fields(target_handle)`，返回 `[{name, value}, ...]`，用 `tabulate` 渲染 Name/Value 两列。
 
 ### `evaluate()` — 在 handle 上执行 JS
 
-源码：`objection/commands/android/heap.py:220`
+源码：[`objection/commands/android/heap.py:220`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/android/heap.py#L220)
 
 这是模块里唯一有交互式 prompt 的命令。REPL 模式下用 `prompt_toolkit.prompt` 配 `PygmentsLexer(JavascriptLexer)` 多行编辑 JS，`clazz` 变量提示在底栏。**JSON 模式下交互 prompt 不可用**，强制要求 `--inline <js>`，否则报错。
 
@@ -124,13 +124,13 @@ flowchart LR
 
 | 符号 | 位置 |
 | --- | --- |
-| `_should_ignore_methods_with_arguments` | `objection/commands/android/heap.py:14` |
-| `_should_return_as_string` | `objection/commands/android/heap.py:25` |
-| `instances` | `objection/commands/android/heap.py:36` |
-| `methods` | `objection/commands/android/heap.py:82` |
-| `execute` | `objection/commands/android/heap.py:131` |
-| `fields` | `objection/commands/android/heap.py:178` |
-| `evaluate` | `objection/commands/android/heap.py:220` |
+| `_should_ignore_methods_with_arguments` | [`objection/commands/android/heap.py:14`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/android/heap.py#L14) |
+| `_should_return_as_string` | [`objection/commands/android/heap.py:25`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/android/heap.py#L25) |
+| `instances` | [`objection/commands/android/heap.py:36`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/android/heap.py#L36) |
+| `methods` | [`objection/commands/android/heap.py:82`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/android/heap.py#L82) |
+| `execute` | [`objection/commands/android/heap.py:131`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/android/heap.py#L131) |
+| `fields` | [`objection/commands/android/heap.py:178`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/android/heap.py#L178) |
+| `evaluate` | [`objection/commands/android/heap.py:220`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/android/heap.py#L220) |
 
 ## 相关文档
 

@@ -22,7 +22,7 @@
 | `iosBundlesGetFrameworks` | 调 `getBundles(BundleType.NSBundleFramework)` |
 
 ### `rpc.iosBundlesGetFrameworks` / `iosBundlesGetBundles` — 按 type 枚举 Bundle
-源码：`agent/src/ios/bundles.ts:13`
+源码：[`agent/src/ios/bundles.ts:13`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/bundles.ts#L13)
 
 入口 `getBundles(type)` 依据传入的 `BundleType` 选择 `NSBundle.allFrameworks()` 或 `allBundles()`，然后遍历数组取 `infoDictionary`：
 ```ts
@@ -73,7 +73,7 @@ flowchart TD
 ## 🔍 源码索引
 | 符号 | 位置 |
 | --- | --- |
-| `getBundles` | `agent/src/ios/bundles.ts:13` |
+| `getBundles` | [`agent/src/ios/bundles.ts:13`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/bundles.ts#L13) |
 
 ## 🔗 相关文档
 - [Frida 与 Agent](/guide/frida-agent)

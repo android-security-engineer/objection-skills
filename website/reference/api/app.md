@@ -18,7 +18,7 @@
 ## 🏗️ 核心结构
 
 ### `create_app` — 应用工厂
-源码：`objection/api/app.py:8`
+源码：[`objection/api/app.py:8`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/api/app.py#L8)
 
 ```python
 from flask import Flask
@@ -71,7 +71,137 @@ flowchart LR
 ## 🔍 源码索引
 | 符号 | 位置 |
 | --- | --- |
-| `create_app` | `objection/api/app.py:8` |
+| `create_app` | [`objection/api/app.py:8`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/api/app.py#L8) |
+
+## 🧩 蓝图注册与路由命名空间
+
+下图刻画三个核心蓝图注册到 Flask app 后形成的路由命名空间层级，以及插件蓝图在 `ApiState.start()` 阶段追加挂载的位置。
+
+```mermaid
+flowchart TD
+    APP["Flask app<br/>(__name__ = objection.api.app)"]
+
+    subgraph 核心蓝图 create_app 注册
+        RPC["rpc.bp<br/>Blueprint('rpc', url_prefix='/rpc')<br/>源: api/rpc.py:6"]
+        SCRIPT["script.bp<br/>Blueprint('script', url_prefix='/script')<br/>源: api/script.py:5"]
+        AE["agent_endpoints.bp<br/>Blueprint('agent_endpoints', url_prefix='')<br/>源: api/agent_endpoints.py:34"]
+    end
+
+    APP --> RPC
+    APP --> SCRIPT
+    APP --> AE
+
+    RPC --> R1["GET/POST /rpc/invoke/<method>"]
+    SCRIPT --> S1["POST /script/runonce"]
+    AE --> A1["POST /command/exec"]
+    AE --> A2["GET /state"]
+    AE --> A3["GET /events/poll"]
+    AE --> A4["GET /capabilities"]
+    AE --> A5["GET/POST /agent/rpc/<method>"]
+
+    subgraph 插件蓝图 ApiState.start 追加
+        PB1["插件1 Blueprint"]
+        PB2["插件2 Blueprint"]
+    end
+    APP -.start()时 register_blueprint.-> PB1
+    APP -.start()时 register_blueprint.-> PB2
+```
+
+命名空间要点（基于 [`rpc.py:6`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/api/rpc.py#L6)、[`script.py:5`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/api/script.py#L5)、[`agent_endpoints.py:34`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/api/agent_endpoints.py#L34)）：
+
+- **`agent_endpoints` 用空前缀**：`url_prefix=''`（[`agent_endpoints.py:34`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/api/agent_endpoints.py#L34)），端点直接挂在根路径，如 `/command/exec`、`/state`。这与 rpc/script 的 `/rpc`、`/script` 前缀形成对比——Agent 端点是 objection 的"主入口"，刻意不设前缀以缩短 URL。
+- **命名空间靠约定不靠隔离**：三个蓝图平级注册，无嵌套。Flask 不强制蓝图间路由不冲突，若插件蓝图也注册 `/state` 会覆盖 agent_endpoints 的 `/state`（Flask 抛 `AssertionError` 阻止覆盖）。objection 靠"插件用独特前缀"的约定避免冲突，但无强制机制。
+- **`/agent/rpc/<method>` 与 `/rpc/invoke/<method>` 互补**：前者由 `agent_endpoints` 提供，强制 JSON 输出、走命令层包装；后者由 `rpc` 蓝图提供，直接桥接 Frida RPC、支持 `?json=false` 返回原始响应。两者都按 `<method>` 路由，但语义不同——前者是"Agent 友好的 RPC"，后者是"裸 RPC 桥接"。
+
+## 🔁 应用工厂调用时序
+
+下图展示从 `ApiState.__init__` 触发 `create_app()` 到 Flask app 就绪、再到 `start()` 挂载插件蓝图并启动服务的完整时序。
+
+```mermaid
+sequenceDiagram
+    participant MOD as 模块导入
+    participant AS as ApiState
+    participant CA as create_app()
+    participant RPCM as rpc 模块
+    participant SCRM as script 模块
+    participant AEM as agent_endpoints 模块
+    participant CLI as objection api 命令
+    participant PLUG as 插件加载器
+    participant FLASK as Flask.run()
+
+    MOD->>AS: ApiState() 单例构造
+    AS->>CA: create_app()
+    CA->>CA: app = Flask('objection.api.app')
+    CA->>RPCM: import rpc (触发模块级 Blueprint 创建)
+    RPCM-->>CA: rpc.bp 就绪
+    CA->>CA: app.register_blueprint(rpc.bp)
+    CA->>SCRM: import script
+    SCRM-->>CA: script.bp 就绪
+    CA->>CA: app.register_blueprint(script.bp)
+    CA->>AEM: import agent_endpoints
+    AEM-->>CA: agent_endpoints.bp 就绪
+    CA->>CA: app.register_blueprint(agent_endpoints.bp)
+    CA-->>AS: 返回 app → core_api
+
+    Note over AS,PLUG: 插件加载阶段 (构造后, start 前)
+    PLUG->>AS: append_api_blueprint(bp) × N
+    AS->>AS: blueprints.append(bp) (暂存)
+
+    CLI->>AS: start(host, port, debug)
+    AS->>AS: for bp in blueprints: register_blueprint(bp)
+    AS->>FLASK: core_api.run(host, port, debug)
+    FLASK-->>CLI: 服务阻塞运行
+```
+
+时序关键点：
+
+- **蓝图在模块导入时创建**：`bp = Blueprint(...)` 是模块级语句（[`rpc.py:6`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/api/rpc.py#L6)），`create_app` 内 `from . import rpc` 触发模块加载时即创建蓝图对象。这意味着蓝图是单例——多次 `create_app()` 会复用同一蓝图对象，但注册到不同 Flask app 实例。Flask 允许同一蓝图注册到多个 app，但 objection 只调一次 `create_app()`。
+- **`from . import` 的顺序**：`app.py` 顶部按 `rpc` → `script` → `agent_endpoints` 顺序导入（[`app.py:3-5`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/api/app.py#L3)），注册顺序与之一致。注册顺序影响 Flask 的路由匹配优先级——但三蓝图路由前缀不重叠，顺序无实际影响。
+- **插件蓝图两阶段**：`append_api_blueprint` 只暂存到 `self.blueprints` 列表，不立即注册（[`state/api.py:11-23`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/state/api.py#L11)）；直到 `start()` 才统一 `register_blueprint`（[`state/api.py:37-38`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/state/api.py#L37)）。这避免了"插件加载中途蓝图被部分访问"的中间状态。
+
+## 📐 路由表装配视图（ASCII 框图）
+
+下图展示 `create_app()` 执行后 Flask app 内部的路由表结构，以及插件蓝图追加后的增量。
+
+```
+create_app() 执行后:
+┌──────────────────────────────────────────────────────────────┐
+│ Flask app (objection.api.app)                                 │
+│                                                               │
+│  url_map (路由表):                                             │
+│  ┌──────────────────────────────────────────────────────────┐│
+│  │ Rule                          Methods   endpoint          ││
+│  │ /rpc/invoke/<string:method>  GET,POST  rpc.invoke         ││
+│  │ /script/runonce               POST      script.runonce    ││
+│  │ /command/exec                 POST      agent_endpoints.* ││
+│  │ /state                        GET       agent_endpoints.* ││
+│  │ /events/poll                  GET       agent_endpoints.* ││
+│  │ /capabilities                 GET       agent_endpoints.* ││
+│  │ /agent/rpc/<method>           GET,POST  agent_endpoints.* ││
+│  └──────────────────────────────────────────────────────────┘│
+│                                                               │
+│  blueprints (已注册):                                         │
+│  ┌──────────────────────────────────────────────────────────┐│
+│  │ rpc.bp            url_prefix='/rpc'                       ││
+│  │ script.bp         url_prefix='/script'                    ││
+│  │ agent_endpoints.bp url_prefix=''                          ││
+│  └──────────────────────────────────────────────────────────┘│
+└──────────────────────────────────────────────────────────────┘
+
+ApiState.start() 追加插件蓝图后:
+┌──────────────────────────────────────────────────────────────┐
+│ + 插件1.bp  url_prefix='/plugin1'  (假设)                     │
+│ + 插件2.bp  url_prefix='/plugin2'  (假设)                     │
+│   → 路由表新增 /plugin1/*, /plugin2/* 规则                     │
+└──────────────────────────────────────────────────────────────┘
+```
+
+装配边界情况：
+
+- **`<string:method>` 路由参数**：`/rpc/invoke/<string:method>` 的 `<string:method>` 是 Flask 的 string 转换器，匹配不含 `/` 的任意字符串（[`rpc.py:10`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/api/rpc.py#L10)）。这意味着方法名不能含斜杠——PascalCase 方法名如 `AndroidHook` 可正常匹配，但若方法名含 `/` 会 404。实际 agent.js 导出的方法名都是标识符，无斜杠。
+- **`/agent/rpc/<method>` 无类型转换器**：`<method>` 等价于 `<string:method>`，但未显式声明类型。Flask 默认 string 转换器，行为一致。
+- **`/script/runonce` 仅 POST**：该端点只接受 POST（[`script.py:11`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/api/script.py#L11)），GET 请求会被 Flask 路由层直接返回 405 Method Not Allowed，不进入视图函数。`/rpc/invoke/<method>` 同时支持 GET 和 POST——GET 无参数调用，POST 以 body 为参数。
+- **无全局错误处理**：`create_app` 未注册 `@app.errorhandler`，蓝图内视图函数抛异常时 Flask 用默认 500 处理器返回 HTML 错误页。这对 Agent 不友好（Agent 期望 JSON），但 `agent_endpoints` 的视图函数内部自行 try/except 并返回统一 JSON schema，绕过了默认错误处理。`rpc` 蓝图的 `invoke` 视图若抛异常则返回 HTML 500——这是裸 RPC 桥接的已知粗糙点。
 
 ## 🔗 相关文档
 - [整体架构](/guide/architecture)

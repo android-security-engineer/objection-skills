@@ -79,4 +79,121 @@ flowchart LR
 - **不能**：对强反 Frida 检测、加固壳、自有协议加密的 App，仍需结合手动 Frida 脚本与其他工具；
 - **定位**：它是一个"快速覆盖 + 工程化"的工具，让你把精力集中在真正需要手动深挖的少数点上。
 
+## 🧱 痛点全景：objection 覆盖的攻击面
+
+把上面 6 个痛点汇总到一张图，可以看出 objection 覆盖的攻击面是"App 运行时可触及的一切"：
+
+```text
+┌──────────────── 目标 App 进程 ────────────────────────────────────────┐
+│                                                                       │
+│  ┌──────────── 网络层 ────────────┐    ┌───────── 运行时方法 ────────┐ │
+│  │ ① SSL Pinning                  │    │ ② 方法 Hook                │ │
+│  │   objection: sslpinning disable│    │   objection: hooking watch │ │
+│  └────────────────────────────────┘    └────────────────────────────┘ │
+│                                                                       │
+│  ┌──────── 凭证存储 ──────────────┐    ┌────────── 堆对象 ───────────┐ │
+│  │ ③ iOS Keychain                │    │ ④ 实例方法调用             │ │
+│  │   Android Keystore            │    │   objection: heap search   │ │
+│  │   objection: keychain/keystore│    │   objection: heap call      │ │
+│  └────────────────────────────────┘    └─────────────────────────────┘ │
+│                                                                       │
+│  ┌──────── 进程内存 ──────────────┐    ┌────────── 沙盒文件 ─────────┐ │
+│  │ ⑤ 硬编码密钥/Token             │    │ ⑥ SQLite/plist/SharedPrefs │ │
+│  │   objection: memory search     │    │   objection: file/env       │ │
+│  └────────────────────────────────┘    └─────────────────────────────┘ │
+│                                                                       │
+└───────────────────────────────────────────────────────────────────────┘
+          │                                            │
+          ▼                                            ▼
+   ┌──────────┐                                ┌──────────────┐
+   │ root/越狱 │                                │ 普通设备      │
+   │ frida-   │                                │ patchapk     │
+   │ server   │                                │ gadget       │
+   └──────────┘                                └──────────────┘
+```
+
+六块攻击面之外，还有两条部署路径（frida-server vs gadget）覆盖不同设备条件——这就是 objection "不越狱也能测"的根基。
+
+## 🔄 痛点 1 与 2 的联动：绕 Pinning 后看方法
+
+实际测试中痛点常联动。最典型的是"绕 Pinning 抓流量 + Hook 加解密方法看明文"组合：
+
+```mermaid
+sequenceDiagram
+    participant T as 测试者
+    participant O as objection
+    participant APP as 目标 App
+    participant B as Burp 代理
+    participant SRV as 后端服务器
+
+    T->>O: android sslpinning disable
+    O->>APP: Hook 7 处校验点
+    APP-->>O: Custom TrustManager ready
+    T->>O: android hooking watch com.example.Crypto!encrypt --dump-args --dump-return
+    O->>APP: 装钩（立即返回）
+    T->>APP: 在 App 里触发登录
+    APP->>APP: 调用 encrypt(明文密码)
+    APP-->>O: 命中：encrypt(明文) → 密文
+    APP->>B: 发请求（密文 + HTTPS）
+    B->>SRV: 转发
+    Note over T,B: 测试者同时拿到：① 方法入参出参（明文）<br/>② Burp 里的请求（密文）<br/>可互证加密逻辑
+```
+
+这种联动的价值：Burp 只看到加密后的密文，但 Hook `encrypt` 方法能拿到加密**前**的明文——两层证据对照，就能确认"这个字段是这么加密的"，进而逆向出加密算法或直接复现请求。
+
+## 🔄 痛点 3 与 4 的联动：从凭证到实例
+
+另一组常见联动是"Dump 凭证发现线索 → 堆搜索拿实例 → 调方法验证"：
+
+```mermaid
+flowchart LR
+    A["ios keychain dump<br/>或 android keystore list"] --> B{"发现敏感 token/key?"}
+    B -->|"是"| C["记下其所属类/方法"]
+    B -->|"否"| D["换路径：内存搜索硬编码"]
+    C --> E["android heap search <类>"]
+    E --> F{"找到实例?"}
+    F -->|"是"| G["android heap call <inst> <method>"]
+    F -->|"否"| H["先在 App 里触发功能<br/>让对象被创建"]
+    H --> E
+    G --> I["验证：方法返回什么？<br/>能否绕过校验？"]
+```
+
+这组联动体现了 objection 的"运行时探索"本质：静态分析看到类与方法，但**对象实例只在运行时存在**——必须先让 App 跑起来、触发功能创建对象，才能 `Java.choose` 拿到它并调用实例方法。
+
+## ⚖️ 设计权衡：覆盖范围 vs 深度
+
+objection 在"覆盖广度"与"单点深度"间做了明确取舍：
+
+| 维度 | objection 的选择 | 代价 |
+| --- | --- | --- |
+| 覆盖范围 | 覆盖移动安全 80% 高频场景（Pin/Hook/凭证/堆/内存/文件） | 对剩下 20%（强反 Frida、加固壳、自定义协议加密）需手动 Frida 脚本深挖 |
+| 能力粒度 | 内置高频封装，开箱即用 | 新增能力要改 agent TS 源码并重构建（见 [Frida 与 Agent](/guide/frida-agent#构建-agent-开发者)） |
+| 设备条件 | 既支持 root（frida-server）也支持普通设备（gadget） | gadget 需重打包重签名，且部分 App 的签名校验会挡路 |
+| 反检测 | 不内置强反 Frida 检测绕过 | 对做了 Frida 检测的 App，需结合其他工具或手写脚本 |
+| 输出 | 双模式（人类文本 + Agent JSON） | 命令函数要兼顾两种输出，改造工作量集中在输出层 |
+
+## 🆚 与替代方案对比（按痛点）
+
+每个痛点都有替代方案，objection 的优势在"统一 + 开箱即用"：
+
+| 痛点 | 替代方案 | objection 优势 |
+| --- | --- | --- |
+| 抓不到 HTTPS | 手写 Frida 脚本绕 Pinning / 用 Magisk 模块 | 一行命令，覆盖 7 处校验点，跨 Android 版本 |
+| 看不到内部 | 反编译猜逻辑 / 手写 Hook | 内置 watch + dump_args/return/backtrace，即时出结果 |
+| 凭证藏深 | 越狱后手动查 Keychain / root 后翻 Keystore | 直接调系统 API dump，跨 App 隔离 |
+| 实例难触及 | 反编译找构造点 / 手写 Java.choose | heap search + heap call 一条龙 |
+| 需 root | 买越狱设备 / 刷 Magisk | gadget 模式普通设备可用 |
+| 重复造轮子 | 每次手写 Frida 脚本 | 内置命令 + REPL + 插件 + Agent 接口 |
+
+## 📜 历史演进：痛点驱动的功能生长
+
+objection 的功能集是痛点驱动逐步长出来的：
+
+- **起源**：Leon Jacobs 在 SensePost 为移动渗透测试造的"Frida + 命令包"，最早覆盖 Pinning 绕过与方法 Hook（痛点 1、2）。
+- **凭证 dump**：为 Keychain/Keystore 取证加命令（痛点 3）。
+- **堆操作**：为调实例方法加 `heap search/call`（痛点 4）。
+- **Gadget 模式**：为普通设备测试加 `patchapk`（痛点 5）。
+- **插件 + HTTP API**：为复用与脚本驱动加插件机制与 `/rpc/invoke`（痛点 6 的工程化）。
+- **Agent 友好层**：随 AI Agent 兴起，加统一 JSON schema、事件流、`agent` 子命令组——让 objection 不仅是人类工具，也是 Agent 可驱动的运行时探测 SKILL。这是从"解决人类痛点"到"解决 Agent 痛点"的延伸。
+
 下一页 [整体架构](/guide/architecture) 会拆解它是怎么做到这些的。

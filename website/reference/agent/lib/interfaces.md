@@ -52,10 +52,10 @@ flowchart LR
 ## 🔍 源码索引
 | 符号 | 位置 |
 | --- | --- |
-| `IFridaInfo` | `agent/src/lib/interfaces.ts:1` |
-| `IIosPackage` | `agent/src/lib/interfaces.ts:10` |
-| `IAndroidPackage` | `agent/src/lib/interfaces.ts:19` |
-| `IIosBundlePaths` | `agent/src/lib/interfaces.ts:32` |
+| `IFridaInfo` | [`agent/src/lib/interfaces.ts:1`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/lib/interfaces.ts#L1) |
+| `IIosPackage` | [`agent/src/lib/interfaces.ts:10`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/lib/interfaces.ts#L10) |
+| `IAndroidPackage` | [`agent/src/lib/interfaces.ts:19`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/lib/interfaces.ts#L19) |
+| `IIosBundlePaths` | [`agent/src/lib/interfaces.ts:32`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/lib/interfaces.ts#L32) |
 
 ## 🔗 相关文档
 - [Frida 与 Agent](/guide/frida-agent)

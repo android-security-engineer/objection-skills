@@ -19,7 +19,7 @@
 ## 🏗️ 核心结构
 
 ### 模块级全局状态
-源码：`objection/utils/events.py:21`
+源码：[`objection/utils/events.py:21`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/events.py#L21)
 
 ```python
 _MAX_EVENTS = 1000
@@ -34,7 +34,7 @@ _dropped = 0
 - `_dropped`：累计丢弃计数，随 `drain_events` 一起清零返回。
 
 ### `record_event` — 入队
-源码：`objection/utils/events.py:29`
+源码：[`objection/utils/events.py:29`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/events.py#L29)
 
 ```python
 def record_event(message: dict, data=None) -> None:
@@ -56,7 +56,7 @@ def record_event(message: dict, data=None) -> None:
 - **丢弃计数先于 append**：先判断 `len == maxlen` 再 append，这样 `_dropped` 准确反映「本次 append 挤掉了一条最旧事件」。
 
 ### `drain_events` — 取出并清空
-源码：`objection/utils/events.py:53`
+源码：[`objection/utils/events.py:53`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/events.py#L53)
 
 ```python
 def drain_events() -> dict:
@@ -72,7 +72,7 @@ def drain_events() -> dict:
 返回固定 schema：`events`（列表）、`dropped`（自上次 drain 累计丢弃数）、`remaining`（恒为 0，因为已清空）。`/events/poll` 默认走这条路径。
 
 ### `peek_events` — 查看不清空
-源码：`objection/utils/events.py:75`
+源码：[`objection/utils/events.py:75`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/events.py#L75)
 
 ```python
 def peek_events() -> dict:
@@ -113,13 +113,13 @@ flowchart LR
 ## 🔍 源码索引
 | 符号 | 位置 |
 | --- | --- |
-| `_MAX_EVENTS` | `objection/utils/events.py:22` |
-| `_events` | `objection/utils/events.py:24` |
-| `_lock` | `objection/utils/events.py:25` |
-| `_dropped` | `objection/utils/events.py:26` |
-| `record_event` | `objection/utils/events.py:29` |
-| `drain_events` | `objection/utils/events.py:53` |
-| `peek_events` | `objection/utils/events.py:75` |
+| `_MAX_EVENTS` | [`objection/utils/events.py:22`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/events.py#L22) |
+| `_events` | [`objection/utils/events.py:24`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/events.py#L24) |
+| `_lock` | [`objection/utils/events.py:25`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/events.py#L25) |
+| `_dropped` | [`objection/utils/events.py:26`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/events.py#L26) |
+| `record_event` | [`objection/utils/events.py:29`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/events.py#L29) |
+| `drain_events` | [`objection/utils/events.py:53`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/events.py#L53) |
+| `peek_events` | [`objection/utils/events.py:75`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/events.py#L75) |
 
 ## 🔗 相关文档
 - [整体架构](/guide/architecture)

@@ -22,7 +22,7 @@
 
 ### `Java` — 兼容性桥接对象
 
-源码：`agent/src/android/lib/libjava.ts:4`
+源码：[`agent/src/android/lib/libjava.ts:4`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/lib/libjava.ts#L4)
 
 模块加载时判断 `globalThis.Java` 是否存在：存在则用旧桥接（并 `send` 一条提示），否则用从 `frida-java-bridge` 导入的默认导出。随后 `export { Java }` 供其它模块 `import { Java } from "./lib/libjava.js"` 使用。
 
@@ -39,7 +39,7 @@ export { Java }
 
 ### `wrapJavaPerform(fn)` — Promise 化的 Java.perform
 
-源码：`agent/src/android/lib/libjava.ts:19`
+源码：[`agent/src/android/lib/libjava.ts:19`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/lib/libjava.ts#L19)
 
 把传入的回调放进 `Java.perform`，成功 `resolve`、异常 `reject`。所有 RPC 导出方法（`proxy.set`、`shell.execute`、`root.disable` 等）都通过它把同步的 Java 操作包成 Promise，由 RPC 层 `await`。
 
@@ -55,7 +55,7 @@ export const wrapJavaPerform = (fn: any): Promise<any> => {
 
 ### `getApplicationContext()` — 取当前 App Context
 
-源码：`agent/src/android/lib/libjava.ts:31`
+源码：[`agent/src/android/lib/libjava.ts:31`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/lib/libjava.ts#L31)
 
 通过 `android.app.ActivityThread.currentApplication().getApplicationContext()` 取 Context。调用方需已处于 `Java.perform` 上下文（通常在 `wrapJavaPerform` 回调内）。`intentUtils.ts` 等处直接 `Java.use("android.app.ActivityThread")` 取 Context，本质与此一致。
 
@@ -69,7 +69,7 @@ export const getApplicationContext = (): any => {
 
 ### `R(name, type)` — 资源 ID 查询
 
-源码：`agent/src/android/lib/libjava.ts:44`
+源码：[`agent/src/android/lib/libjava.ts:44`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/lib/libjava.ts#L44)
 
 模拟 App 内 `R.id.content_frame` 这类引用：通过 `Context.getResources().getIdentifier(name, type, packageName)` 把资源名+类型转成数字 ID。典型用法 `R("content_frame", "id")`。
 
@@ -107,12 +107,12 @@ flowchart TD
 
 | 符号 | 位置 |
 | --- | --- |
-| `Java` 兼容性判断 | `agent/src/android/lib/libjava.ts:4` |
-| 旧版 Frida 提示 | `agent/src/android/lib/libjava.ts:7` |
-| `export { Java }` | `agent/src/android/lib/libjava.ts:13` |
-| `wrapJavaPerform` | `agent/src/android/lib/libjava.ts:19` |
-| `getApplicationContext` | `agent/src/android/lib/libjava.ts:31` |
-| `R(name, type)` | `agent/src/android/lib/libjava.ts:44` |
+| `Java` 兼容性判断 | [`agent/src/android/lib/libjava.ts:4`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/lib/libjava.ts#L4) |
+| 旧版 Frida 提示 | [`agent/src/android/lib/libjava.ts:7`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/lib/libjava.ts#L7) |
+| `export { Java }` | [`agent/src/android/lib/libjava.ts:13`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/lib/libjava.ts#L13) |
+| `wrapJavaPerform` | [`agent/src/android/lib/libjava.ts:19`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/lib/libjava.ts#L19) |
+| `getApplicationContext` | [`agent/src/android/lib/libjava.ts:31`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/lib/libjava.ts#L31) |
+| `R(name, type)` | [`agent/src/android/lib/libjava.ts:44`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/lib/libjava.ts#L44) |
 
 ## 🔗 相关文档
 

@@ -8,7 +8,7 @@
 | --- | --- |
 | 源码路径 | `agent/src/android/userinterface.ts` |
 | 平台 | Android（Java 层，主线程操作） |
-| 导出的 RPC | `screenshot`（`agent/src/rpc/android.ts:94` → `androidUiScreenshot`）、`setFlagSecure`（`agent/src/rpc/android.ts:95` → `androidUiSetFlagSecure`） |
+| 导出的 RPC | `screenshot`（[`agent/src/rpc/android.ts:94`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/rpc/android.ts#L94) → `androidUiScreenshot`）、`setFlagSecure`（[`agent/src/rpc/android.ts:95`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/rpc/android.ts#L95) → `androidUiSetFlagSecure`） |
 | 依赖 | `../lib/color.js`、`./lib/libjava.js`、`./lib/types.js` |
 
 ## 🎯 解决的问题
@@ -26,7 +26,7 @@
 
 ### `rpc.screenshot` — 捕获当前界面为 PNG 字节
 
-源码：`agent/src/android/userinterface.ts:19`
+源码：[`agent/src/android/userinterface.ts:19`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/userinterface.ts#L19)
 
 先通过 `ActivityThread.currentActivityThread().mActivities` 拿到全部 Activity 记录，`Java.cast` 成 `ActivityThread$ActivityClientRecord` 后找到 `paused == false` 的那条，即为当前可见 Activity。然后取其 `Window.getDecorView().getRootView()`，开启 drawing cache、`Bitmap.createBitmap` 拷贝，再用 `Bitmap.compress(PNG, 100, ByteArrayOutputStream)` 压成 PNG，返回 `outputStream.buf.value` 字节数组。
 
@@ -54,9 +54,9 @@ return bytes;
 
 ### `rpc.setFlagSecure` — 开关 FLAG_SECURE
 
-源码：`agent/src/android/userinterface.ts:60`
+源码：[`agent/src/android/userinterface.ts:60`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/userinterface.ts#L60)
 
-`FLAG_SECURE = 0x00002000`（定义在 `agent/src/android/userinterface.ts:17`，对应 `WindowManager.LayoutParams.FLAG_SECURE`）。定位当前 Activity 的流程同 `screenshot`，随后用 `Java.scheduleOnMainThread` 在主线程调用 `getWindow().setFlags(v ? FLAG_SECURE : 0, FLAG_SECURE)`。
+`FLAG_SECURE = 0x00002000`（定义在 [`agent/src/android/userinterface.ts:17`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/userinterface.ts#L17)，对应 `WindowManager.LayoutParams.FLAG_SECURE`）。定位当前 Activity 的流程同 `screenshot`，随后用 `Java.scheduleOnMainThread` 在主线程调用 `getWindow().setFlags(v ? FLAG_SECURE : 0, FLAG_SECURE)`。
 
 ```ts
 const FLAG_SECURE = 0x00002000;
@@ -70,7 +70,7 @@ if (currentActivity) {
 }
 ```
 
-源码注释明确指出：不先调用一次 `getWindow()` 会在 `setFlags` 时触发 Frida abort 错误（`agent/src/android/userinterface.ts:79`）。
+源码注释明确指出：不先调用一次 `getWindow()` 会在 `setFlags` 时触发 Frida abort 错误（[`agent/src/android/userinterface.ts:79`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/userinterface.ts#L79)）。
 
 ```mermaid
 flowchart TD
@@ -97,13 +97,13 @@ flowchart TD
 
 | 符号 | 位置 |
 | --- | --- |
-| `FLAG_SECURE` 常量 | `agent/src/android/userinterface.ts:17` |
-| `export const screenshot` | `agent/src/android/userinterface.ts:19` |
-| 定位当前 Activity 循环 | `agent/src/android/userinterface.ts:36` |
-| drawing cache → Bitmap.compress | `agent/src/android/userinterface.ts:47` |
-| 返回字节 `outputStream.buf.value` | `agent/src/android/userinterface.ts:53` |
-| `export const setFlagSecure` | `agent/src/android/userinterface.ts:60` |
-| `Java.scheduleOnMainThread` 设置标志 | `agent/src/android/userinterface.ts:82` |
+| `FLAG_SECURE` 常量 | [`agent/src/android/userinterface.ts:17`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/userinterface.ts#L17) |
+| `export const screenshot` | [`agent/src/android/userinterface.ts:19`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/userinterface.ts#L19) |
+| 定位当前 Activity 循环 | [`agent/src/android/userinterface.ts:36`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/userinterface.ts#L36) |
+| drawing cache → Bitmap.compress | [`agent/src/android/userinterface.ts:47`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/userinterface.ts#L47) |
+| 返回字节 `outputStream.buf.value` | [`agent/src/android/userinterface.ts:53`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/userinterface.ts#L53) |
+| `export const setFlagSecure` | [`agent/src/android/userinterface.ts:60`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/userinterface.ts#L60) |
+| `Java.scheduleOnMainThread` 设置标志 | [`agent/src/android/userinterface.ts:82`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/userinterface.ts#L82) |
 
 ## 🔗 相关文档
 

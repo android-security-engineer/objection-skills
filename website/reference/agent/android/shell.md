@@ -8,7 +8,7 @@
 | --- | --- |
 | 源码路径 | `agent/src/android/shell.ts` |
 | 平台 | Android（Java 层） |
-| 导出的 RPC | `execute`（经 `agent/src/rpc/android.ts:35` 暴露为 `androidShellExec`） |
+| 导出的 RPC | `execute`（经 [`agent/src/rpc/android.ts:35`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/rpc/android.ts#L35) 暴露为 `androidShellExec`） |
 | 依赖 | `./lib/interfaces.js`、`./lib/libjava.js`、`./lib/types.js` |
 | 返回类型 | `IExecutedCommand`（`command` / `stdOut` / `stdErr`） |
 
@@ -26,7 +26,7 @@
 
 ### `rpc.execute` — 执行并捕获输出
 
-源码：`agent/src/android/shell.ts:15`
+源码：[`agent/src/android/shell.ts:15`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/shell.ts#L15)
 
 实现用 `Runtime.getRuntime().exec(cmd)` 拿到 `Process` 对象，再用 `InputStreamReader` + `BufferedReader` 逐行读取两个流，拼进 `StringBuilder`。先读 stderr 再读 stdout，最后组装成 `IExecutedCommand` 返回。
 
@@ -54,7 +54,7 @@ export const execute = (cmd: string): Promise<IExecutedCommand> => {
 };
 ```
 
-`IExecutedCommand` 接口定义在 `agent/src/android/lib/interfaces.ts:10`，三个字段 `command` / `stdOut` / `stdErr` 均为 `string`。
+`IExecutedCommand` 接口定义在 [`agent/src/android/lib/interfaces.ts:10`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/lib/interfaces.ts#L10)，三个字段 `command` / `stdOut` / `stdErr` 均为 `string`。
 
 ```mermaid
 flowchart TD
@@ -80,12 +80,12 @@ flowchart TD
 
 | 符号 | 位置 |
 | --- | --- |
-| `export const execute` | `agent/src/android/shell.ts:15` |
-| `Java.use("java.lang.Runtime")` | `agent/src/android/shell.ts:32` |
-| `runtime.getRuntime().exec(cmd)` | `agent/src/android/shell.ts:38` |
-| 读 stderr 循环 | `agent/src/android/shell.ts:48` |
-| 读 stdout 循环 | `agent/src/android/shell.ts:60` |
-| 返回 `IExecutedCommand` | `agent/src/android/shell.ts:64` |
+| `export const execute` | [`agent/src/android/shell.ts:15`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/shell.ts#L15) |
+| `Java.use("java.lang.Runtime")` | [`agent/src/android/shell.ts:32`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/shell.ts#L32) |
+| `runtime.getRuntime().exec(cmd)` | [`agent/src/android/shell.ts:38`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/shell.ts#L38) |
+| 读 stderr 循环 | [`agent/src/android/shell.ts:48`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/shell.ts#L48) |
+| 读 stdout 循环 | [`agent/src/android/shell.ts:60`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/shell.ts#L60) |
+| 返回 `IExecutedCommand` | [`agent/src/android/shell.ts:64`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/shell.ts#L64) |
 
 ## 🔗 相关文档
 

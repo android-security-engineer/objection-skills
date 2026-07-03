@@ -19,7 +19,7 @@
 ## 🏗️ 核心结构
 
 ### 模块级路径常量与 `list2posix_cmdline`
-源码：`objection/utils/patchers/base.py:12`
+源码：[`objection/utils/patchers/base.py:12`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/base.py#L12)
 
 ```python
 objection_path = os.path.join(os.path.expanduser('~'), '.objection')
@@ -35,7 +35,7 @@ def list2posix_cmdline(seq):
 - `list2posix_cmdline`：POSIX 下的命令行拼接，用 `shlex.quote` 转义每个参数——`subprocess.list2cmdline` 是 Windows 语义，POSIX 下会错误转义。
 
 ### `BasePlatformGadget` — gadget 下载/版本基类
-源码：`objection/utils/patchers/base.py:28`
+源码：[`objection/utils/patchers/base.py:28`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/base.py#L28)
 
 ```python
 class BasePlatformGadget(object):
@@ -48,7 +48,7 @@ class BasePlatformGadget(object):
 构造时持有 `Github` 实例（用于查 release assets）。两个版本管理方法：
 
 ### `BasePlatformGadget.get_local_version` — 读本地版本
-源码：`objection/utils/patchers/base.py:40`
+源码：[`objection/utils/patchers/base.py:40`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/base.py#L40)
 
 ```python
 @staticmethod
@@ -73,12 +73,12 @@ def get_local_version(gadget_type: str) -> str:
 `@staticmethod` 说明它不依赖实例状态——任意地方都能查。返回 `'0'` 作为「未安装」哨兵值（版本号字符串不会是单字符 `0`，便于上层 `Version(local) < Version(remote)` 比较）。三类失败都返回 `'0'`：文件不存在、JSON 损坏、类型未记录。
 
 ### `BasePlatformGadget.set_local_version` — 写本地版本
-源码：`objection/utils/patchers/base.py:68`
+源码：[`objection/utils/patchers/base.py:68`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/base.py#L68)
 
 读改写 `gadget_versions` JSON：先读现有字典（文件损坏则置空 `{}`），加新键，整体 dump 回去。返回 `self` 支持链式调用。
 
 ### `BasePlatformPatcher` — patcher 命令基类
-源码：`objection/utils/patchers/base.py:104`
+源码：[`objection/utils/patchers/base.py:104`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/base.py#L104)
 
 ```python
 class BasePlatformPatcher(object):
@@ -99,7 +99,7 @@ class BasePlatformPatcher(object):
 - `list2cmdline`：按操作系统绑定为 Windows 版或 POSIX 版，子类调 `self.list2cmdline(...)` 拼命令行。
 
 ### `BasePlatformPatcher._check_commands` — 探测依赖
-源码：`objection/utils/patchers/base.py:121`
+源码：[`objection/utils/patchers/base.py:121`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/base.py#L121)
 
 ```python
 def _check_commands(self) -> bool:
@@ -144,15 +144,15 @@ flowchart TD
 ## 🔍 源码索引
 | 符号 | 位置 |
 | --- | --- |
-| `objection_path` | `objection/utils/patchers/base.py:12` |
-| `gadget_versions` | `objection/utils/patchers/base.py:13` |
-| `list2posix_cmdline` | `objection/utils/patchers/base.py:16` |
-| `BasePlatformGadget` | `objection/utils/patchers/base.py:28` |
-| `BasePlatformGadget.get_local_version` | `objection/utils/patchers/base.py:40` |
-| `BasePlatformGadget.set_local_version` | `objection/utils/patchers/base.py:68` |
-| `BasePlatformPatcher` | `objection/utils/patchers/base.py:104` |
-| `BasePlatformPatcher._check_commands` | `objection/utils/patchers/base.py:121` |
-| `BasePlatformPatcher.are_requirements_met` | `objection/utils/patchers/base.py:143` |
+| `objection_path` | [`objection/utils/patchers/base.py:12`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/base.py#L12) |
+| `gadget_versions` | [`objection/utils/patchers/base.py:13`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/base.py#L13) |
+| `list2posix_cmdline` | [`objection/utils/patchers/base.py:16`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/base.py#L16) |
+| `BasePlatformGadget` | [`objection/utils/patchers/base.py:28`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/base.py#L28) |
+| `BasePlatformGadget.get_local_version` | [`objection/utils/patchers/base.py:40`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/base.py#L40) |
+| `BasePlatformGadget.set_local_version` | [`objection/utils/patchers/base.py:68`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/base.py#L68) |
+| `BasePlatformPatcher` | [`objection/utils/patchers/base.py:104`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/base.py#L104) |
+| `BasePlatformPatcher._check_commands` | [`objection/utils/patchers/base.py:121`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/base.py#L121) |
+| `BasePlatformPatcher.are_requirements_met` | [`objection/utils/patchers/base.py:143`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/patchers/base.py#L143) |
 
 ## 🔗 相关文档
 - [整体架构](/guide/architecture)

@@ -20,6 +20,42 @@ flowchart TD
     ROOT --> CMD[commands 组<br/>history/save/clear]
 ```
 
+### 命令分发调用栈
+
+下面是 REPL 收到一行命令后，从解析到执行函数的完整调用栈（ASCII 框图）：
+
+```
+REPL 输入: "android hooking list classes"
+  │
+  ▼
+┌─────────────────────────────────────────────────────────┐
+│ console/repl.py : Repl.run_command(line)                │
+│   ├─ tokenize(line) → ["android","hooking","list",...]  │
+│   └─ walk COMMANDS tree → 找到 exec 函数                 │
+└─────────────────────────────────────────────────────────┘
+  │
+  ▼
+┌─────────────────────────────────────────────────────────┐
+│ console/commands.py : COMMANDS['android']['commands']   │
+│   ['hooking']['commands']['list']['commands']           │
+│   ['classes']['exec'] = hooking.show_android_classes    │
+└─────────────────────────────────────────────────────────┘
+  │
+  ▼
+┌─────────────────────────────────────────────────────────┐
+│ commands/android/hooking.py : show_android_classes()    │
+│   ├─ api = state_connection.get_api()                   │
+│   ├─ classes = api.android_hooking_get_classes()  ◀─ RPC│
+│   └─ output_result(CommandResult(result=classes))       │
+└─────────────────────────────────────────────────────────┘
+  │
+  ▼  (frida 同步 RPC 通道)
+┌─────────────────────────────────────────────────────────┐
+│ agent.js (注入目标进程) : rpc.androidHookingGetClasses() │
+│   └─ Java.perform(() => Java.enumerateLoadedClasses(...))│
+└─────────────────────────────────────────────────────────┘
+```
+
 ## 🌳 完整命令清单
 
 ### 🖥️ 通用与环境

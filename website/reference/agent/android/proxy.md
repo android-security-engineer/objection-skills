@@ -8,7 +8,7 @@
 | --- | --- |
 | 源码路径 | `agent/src/android/proxy.ts` |
 | 平台 | Android（Java 层） |
-| 导出的 RPC | `set`（经 `agent/src/rpc/android.ts:87` 暴露为 `androidProxySet`） |
+| 导出的 RPC | `set`（经 [`agent/src/rpc/android.ts:87`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/rpc/android.ts#L87) 暴露为 `androidProxySet`） |
 | 依赖 | `./lib/libjava.js`、`../lib/color.js` |
 
 ## 🎯 解决的问题
@@ -25,7 +25,7 @@
 
 ### `rpc.set` — 写入 JVM 代理属性
 
-源码：`agent/src/android/proxy.ts:7`
+源码：[`agent/src/android/proxy.ts:7`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/proxy.ts#L7)
 
 实现极简：拿到 `java.lang.System` 类后，依次调用 `setProperty` 写入 `http.proxyHost/Port` 与 `https.proxyHost/Port`。`System` 未定义时直接跳过，不抛错。由于属性是进程级全局，设置后所有新建的基于默认 `ProxySelector` 的连接都会受影响。
 
@@ -66,10 +66,10 @@ flowchart LR
 
 | 符号 | 位置 |
 | --- | --- |
-| `export const set` | `agent/src/android/proxy.ts:7` |
-| `Java.use("java.lang.System")` | `agent/src/android/proxy.ts:12` |
-| 写入 `http.proxyHost/Port` | `agent/src/android/proxy.ts:16` |
-| 写入 `https.proxyHost/Port` | `agent/src/android/proxy.ts:19` |
+| `export const set` | [`agent/src/android/proxy.ts:7`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/proxy.ts#L7) |
+| `Java.use("java.lang.System")` | [`agent/src/android/proxy.ts:12`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/proxy.ts#L12) |
+| 写入 `http.proxyHost/Port` | [`agent/src/android/proxy.ts:16`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/proxy.ts#L16) |
+| 写入 `https.proxyHost/Port` | [`agent/src/android/proxy.ts:19`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/proxy.ts#L19) |
 
 ## 🔗 相关文档
 

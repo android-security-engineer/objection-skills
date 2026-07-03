@@ -30,7 +30,7 @@ Python 层极简：调用一次 RPC，无参数解析，无返回数据处理。
 
 ### `disable()` — 关闭越狱检测
 
-源码：`objection/commands/ios/jailbreak.py:7`
+源码：[`objection/commands/ios/jailbreak.py:7`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/ios/jailbreak.py#L7)
 
 ```python
 # objection/commands/ios/jailbreak.py:15-16
@@ -40,7 +40,7 @@ api.ios_jailbreak_disable()
 
 ### `simulate()` — 模拟越狱环境
 
-源码：`objection/commands/ios/jailbreak.py:29`
+源码：[`objection/commands/ios/jailbreak.py:29`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/ios/jailbreak.py#L29)
 
 ```python
 # objection/commands/ios/jailbreak.py:37-38
@@ -62,14 +62,14 @@ flowchart LR
 
 ## JSON 模式行为
 
-两者在 JSON 模式都返回 `CommandResult`，结果体仅一个 `action` 字段（`jailbreak_detection_disabled` / `jailbreak_simulated`），并带 warning 提示「Job id 未暴露，用 `agent state` 查询运行中的 Job」（`objection/commands/ios/jailbreak.py:21-23`、`objection/commands/ios/jailbreak.py:43-45`）。命令名分别为 `ios jailbreak disable` / `ios jailbreak simulate`。非 JSON 模式静默返回 `None`。
+两者在 JSON 模式都返回 `CommandResult`，结果体仅一个 `action` 字段（`jailbreak_detection_disabled` / `jailbreak_simulated`），并带 warning 提示「Job id 未暴露，用 `agent state` 查询运行中的 Job」（[`objection/commands/ios/jailbreak.py:21-23`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/ios/jailbreak.py#L21)、[`objection/commands/ios/jailbreak.py:43-45`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/ios/jailbreak.py#L43)）。命令名分别为 `ios jailbreak disable` / `ios jailbreak simulate`。非 JSON 模式静默返回 `None`。
 
 ## 源码索引
 
 | 符号 | 位置 |
 | --- | --- |
-| `disable` | `objection/commands/ios/jailbreak.py:7` |
-| `simulate` | `objection/commands/ios/jailbreak.py:29` |
+| `disable` | [`objection/commands/ios/jailbreak.py:7`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/ios/jailbreak.py#L7) |
+| `simulate` | [`objection/commands/ios/jailbreak.py:29`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/ios/jailbreak.py#L29) |
 
 ## 相关文档
 

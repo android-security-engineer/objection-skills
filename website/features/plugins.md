@@ -113,13 +113,71 @@ flowchart LR
 - **消息处理**：插件可自定义 `on_message_handler`，否则用 objection 默认的 `script_on_message`；
 - **动态导入**：用 `importlib` + 随机 uuid 模块名加载，避免同名冲突。
 
+## 🔬 加载流程与生命周期
+
+插件加载分两阶段：先 `importlib` 动态导入 Python 类并注册命令，再（若带脚本）创建独立 session 注入 `index.js`：
+
+```mermaid
+sequenceDiagram
+    participant U as 测试者
+    participant PM as plugin_manager.load_plugin
+    participant Py as importlib
+    participant AG as utils/plugin.py
+    participant FR as Frida session
+    U->>PM: plugin load /path/to/plugin [namespace]
+    PM->>Py: importlib 加载插件类(随机 uuid 模块名)
+    Py-->>PM: Plugin 子类
+    PM->>AG: Plugin 实例.on_load() / inject()
+    alt 带脚本(index.js)
+        AG->>FR: 创建独立 session + 注入脚本
+        FR-->>AG: script 句柄
+        AG->>AG: self.api = script.exports_sync
+    end
+    AG-->>PM: 注册命名空间命令到 COMMANDS
+    PM-->>U: 插件就绪，可用 ns.command 调用
+```
+
+### 插件与主 agent 的隔离边界
+
+```
+目标进程
+┌─────────────────────────────────────────────┐
+│  主 objection agent (agent.js)              │
+│  └─ rpc.exports: android*/ios*/memory*...   │
+│                                             │
+│  插件 session (独立 Script)                 │
+│  └─ rpc.exports: 插件自定义方法             │
+│      (崩溃不影响主 agent)                    │
+└─────────────────────────────────────────────┘
+        ▲                        ▲
+        │ exports_sync           │ exports_sync
+        │                        │
+   state_connection          Plugin.api (独立)
+   .get_api()                命名空间隔离
+```
+
+### 边界情况
+
+- **缺 `index.js`**：纯 Python 插件不创建 session，`inject()` 跳过脚本注入，只注册命令。
+- **命名空间冲突**：加载时若命名空间已被占用，会用新插件覆盖旧命令表项（无显式报错）。
+- **`on_message_handler` 缺失**：插件脚本 `send()` 的消息会丢失，除非定义了 handler 或回退到默认 `script_on_message`。
+- **HTTP 蓝图重复**：`_append_to_api` 不去重，重复加载同一插件会注册多个相同路由。
+- **卸载**：objection 无内置插件卸载命令，REPL 退出即随会话释放。
+
 ## 源码索引
 
 | 内容 | 位置 |
 | --- | --- |
-| 加载入口 | `objection/commands/plugin_manager.py:11` |
-| 注册命令表 | `objection/commands/plugin_manager.py:58` |
-| 插件基类 | `objection/utils/plugin.py:9` |
-| 准备脚本源 | `objection/utils/plugin.py:41` |
-| 注入 session | `objection/utils/plugin.py:77` |
-| HTTP API 扩展 | `objection/utils/plugin.py:101` |
+| 加载入口 | [`objection/commands/plugin_manager.py:11`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/plugin_manager.py#L11) |
+| 注册命令表 | [`objection/commands/plugin_manager.py:58`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/plugin_manager.py#L58) |
+| 插件基类 | [`objection/utils/plugin.py:9`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/plugin.py#L9) |
+| 准备脚本源 | [`objection/utils/plugin.py:41`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/plugin.py#L41) |
+| 注入 session | [`objection/utils/plugin.py:77`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/plugin.py#L77) |
+| HTTP API 扩展 | [`objection/utils/plugin.py:101`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/plugin.py#L101) |
+
+## 🔗 相关文档
+
+- [源码：commands/plugin_manager](/reference/commands/plugin-manager)
+- [源码：utils/plugin](/reference/utils/plugin)
+- [运行时操作命令](/features/runtime-commands)
+

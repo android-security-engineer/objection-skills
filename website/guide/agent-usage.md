@@ -123,6 +123,102 @@ objection 仓库内置了一个 SKILL 包（`.claude/skills/objection/`），供
 
 加载该 SKILL 后，Agent 即可按上述接口驱动 objection，无需猜测命令格式或解析输出。
 
+## 🧱 Agent 化输出的双层渲染
+
+objection 的命令函数传统上直接 `click.secho` 打印人类文本。Agent 化改造引入了 [`CommandResult`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/output.py#L80) 结构化结果对象：命令函数构造它返回，由 [`output_result`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/output.py#L129) 根据当前模式渲染。下面这张 ASCII 框图画的是同一个 `CommandResult` 在两种模式下走的不同出口：
+
+```text
+                  命令实现 commands/*.py
+                          │
+                          │ 构造并返回
+                          ▼
+              ┌───────────────────────┐
+              │   CommandResult       │
+              │  result / status      │
+              │  jobs_created         │
+              │  warnings / human_text│
+              └───────────┬───────────┘
+                          │
+                          ▼
+              ┌───────────────────────┐
+              │  output_result()      │  ← utils/output.py:129
+              └───────────┬───────────┘
+                          │
+            ┌─────────────┴─────────────┐
+            │                           │
+   is_json_output()?                   否（人类模式）
+            │ 是（Agent 模式）          │
+            ▼                           ▼
+  ┌─────────────────────┐    ┌──────────────────────────┐
+  │ to_dict() → JSON    │    │ warnings→黄色            │
+  │ {status,command,    │    │ human_text 或 result repr │
+  │  result,jobs_created│    │ → click.echo 彩色文本    │
+  │  ,warnings}         │    └──────────────────────────┘
+  └──────────┬──────────┘
+             │
+   _capturing()?
+   ├─ 是(HTTP捕获栈) → append 到缓冲, 供 HTTP 端点取回
+   └─ 否(CLI agent exec) → click.echo JSON 到 stdout
+```
+
+这套渲染层是 Agent 化的基础设施，关键点：
+
+- **一套数据，两种出口**：`CommandResult` 是纯数据，`output_result` 是渲染策略。Agent 模式产出可解析 JSON，人类模式保留彩色文本——同一个命令实现同时服务两类用户。
+- **捕获栈服务 HTTP**：HTTP 端点不能依赖 stdout（并发污染），故 `push_result_capture()` 让 `output_result` 在 JSON 模式下把 payload append 到缓冲而非打印（[output.py:144](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/output.py#L144)）。这让改造过的命令无需任何改动即可服务于 HTTP。
+- **异步事件独立**：Hook 命中等异步结果不进 `CommandResult`，而是经 `script_on_message` → `record_event` 入事件队列（[events.py:29](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/events.py#L29)），由 `/events/poll` 或 `agent state` 取回。这是"动作命令返 envelope + 命中走事件流"双轨制的底层实现。
+
+## 🔄 Agent 调用 objection 的三入口对照
+
+AI Agent 驱动 objection 有三条入口路径，落地到不同代码：
+
+```mermaid
+flowchart LR
+    subgraph "入口 1: agent exec CLI"
+        A1["objection -g pkg agent exec 'cmd'"] --> AC["agent_cli.py:agent_exec"]
+        AC --> BA["_bootstrap_agent + set_json_output"]
+        BA --> REPL1["Repl.run_command"]
+    end
+    subgraph "入口 2: HTTP /command/exec"
+        A2["POST /command/exec"] --> AE["agent_endpoints.py:command_exec"]
+        AE --> CAP["push_result_capture"]
+        CAP --> REPL2["Repl.run_command"]
+    end
+    subgraph "入口 3: agent rpc / /agent/rpc"
+        A3["objection agent rpc m / POST /agent/rpc/m"] --> RPC["getattr(api, m)()"]
+        RPC --> EXP["script.exports_sync"]
+    end
+    REPL1 --> OUT["utils/output.py output_result"]
+    REPL2 --> OUT
+    EXP --> OUT2["output_result 包装原始返回"]
+    OUT --> JSON["统一 JSON schema → stdout/HTTP"]
+    OUT2 --> JSON
+```
+
+三入口的选择逻辑：
+
+- **`agent exec` / `/command/exec`**：走人类命令层，享受 `CommandResult` 的 warnings/jobs_created 语义，但只能调已注册命令。适合 Agent 走标准 objection 命令（[agent_cli.py:91](https://github.com/android-security-engineer/objection-skills/blob/master/objection/console/agent_cli.py#L91)）。
+- **`agent rpc` / `/agent/rpc`**：绕过命令层直调 agent RPC，拿原始结构化返回，仍包装成统一 schema（[agent_cli.py:158](https://github.com/android-security-engineer/objection-skills/blob/master/objection/console/agent_cli.py#L158)、[agent_endpoints.py:264](https://github.com/android-security-engineer/objection-skills/blob/master/objection/api/agent_endpoints.py#L264)）。适合命令未改造或要原始数据。
+- **`agent capabilities` / `/capabilities`**：静态注册表快照，不需设备（[agent_cli.py:240](https://github.com/android-security-engineer/objection-skills/blob/master/objection/console/agent_cli.py#L240)）。Agent 第一步用它发现能力。
+
+## ⚖️ 设计权衡
+
+| 决策 | 选择 | 替代方案 | 权衡理由 |
+| --- | --- | --- | --- |
+| Agent 接口与人类命令共用实现 | `set_json_output(True)` + `CommandResult` 双出口 | 为 Agent 单写一套命令 | 一套命令逻辑服务两类用户，避免双份维护。代价是命令函数要兼顾两种输出（多数靠 `output_result` 统一处理）。 |
+| `agent exec` 复用 Repl.run_command | new Repl + run_command | 单写分派 | 复用与人类 REPL 完全相同的命令分派与补全注册表。代价是 Repl 构造略重，但 run_command 不依赖交互态。 |
+| 动作命令不返 Job id | 装 hook 返 `{"action":...}` + 警告 | 让 agent 返回 Job id | agent RPC 返回 void，Python 侧拿不到 Job id（job 是 agent 内部创建）。务实做法是用警告引导 Agent 调 `agent state`。 |
+| 异步结果走事件队列 | `/events/poll` 拉取 | 实时 stdout 流 | Agent 调用是请求—响应模型，无法接收持续推送。可轮询队列契合 Agent 的拉取模型；有界 + dropped 计数防风暴。 |
+| JSON 模式无交互提示 | `click.confirm` 自动继续 | 阻塞等输入 | Agent 无人在终端前，阻塞会挂死。代价是危险操作（如 keychain clear）在 JSON 模式不再确认——靠 Agent 自身谨慎。 |
+| 交互命令返错引导 | `sqlite connect` 等返错 + 引导替代 | 强行支持 | 交互编辑器无法在 JSON 模式表达；明确返错并给替代方案（如 `filesystem download` 拉回本地）比半支持更安全。 |
+
+## 📜 历史演进
+
+- **传统命令层**：所有命令直接 `click.secho` 打印彩色文本，只有人类入口。
+- **`--json <file>` 阶段**：部分命令（`memory list modules`、`ios keychain dump`）加 `--json` 参数写文件，是最早的结构化输出尝试，但只覆盖少数命令、且写文件而非 stdout。
+- **`CommandResult` + 全局 JSON 模式**：引入统一输出层 [`objection/utils/output.py`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/output.py)，`set_json_output(True)` 后所有改造命令走 JSON 出口。`agent exec`/HTTP 全局开启此模式（[agent_cli.py:42](https://github.com/android-security-engineer/objection-skills/blob/master/objection/console/agent_cli.py#L42)）。
+- **`agent` 子命令组与 HTTP 端点**：新增 [`objection/console/agent_cli.py`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/console/agent_cli.py) 与 [`objection/api/agent_endpoints.py`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/api/agent_endpoints.py)，提供能力发现、状态查询、事件轮询、直调 RPC——这是为 AI Agent 量身打造的入口层。
+- **SKILL 包**：仓库内置 `.claude/skills/objection/` SKILL 包，让 Claude 等 Agent 加载后即按上述接口驱动，无需猜命令格式。这是把"Agent 友好接口"再封装成 Agent 原生可发现的技能。
+
 ## 故障排查
 
 - **"Frida server is not running"** → 设备上未跑 `frida-server`，或包名错误。让用户启动它（Android：`adb shell su -c frida-server &`）并用 `frida-ps -U` 确认。

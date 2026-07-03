@@ -42,7 +42,7 @@
 
 ### `show_android_classes()` — 列类
 
-源码：`objection/commands/android/hooking.py:144`
+源码：[`objection/commands/android/hooking.py:144`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/android/hooking.py#L144)
 
 无参数，调 `api.android_hooking_get_classes()` 取列表，`sorted()` 后逐行打印并统计数量。注意 Java 类按需加载，未必全在。
 
@@ -62,7 +62,7 @@ click.secho('\nFound {0} classes'.format(len(classes)), bold=True)
 
 ### `watch()` — watch 方法调用
 
-源码：`objection/commands/android/hooking.py:300`
+源码：[`objection/commands/android/hooking.py:300`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/android/hooking.py#L300)
 
 核心侦察命令。`args[0]` 为模式（`com.example.test!toString` 或类名/通配）。先 `_is_pattern_or_constant()` 校验语法，再调 `api.android_hooking_watch(query, dump_args, dump_backtrace, dump_return)`。命中以异步消息到达。
 
@@ -80,7 +80,7 @@ api.android_hooking_watch(query,
 
 ### `search()` — 搜索类与方法
 
-源码：`objection/commands/android/hooking.py:365`
+源码：[`objection/commands/android/hooking.py:365`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/android/hooking.py#L365)
 
 最复杂的命令。调 `api.android_hooking_enumerate(query)` 拿 `[{loader, classes:[{name, methods}]}]`。JSON 模式下会**额外**对每个类调 `api.android_hooking_get_class_methods_overloads(name, methods, loader)` 补全 overload 信息（从 loader 字符串里解析 `$className`）。
 
@@ -94,7 +94,7 @@ results = api.android_hooking_enumerate(query)
 
 ### `set_method_return_value()` — 固定返回值
 
-源码：`objection/commands/android/hooking.py:554`
+源码：[`objection/commands/android/hooking.py:554`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/android/hooking.py#L554)
 
 要求至少 2 个位置参数，且最后一个必须是 `true`/`false`。`args[0]` 是全限定方法名（单引号会被替换为双引号以适配重载签名），`args[1]` 可选 overload 过滤串。调 `api.android_hooking_set_method_return(class_name, overload_filter, retval)`。
 
@@ -109,13 +109,13 @@ api.android_hooking_set_method_return(class_name, overload_filter, retval)
 
 ### `notify()` — 懒监听类加载
 
-源码：`objection/commands/android/hooking.py:235`
+源码：[`objection/commands/android/hooking.py:235`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/android/hooking.py#L235)
 
 针对动态加载场景：类还没出现时，`api.android_hooking_lazy_watch_for_pattern(query, should_watch, dump_arguments, dump_return, dump_backtrace)` 在 agent 侧埋点，类一加载即触发 watch。
 
 ### `get_current_activity()` — 取当前 Activity
 
-源码：`objection/commands/android/hooking.py:533`
+源码：[`objection/commands/android/hooking.py:533`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/android/hooking.py#L533)
 
 调 `api.android_hooking_get_current_activity()` 返回 `{activity, fragment}` dict，分别打印。
 
@@ -141,27 +141,27 @@ flowchart LR
 
 | 符号 | 位置 |
 | --- | --- |
-| `_is_pattern_or_constant` | `objection/commands/android/hooking.py:11` |
-| `_string_is_true` | `objection/commands/android/hooking.py:33` |
-| `_should_dump_backtrace` | `objection/commands/android/hooking.py:44` |
-| `_should_watch` | `objection/commands/android/hooking.py:55` |
-| `_should_dump_args` | `objection/commands/android/hooking.py:66` |
-| `_should_dump_return_value` | `objection/commands/android/hooking.py:77` |
-| `_should_dump_json` | `objection/commands/android/hooking.py:88` |
-| `_should_be_quiet` | `objection/commands/android/hooking.py:99` |
-| `_should_print_only_classes` | `objection/commands/android/hooking.py:110` |
-| `_get_flag_value` | `objection/commands/android/hooking.py:121` |
-| `show_android_classes` | `objection/commands/android/hooking.py:144` |
-| `show_android_class_loaders` | `objection/commands/android/hooking.py:170` |
-| `show_android_class_methods` | `objection/commands/android/hooking.py:194` |
-| `notify` | `objection/commands/android/hooking.py:235` |
-| `watch` | `objection/commands/android/hooking.py:300` |
-| `search` | `objection/commands/android/hooking.py:365` |
-| `show_registered_broadcast_receivers` | `objection/commands/android/hooking.py:464` |
-| `show_registered_services` | `objection/commands/android/hooking.py:487` |
-| `show_registered_activities` | `objection/commands/android/hooking.py:510` |
-| `get_current_activity` | `objection/commands/android/hooking.py:533` |
-| `set_method_return_value` | `objection/commands/android/hooking.py:554` |
+| `_is_pattern_or_constant` | [`objection/commands/android/hooking.py:11`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/android/hooking.py#L11) |
+| `_string_is_true` | [`objection/commands/android/hooking.py:33`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/android/hooking.py#L33) |
+| `_should_dump_backtrace` | [`objection/commands/android/hooking.py:44`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/android/hooking.py#L44) |
+| `_should_watch` | [`objection/commands/android/hooking.py:55`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/android/hooking.py#L55) |
+| `_should_dump_args` | [`objection/commands/android/hooking.py:66`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/android/hooking.py#L66) |
+| `_should_dump_return_value` | [`objection/commands/android/hooking.py:77`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/android/hooking.py#L77) |
+| `_should_dump_json` | [`objection/commands/android/hooking.py:88`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/android/hooking.py#L88) |
+| `_should_be_quiet` | [`objection/commands/android/hooking.py:99`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/android/hooking.py#L99) |
+| `_should_print_only_classes` | [`objection/commands/android/hooking.py:110`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/android/hooking.py#L110) |
+| `_get_flag_value` | [`objection/commands/android/hooking.py:121`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/android/hooking.py#L121) |
+| `show_android_classes` | [`objection/commands/android/hooking.py:144`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/android/hooking.py#L144) |
+| `show_android_class_loaders` | [`objection/commands/android/hooking.py:170`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/android/hooking.py#L170) |
+| `show_android_class_methods` | [`objection/commands/android/hooking.py:194`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/android/hooking.py#L194) |
+| `notify` | [`objection/commands/android/hooking.py:235`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/android/hooking.py#L235) |
+| `watch` | [`objection/commands/android/hooking.py:300`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/android/hooking.py#L300) |
+| `search` | [`objection/commands/android/hooking.py:365`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/android/hooking.py#L365) |
+| `show_registered_broadcast_receivers` | [`objection/commands/android/hooking.py:464`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/android/hooking.py#L464) |
+| `show_registered_services` | [`objection/commands/android/hooking.py:487`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/android/hooking.py#L487) |
+| `show_registered_activities` | [`objection/commands/android/hooking.py:510`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/android/hooking.py#L510) |
+| `get_current_activity` | [`objection/commands/android/hooking.py:533`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/android/hooking.py#L533) |
+| `set_method_return_value` | [`objection/commands/android/hooking.py:554`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/android/hooking.py#L554) |
 
 ## 相关文档
 

@@ -29,7 +29,7 @@ Python 层极简：调用一次 `ios_monitor_crypto_enable()` 即在目标进程
 
 ### `crypto_enable()` — 开启加密监控
 
-源码：`objection/commands/ios/monitor.py:7`
+源码：[`objection/commands/ios/monitor.py:7`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/ios/monitor.py#L7)
 
 ```python
 # objection/commands/ios/monitor.py:15-16
@@ -37,7 +37,7 @@ api = state_connection.get_api()
 api.ios_monitor_crypto_enable()
 ```
 
-JSON 模式返回见 `objection/commands/ios/monitor.py:18-26`：
+JSON 模式返回见 [`objection/commands/ios/monitor.py:18-26`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/ios/monitor.py#L18)：
 
 ```python
 CommandResult(
@@ -63,7 +63,7 @@ flowchart LR
 
 | 符号 | 位置 |
 | --- | --- |
-| `crypto_enable` | `objection/commands/ios/monitor.py:7` |
+| `crypto_enable` | [`objection/commands/ios/monitor.py:7`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/ios/monitor.py#L7) |
 
 ## 相关文档
 

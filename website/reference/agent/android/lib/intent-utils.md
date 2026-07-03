@@ -22,7 +22,7 @@
 
 ### `analyseIntent(methodName, intent, backtrace)` — 解析并打印 Intent
 
-源码：`agent/src/android/lib/intentUtils.ts:4`
+源码：[`agent/src/android/lib/intentUtils.ts:4`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/lib/intentUtils.ts#L4)
 
 函数先用 `intent.getComponent()` 判断是否为显式 Intent：非空即显式，只打印一行类型；为空即隐式，进入详细打印分支。`backtrace=true` 时用 `android.util.Log.getStackTraceString(new Exception())` 取调用栈。
 
@@ -74,7 +74,7 @@ flowchart TD
 
 ## ⚙️ 实现要点
 
-- **复用者**：`agent/src/android/intent.ts` 在 Hook 到 `Activity.startActivity` / `Context.startService` 等方法时调用 `analyseIntent`，把捕获的 Intent 实例传进来；RPC 层 `androidIntentAnalyze`（`agent/src/rpc/android.ts:75`）触发的是 `intent.analyzeImplicits(backtrace)`，后者内部批量 Hook 这些入口。
+- **复用者**：`agent/src/android/intent.ts` 在 Hook 到 `Activity.startActivity` / `Context.startService` 等方法时调用 `analyseIntent`，把捕获的 Intent 实例传进来；RPC 层 `androidIntentAnalyze`（[`agent/src/rpc/android.ts:75`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/rpc/android.ts#L75)）触发的是 `intent.analyzeImplicits(backtrace)`，后者内部批量 Hook 这些入口。
 - **不抛异常**：全函数 `try/catch`，任何字段访问失败都只 `send` 错误信息，保证 Hook 链不中断。
 - **颜色区分**：隐式 Intent 用 `redBright` 突出风险，显式与各字段用 `green`，便于在控制台快速扫读。
 - **`Java.use` 在调用时取类**：`android.util.Log`、`java.lang.Exception`、`ActivityThread` 等都在函数体内 `Java.use`，依赖调用方已处于 `Java.perform` 上下文（Hook 实现天然满足）。
@@ -84,14 +84,14 @@ flowchart TD
 
 | 符号 | 位置 |
 | --- | --- |
-| `export const analyseIntent` | `agent/src/android/lib/intentUtils.ts:4` |
-| `getComponent()` 显式/隐式判断 | `agent/src/android/lib/intentUtils.ts:9` |
-| backtrace 取栈 | `agent/src/android/lib/intentUtils.ts:14` |
-| 打印 Action/Data/Type/Flags | `agent/src/android/lib/intentUtils.ts:22` |
-| 遍历 Categories | `agent/src/android/lib/intentUtils.ts:28` |
-| `queryIntentActivities(MATCH_ALL)` | `agent/src/android/lib/intentUtils.ts:51` |
-| 遍历响应 App 列表 | `agent/src/android/lib/intentUtils.ts:54` |
-| 顶层 `try/catch` | `agent/src/android/lib/intentUtils.ts:5` |
+| `export const analyseIntent` | [`agent/src/android/lib/intentUtils.ts:4`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/lib/intentUtils.ts#L4) |
+| `getComponent()` 显式/隐式判断 | [`agent/src/android/lib/intentUtils.ts:9`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/lib/intentUtils.ts#L9) |
+| backtrace 取栈 | [`agent/src/android/lib/intentUtils.ts:14`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/lib/intentUtils.ts#L14) |
+| 打印 Action/Data/Type/Flags | [`agent/src/android/lib/intentUtils.ts:22`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/lib/intentUtils.ts#L22) |
+| 遍历 Categories | [`agent/src/android/lib/intentUtils.ts:28`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/lib/intentUtils.ts#L28) |
+| `queryIntentActivities(MATCH_ALL)` | [`agent/src/android/lib/intentUtils.ts:51`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/lib/intentUtils.ts#L51) |
+| 遍历响应 App 列表 | [`agent/src/android/lib/intentUtils.ts:54`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/lib/intentUtils.ts#L54) |
+| 顶层 `try/catch` | [`agent/src/android/lib/intentUtils.ts:5`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/lib/intentUtils.ts#L5) |
 
 ## 🔗 相关文档
 

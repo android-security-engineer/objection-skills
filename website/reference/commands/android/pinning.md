@@ -31,7 +31,7 @@ Python 层仅解析 `--quiet` 标志并透传给 `api.android_ssl_pinning_disabl
 
 ### `android_disable()` — 绕过 SSL pinning
 
-源码：`objection/commands/android/pinning.py:17`
+源码：[`objection/commands/android/pinning.py:17`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/android/pinning.py#L17)
 
 无位置参数。调 `api.android_ssl_pinning_disable(_should_be_quiet(args))`。JSON 模式返回 `result={'action': 'ssl_pinning_disabled', 'quiet': ...}`，`warnings` 提示作业 id 需经 `agent state` 查。
 
@@ -70,8 +70,8 @@ flowchart LR
 
 | 符号 | 位置 |
 | --- | --- |
-| `_should_be_quiet` | `objection/commands/android/pinning.py:5` |
-| `android_disable` | `objection/commands/android/pinning.py:17` |
+| `_should_be_quiet` | [`objection/commands/android/pinning.py:5`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/android/pinning.py#L5) |
+| `android_disable` | [`objection/commands/android/pinning.py:17`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/android/pinning.py#L17) |
 
 ## 相关文档
 

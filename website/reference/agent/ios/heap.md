@@ -25,7 +25,7 @@
 | `iosHeapEvaluateJs` | 在对象上下文 `eval` 任意 JS |
 
 ### `rpc.iosHeapPrintLiveInstances` — 枚举活实例
-源码：`agent/src/ios/heap.ts:22`
+源码：[`agent/src/ios/heap.ts:22`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/heap.ts#L22)
 
 `enumerateInstances` 用 `ObjC.chooseSync` 配合 `DetailedChooseSpecifier`（`subclasses: true`）抓子类实例，每个实例取 `$className / handle / $ivars / $kind / $ownMethods / $superClass`：
 ```ts
@@ -39,7 +39,7 @@ return ObjC.chooseSync(specifier);
 实例信息在 `:27-36` 装配为 `IHeapObject`，单实例出错用 try/catch 跳过。
 
 ### `rpc.iosHeapPrintIvars` — 指针解析 + ivar dump
-源码：`agent/src/ios/heap.ts:52`
+源码：[`agent/src/ios/heap.ts:52`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/heap.ts#L52)
 
 `resolvePointer` 用 `new ObjC.Object(new NativePointer(pointer))` 把字符串指针还原为 ObjC 对象。`toUTF8` 为真时克隆 ivar 字典，逐项用 `bytesToUTF8` 转字符串（避免直接改 `$ivars` 的访问错误）：
 ```ts
@@ -56,7 +56,7 @@ if (toUTF8) {
 ```
 
 ### `rpc.iosHeapExecMethod` — 调用实例方法
-源码：`agent/src/ios/heap.ts:80`
+源码：[`agent/src/ios/heap.ts:80`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/heap.ts#L80)
 
 直接 `i[method]()` 调用对象方法，`returnString` 为真时把返回值 `toString()`：
 ```ts
@@ -67,7 +67,7 @@ return i[method]();
 ```
 
 ### `rpc.iosHeapEvaluateJs` — 对象上下文 eval
-源码：`agent/src/ios/heap.ts:92`
+源码：[`agent/src/ios/heap.ts:92`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/heap.ts#L92)
 
 `resolvePointer` 后 `eval(js)`，`ptr` 变量在 eval 作用域内可见，可写 `ptr.$ivars.foo` 等表达式（`:93-95`，带 `no-eval` tslint 注释）。
 
@@ -94,13 +94,13 @@ flowchart TD
 ## 🔍 源码索引
 | 符号 | 位置 |
 | --- | --- |
-| `enumerateInstances` | `agent/src/ios/heap.ts:8` |
-| `getInstances` | `agent/src/ios/heap.ts:22` |
-| `resolvePointer` | `agent/src/ios/heap.ts:45` |
-| `getIvars` | `agent/src/ios/heap.ts:52` |
-| `getMethods` | `agent/src/ios/heap.ts:75` |
-| `callInstanceMethod` | `agent/src/ios/heap.ts:80` |
-| `evaluate` | `agent/src/ios/heap.ts:92` |
+| `enumerateInstances` | [`agent/src/ios/heap.ts:8`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/heap.ts#L8) |
+| `getInstances` | [`agent/src/ios/heap.ts:22`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/heap.ts#L22) |
+| `resolvePointer` | [`agent/src/ios/heap.ts:45`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/heap.ts#L45) |
+| `getIvars` | [`agent/src/ios/heap.ts:52`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/heap.ts#L52) |
+| `getMethods` | [`agent/src/ios/heap.ts:75`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/heap.ts#L75) |
+| `callInstanceMethod` | [`agent/src/ios/heap.ts:80`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/heap.ts#L80) |
+| `evaluate` | [`agent/src/ios/heap.ts:92`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/heap.ts#L92) |
 
 ## 🔗 相关文档
 - [Frida 与 Agent](/guide/frida-agent)

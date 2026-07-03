@@ -26,7 +26,7 @@
 | `iosHookingSetReturnValue` | 强制覆盖方法返回值为 true/false |
 
 ### `rpc.iosHookingWatch` — Hook 类或方法
-源码：`agent/src/ios/hooking.ts:35`
+源码：[`agent/src/ios/hooking.ts:35`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/hooking.ts#L35)
 
 `watch` 建一个 `ios-watch` 任务，根据 pattern 是否含 `[` 判断是选择子模式还是类名：含 `[` 则用 `ApiResolver` 展开所有匹配方法逐个 `watchMethod`，否则调 `watchClass`：
 ```ts
@@ -44,7 +44,7 @@ watchClass(patternOrClass, job, dargs, dbt, dret, watchParents);
 `watchClass` 根据 `parents` 决定遍历 `$methods` 还是 `$ownMethods`，拼成 `-[Class method]` 选择子交给 `watchMethod`（`:71-76`）。
 
 ### `watchMethod` — 拦截单个选择子
-源码：`agent/src/ios/hooking.ts:80`
+源码：[`agent/src/ios/hooking.ts:80`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/hooking.ts#L80)
 
 用 `ApiResolver('objc')` 解析选择子地址，`Interceptor.attach` 挂上。`onEnter` 统计参数个数（按 `:` 数量），打印调用与 receiver `$kind`/`$superClass`；按 `dbt` 打回溯、按 `dargs` dump 参数（args[0]=self, args[1]=selector, args[2+]=实参）：
 ```ts
@@ -61,7 +61,7 @@ if (dargs && argumentCount > 0) {
 `onLeave` 按 `dret` 打印返回值（`:157-161`），`InvocationListener` 加入任务。
 
 ### `rpc.iosHookingSetReturnValue` — 改写返回值
-源码：`agent/src/ios/hooking.ts:167`
+源码：[`agent/src/ios/hooking.ts:167`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/hooking.ts#L167)
 
 `TRUE = 0x1`、`FALSE = 0x0`。`ApiResolver` 解析选择子，`onLeave` 比较当前返回值，不同则 `retval.replace`：
 ```ts
@@ -83,7 +83,7 @@ const watchInvocation: InvocationListener = Interceptor.attach(matchedMethod.add
 ```
 
 ### `rpc.iosHookingSearch` — 选择子搜索
-源码：`agent/src/ios/hooking.ts:27`
+源码：[`agent/src/ios/hooking.ts:27`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/hooking.ts#L27)
 
 不含 `[` 时自动补成 `*[*<pattern>* *]` 通配模式，再 `objcEnumerate`：
 ```ts
@@ -119,14 +119,14 @@ flowchart TD
 ## 🔍 源码索引
 | 符号 | 位置 |
 | --- | --- |
-| `getClasses` | `agent/src/ios/hooking.ts:6` |
-| `getClassMethods` | `agent/src/ios/hooking.ts:10` |
-| `objcEnumerate` | `agent/src/ios/hooking.ts:23` |
-| `search` | `agent/src/ios/hooking.ts:27` |
-| `watch` | `agent/src/ios/hooking.ts:35` |
-| `watchClass` | `agent/src/ios/hooking.ts:59` |
-| `watchMethod` | `agent/src/ios/hooking.ts:80` |
-| `setMethodReturn` | `agent/src/ios/hooking.ts:167` |
+| `getClasses` | [`agent/src/ios/hooking.ts:6`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/hooking.ts#L6) |
+| `getClassMethods` | [`agent/src/ios/hooking.ts:10`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/hooking.ts#L10) |
+| `objcEnumerate` | [`agent/src/ios/hooking.ts:23`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/hooking.ts#L23) |
+| `search` | [`agent/src/ios/hooking.ts:27`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/hooking.ts#L27) |
+| `watch` | [`agent/src/ios/hooking.ts:35`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/hooking.ts#L35) |
+| `watchClass` | [`agent/src/ios/hooking.ts:59`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/hooking.ts#L59) |
+| `watchMethod` | [`agent/src/ios/hooking.ts:80`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/hooking.ts#L80) |
+| `setMethodReturn` | [`agent/src/ios/hooking.ts:167`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/hooking.ts#L167) |
 
 ## 🔗 相关文档
 - [Frida 与 Agent](/guide/frida-agent)

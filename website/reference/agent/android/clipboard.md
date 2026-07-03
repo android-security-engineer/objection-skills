@@ -20,7 +20,7 @@
 | `androidMonitorClipboard` | 启动 5 秒轮询，文本变化时 `send()` |
 
 ### `rpc.androidMonitorClipboard` — 剪贴板轮询
-源码：`agent/src/android/clipboard.ts:9`
+源码：[`agent/src/android/clipboard.ts:9`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/clipboard.ts#L9)
 
 启动时会先打印一条 Warning 告知模块未完全可用：
 
@@ -72,14 +72,45 @@ flowchart TD
     Send --> Poll
 ```
 
+### 轮询时序
+
+```mermaid
+sequenceDiagram
+    participant Py as Python REPL
+    participant Agent as clipboard.ts
+    participant CM as ClipboardManager
+    Py->>Agent: rpc.androidMonitorClipboard()
+    Agent-->>Py: send(Warning: still broken)
+    Agent->>CM: getSystemService("clipboard")
+    CM-->>Agent: ClipboardManager 句柄
+    loop 每 5 秒
+        Agent->>CM: getPrimaryClip().getItemAt(0).coerceToText()
+        CM-->>Agent: 当前文本
+        alt 与上次不同
+            Agent-->>Py: send([pasteboard-monitor] Data: ...)
+        else 相同
+            Agent->>Agent: 跳过（去重）
+        end
+    end
+```
+
+## ⚠️ 边界情况与已知缺陷
+
+- **无法停止**：轮询通过 `setInterval` 启动，但**未注册为 Job**（不经过 `lib/jobs.ts` 的注册表），因此 `jobs kill` 无法终止它。一旦启动只能断开会话结束。这是源码标注 "broken" 的核心点。
+- **主线程要求**：`getSystemService` 必须在主线程或已 attach 的 Java 运行时上下文调用，`wrapJavaPerform` 保证这一点；若 Agent 尚未完成 Java attach，调用会抛异常。
+- **多用户/多剪贴板**：Android 多用户场景下 `getPrimaryClip` 只反映当前用户的系统剪贴板，不覆盖 `DevicePolicyManager` 管控的受限用户。
+- **`coerceToText` 的隐式转换**：当 ClipData.Item 是 Intent 或 URI 时，`coerceToText` 会调用 `Intent.toUri` / `URI.toString`，可能把非文本意图也当文本推送，需在 Python 侧甄别。
+- **5 秒粒度**：轮询间隔固定 5 秒，短于该间隔的"复制→清空"动作可能被错过。
+
+
 ## 🔍 源码索引
 | 符号 | 位置 |
 | --- | --- |
-| `monitor` | `agent/src/android/clipboard.ts:9` |
-| `CLIPBOARD_SERVICE` | `agent/src/android/clipboard.ts:19` |
-| `data` 缓存 | `agent/src/android/clipboard.ts:22` |
-| `wrapJavaPerform` 块 | `agent/src/android/clipboard.ts:24` |
-| `setInterval` 轮询 | `agent/src/android/clipboard.ts:31` |
+| `monitor` | [`agent/src/android/clipboard.ts:9`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/clipboard.ts#L9) |
+| `CLIPBOARD_SERVICE` | [`agent/src/android/clipboard.ts:19`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/clipboard.ts#L19) |
+| `data` 缓存 | [`agent/src/android/clipboard.ts:22`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/clipboard.ts#L22) |
+| `wrapJavaPerform` 块 | [`agent/src/android/clipboard.ts:24`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/clipboard.ts#L24) |
+| `setInterval` 轮询 | [`agent/src/android/clipboard.ts:31`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/clipboard.ts#L31) |
 
 ## 🔗 相关文档
 - [Frida 与 Agent](/guide/frida-agent)

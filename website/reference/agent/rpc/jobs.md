@@ -27,7 +27,7 @@
 
 ### `jobs` — 聚合对象
 
-源码：`agent/src/rpc/jobs.ts:3`
+源码：[`agent/src/rpc/jobs.ts:3`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/rpc/jobs.ts#L3)
 
 整个文件就是把 `lib/jobs` 命名空间下的 `all` 与 `kill` 两个函数改名为 `jobsGet`/`jobsKill` 并经箭头函数透传。`jobsKill` 接收一个数字标识符 `ident`，下传给 `j.kill`。
 
@@ -66,9 +66,9 @@ flowchart LR
 
 | 符号 | 位置 |
 | --- | --- |
-| `jobs` 导出对象 | `agent/src/rpc/jobs.ts:3` |
-| `jobsGet` | `agent/src/rpc/jobs.ts:5` |
-| `jobsKill` | `agent/src/rpc/jobs.ts:6` |
+| `jobs` 导出对象 | [`agent/src/rpc/jobs.ts:3`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/rpc/jobs.ts#L3) |
+| `jobsGet` | [`agent/src/rpc/jobs.ts:5`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/rpc/jobs.ts#L5) |
+| `jobsKill` | [`agent/src/rpc/jobs.ts:6`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/rpc/jobs.ts#L6) |
 
 ## 🔗 相关文档
 

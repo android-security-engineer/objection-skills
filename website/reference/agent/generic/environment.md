@@ -32,7 +32,7 @@
 
 ### `runtime` — 运行时判定
 
-源码：`agent/src/generic/environment.ts:36`
+源码：[`agent/src/generic/environment.ts:36`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/generic/environment.ts#L36)
 
 通过 `ObjC.available` 与 `Java.available` 两个 Frida 全局判断当前进程支持哪种运行时，返回 `DeviceType` 常量。优先判断 iOS，否则判断 Android，二者皆不可用则返回 `unknown`。
 
@@ -47,7 +47,7 @@ export const runtime = (): string => {
 
 ### `frida` — Frida 元数据
 
-源码：`agent/src/generic/environment.ts:43`
+源码：[`agent/src/generic/environment.ts:43`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/generic/environment.ts#L43)
 
 直接读取 `Process` 与 `Frida` 全局对象，组装成 `IFridaInfo` 结构返回，包含架构、是否附调试器、堆大小、平台、脚本运行时与 Frida 版本。
 
@@ -67,7 +67,7 @@ export const frida = (): IFridaInfo => {
 
 ### `iosPackage` — iOS 设备与应用画像
 
-源码：`agent/src/generic/environment.ts:54`
+源码：[`agent/src/generic/environment.ts:54`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/generic/environment.ts#L54)
 
 读取 `UIDevice` 与主 `NSBundle`，返回应用 Bundle Identifier、设备名、型号、系统名与系统版本，以及 vendor 标识符。
 
@@ -89,7 +89,7 @@ export const iosPackage = (): IIosPackage => {
 
 ### `iosPaths` — iOS 沙盒目录
 
-源码：`agent/src/generic/environment.ts:77`
+源码：[`agent/src/generic/environment.ts:77`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/generic/environment.ts#L77)
 
 通过内部 helper `getPathForNSLocation`（第 26 行）调用 `NSFileManager` 的 `URLsForDirectory:inDomains:` 查询 Caches / Document / Library 目录，再叠加 `NSBundle` 的 `bundlePath`，返回 `IIosBundlePaths`。
 
@@ -108,7 +108,7 @@ export const iosPaths = (): IIosBundlePaths => {
 
 ### `androidPackage` — Android Build 信息
 
-源码：`agent/src/generic/environment.ts:88`
+源码：[`agent/src/generic/environment.ts:88`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/generic/environment.ts#L88)
 
 在 `wrapJavaPerform` 内读取 `android.os.Build` 的静态字段（BOARD、BRAND、DEVICE、MODEL 等），叠加 `getApplicationContext().getPackageName()` 与 `Java.androidVersion`，返回 `IAndroidPackage`。
 
@@ -130,7 +130,7 @@ export const androidPackage = (): Promise<IAndroidPackage> => {
 
 ### `androidPaths` — Android 沙盒目录
 
-源码：`agent/src/generic/environment.ts:109`
+源码：[`agent/src/generic/environment.ts:109`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/generic/environment.ts#L109)
 
 同样在 `wrapJavaPerform` 内，通过 `Context` 的 `getCacheDir`、`getFilesDir`、`getExternalCacheDir`、`getObbDir`、`getPackageCodePath` 等方法拼装 Android 端目录集合，并对 `getCodeCacheDir` 做了能力探测（旧系统无此方法时回退为 `"n/a"`）。
 
@@ -183,13 +183,13 @@ flowchart TB
 
 | 符号 | 位置 |
 | --- | --- |
-| `getPathForNSLocation` | `agent/src/generic/environment.ts:26` |
-| `runtime` | `agent/src/generic/environment.ts:36` |
-| `frida` | `agent/src/generic/environment.ts:43` |
-| `iosPackage` | `agent/src/generic/environment.ts:54` |
-| `iosPaths` | `agent/src/generic/environment.ts:77` |
-| `androidPackage` | `agent/src/generic/environment.ts:88` |
-| `androidPaths` | `agent/src/generic/environment.ts:109` |
+| `getPathForNSLocation` | [`agent/src/generic/environment.ts:26`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/generic/environment.ts#L26) |
+| `runtime` | [`agent/src/generic/environment.ts:36`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/generic/environment.ts#L36) |
+| `frida` | [`agent/src/generic/environment.ts:43`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/generic/environment.ts#L43) |
+| `iosPackage` | [`agent/src/generic/environment.ts:54`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/generic/environment.ts#L54) |
+| `iosPaths` | [`agent/src/generic/environment.ts:77`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/generic/environment.ts#L77) |
+| `androidPackage` | [`agent/src/generic/environment.ts:88`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/generic/environment.ts#L88) |
+| `androidPaths` | [`agent/src/generic/environment.ts:109`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/generic/environment.ts#L109) |
 
 ## 🔗 相关文档
 

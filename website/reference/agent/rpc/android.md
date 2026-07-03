@@ -37,7 +37,7 @@
 
 ### `android` — 聚合对象
 
-源码：`agent/src/rpc/android.ts:27`
+源码：[`agent/src/rpc/android.ts:27`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/rpc/android.ts#L27)
 
 整个模块导出的是一个对象字面量 `android`，键为 RPC 方法名，值为箭头函数。箭头函数体几乎都是一行调用，把参数按位置转发给平台模块函数并返回其结果。下例展示剪贴板、shell、文件、keystore 四类典型包装：
 
@@ -69,7 +69,7 @@ export const android = {
 
 ### Hooking 子集 — 参数透传与重命名
 
-源码：`agent/src/rpc/android.ts:49`
+源码：[`agent/src/rpc/android.ts:49`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/rpc/android.ts#L49)
 
 `hooking` 相关方法数量最多，展示了“长参数列表逐个透传 + 默认参数”的典型包装风格。`androidHookingGetClassMethodsOverloads` 还带默认值 `methodAllowList: string[] = []` 与可选 `loader?`，RPC 层与平台函数签名保持一致。
 
@@ -115,19 +115,19 @@ flowchart TB
 
 | 符号 | 位置 |
 | --- | --- |
-| `android` 导出对象 | `agent/src/rpc/android.ts:27` |
-| `androidMonitorClipboard` | `agent/src/rpc/android.ts:29` |
-| `androidDeoptimize` | `agent/src/rpc/android.ts:32` |
-| `androidShellExec` | `agent/src/rpc/android.ts:35` |
-| `androidFile*` 文件系统组 | `agent/src/rpc/android.ts:38` |
-| `androidHookingGetClassMethods` | `agent/src/rpc/android.ts:49` |
-| `androidHeapEvaluateHandleMethod` | `agent/src/rpc/android.ts:65` |
-| `androidIntentStartActivity` | `agent/src/rpc/android.ts:73` |
-| `androidKeystoreClear` | `agent/src/rpc/android.ts:78` |
-| `androidSslPinningDisable` | `agent/src/rpc/android.ts:84` |
-| `androidProxySet` | `agent/src/rpc/android.ts:87` |
-| `androidRootDetectionDisable` | `agent/src/rpc/android.ts:90` |
-| `androidUiScreenshot` | `agent/src/rpc/android.ts:94` |
+| `android` 导出对象 | [`agent/src/rpc/android.ts:27`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/rpc/android.ts#L27) |
+| `androidMonitorClipboard` | [`agent/src/rpc/android.ts:29`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/rpc/android.ts#L29) |
+| `androidDeoptimize` | [`agent/src/rpc/android.ts:32`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/rpc/android.ts#L32) |
+| `androidShellExec` | [`agent/src/rpc/android.ts:35`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/rpc/android.ts#L35) |
+| `androidFile*` 文件系统组 | [`agent/src/rpc/android.ts:38`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/rpc/android.ts#L38) |
+| `androidHookingGetClassMethods` | [`agent/src/rpc/android.ts:49`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/rpc/android.ts#L49) |
+| `androidHeapEvaluateHandleMethod` | [`agent/src/rpc/android.ts:65`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/rpc/android.ts#L65) |
+| `androidIntentStartActivity` | [`agent/src/rpc/android.ts:73`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/rpc/android.ts#L73) |
+| `androidKeystoreClear` | [`agent/src/rpc/android.ts:78`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/rpc/android.ts#L78) |
+| `androidSslPinningDisable` | [`agent/src/rpc/android.ts:84`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/rpc/android.ts#L84) |
+| `androidProxySet` | [`agent/src/rpc/android.ts:87`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/rpc/android.ts#L87) |
+| `androidRootDetectionDisable` | [`agent/src/rpc/android.ts:90`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/rpc/android.ts#L90) |
+| `androidUiScreenshot` | [`agent/src/rpc/android.ts:94`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/rpc/android.ts#L94) |
 
 ## 🔗 相关文档
 

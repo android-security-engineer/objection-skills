@@ -21,7 +21,7 @@ android intent implicit_intents --dump-backtrace
 
 ### 实现原理
 
-`agent/src/android/intent.ts:73` `analyzeImplicits()`。Hook 几个启动组件的方法，拦截传入的 `Intent` 对象并 dump：
+[`agent/src/android/intent.ts:73`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/intent.ts#L73) `analyzeImplicits()`。Hook 几个启动组件的方法，拦截传入的 `Intent` 对象并 dump：
 
 ```mermaid
 flowchart TB
@@ -115,8 +115,8 @@ flowchart LR
 | 内容 | 位置 |
 | --- | --- |
 | Intent 命令 | `objection/commands/android/intents.py` |
-| analyzeImplicits | `agent/src/android/intent.ts:73` |
+| analyzeImplicits | [`agent/src/android/intent.ts:73`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/intent.ts#L73) |
 | clipboard 命令 | `objection/commands/android/clipboard.py` |
 | clipboard agent | `agent/src/android/clipboard.ts` |
-| deoptimize RPC | `agent/src/rpc/android.ts:31` |
+| deoptimize RPC | [`agent/src/rpc/android.ts:31`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/rpc/android.ts#L31) |
 | deoptimize 实现 | `agent/src/android/general.ts` |

@@ -27,7 +27,7 @@
 | `iosKeychainEmpty` | 清空全部类条目 |
 
 ### `rpc.iosKeychainList` — 枚举 + 解码
-源码：`agent/src/ios/keychain.ts:130`
+源码：[`agent/src/ios/keychain.ts:130`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/keychain.ts#L130)
 
 `enumerateKeychain` 建查询字典（`kSecReturnAttributes/Data/Ref = True`、`kSecMatchLimitAll`、`kSecAttrSynchronizableAny`），对 5 类 `itemClasses` 逐类调 `SecItemCopyMatching`：
 ```ts
@@ -44,7 +44,7 @@ const copyResult: NativePointer = libObjc.SecItemCopyMatching(searchDictionary, 
 `list` 把每条结果映射成 `IKeychainItem`，`data` 字段对 Key 类返回 `(Key data not displayed)`，其余按 `smartDecode` 选 `smartDataToString` 或 `bytesToUTF8`（`:143-147`），并附 `dataHex`。
 
 ### `decodeAcl` — ACL 约束解码
-源码：`agent/src/ios/keychain.ts:238`
+源码：[`agent/src/ios/keychain.ts:238`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/keychain.ts#L238)
 
 调未文档化 `SecAccessControlGetConstraints` 拿 ACL 字典，遍历 `dacl/osgn/od/prp` 等 key，按 `cpo/cup/pkofn/cbio` 翻译成 `kSecAccessControlUserPresence` 等标志：
 ```ts
@@ -57,7 +57,7 @@ case "cbio":
 ```
 
 ### `rpc.iosKeychainAdd` — SecItemAdd
-源码：`agent/src/ios/keychain.ts:211`
+源码：[`agent/src/ios/keychain.ts:211`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/keychain.ts#L211)
 
 建 `kSecClassGenericPassword` 字典，account/service/data 转 `NSData` 后 `SecItemAdd(itemDict, NULL)`，返回 `result.isNull()`（`true` 表示成功，`errSecSuccess=0`）：
 ```ts
@@ -67,7 +67,7 @@ return result.isNull();
 ```
 
 ### `rpc.iosKeychainEmpty` — SecItemDelete 全清
-源码：`agent/src/ios/keychain.ts:166`
+源码：[`agent/src/ios/keychain.ts:166`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/keychain.ts#L166)
 
 对 5 类逐类设 `kSecClass` 后 `SecItemDelete(searchDictionary)`，不指定 account/service 即全删（`:167-174`）。
 
@@ -99,15 +99,15 @@ flowchart TD
 ## 🔍 源码索引
 | 符号 | 位置 |
 | --- | --- |
-| `itemClasses` | `agent/src/ios/keychain.ts:29` |
-| `enumerateKeychain` | `agent/src/ios/keychain.ts:39` |
-| `listRaw` | `agent/src/ios/keychain.ts:122` |
-| `list` | `agent/src/ios/keychain.ts:130` |
-| `empty` | `agent/src/ios/keychain.ts:166` |
-| `remove` | `agent/src/ios/keychain.ts:178` |
-| `update` | `agent/src/ios/keychain.ts:191` |
-| `add` | `agent/src/ios/keychain.ts:211` |
-| `decodeAcl` | `agent/src/ios/keychain.ts:238` |
+| `itemClasses` | [`agent/src/ios/keychain.ts:29`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/keychain.ts#L29) |
+| `enumerateKeychain` | [`agent/src/ios/keychain.ts:39`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/keychain.ts#L39) |
+| `listRaw` | [`agent/src/ios/keychain.ts:122`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/keychain.ts#L122) |
+| `list` | [`agent/src/ios/keychain.ts:130`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/keychain.ts#L130) |
+| `empty` | [`agent/src/ios/keychain.ts:166`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/keychain.ts#L166) |
+| `remove` | [`agent/src/ios/keychain.ts:178`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/keychain.ts#L178) |
+| `update` | [`agent/src/ios/keychain.ts:191`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/keychain.ts#L191) |
+| `add` | [`agent/src/ios/keychain.ts:211`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/keychain.ts#L211) |
+| `decodeAcl` | [`agent/src/ios/keychain.ts:238`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/keychain.ts#L238) |
 
 ## 🔗 相关文档
 - [Frida 与 Agent](/guide/frida-agent)

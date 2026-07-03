@@ -30,7 +30,7 @@
 
 ### `start` — 启动入口（已禁用）
 
-源码：`agent/src/generic/http.ts:42`
+源码：[`agent/src/generic/http.ts:42`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/generic/http.ts#L42)
 
 `start()` 第一行就调用 `log(c.redBright("httpServer module not currently available."))`，随后仅保留对“服务器已在运行”的提前返回判断，而 `createServer`、`httpServer.listen` 等真正建站逻辑全部以注释形式存在。即使传入 `pwd` 与 `port`，也不会有任何网络监听发生。
 
@@ -49,7 +49,7 @@ export const start = (pwd: string, port: number = 9000): void => {
 
 ### `dirListingHTML` — 目录索引生成（设计参考）
 
-源码：`agent/src/generic/http.ts:14`
+源码：[`agent/src/generic/http.ts:14`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/generic/http.ts#L14)
 
 该函数未被注释、仍是“活代码”，但鉴于 `start` 不再调用它，目前实际不会执行。其逻辑是用 `fs.list` 列目录，对目录名补斜杠，并按当前路径拼接 `<a href>` 链接，返回一段 HTML。
 
@@ -68,7 +68,7 @@ const dirListingHTML = (pwd: string, path: string): string => {
 
 ### `stop` / `status` — 状态管理
 
-源码：`agent/src/generic/http.ts:103` / `agent/src/generic/http.ts:117`
+源码：[`agent/src/generic/http.ts:103`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/generic/http.ts#L103) / [`agent/src/generic/http.ts:117`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/generic/http.ts#L117)
 
 `stop` 检查 `httpServer` 是否存在，存在则调用 `close()` 并在 `close` 事件里清空变量；`status` 根据 `httpServer.listening` 打印运行端口与服务路径，或提示未运行。由于 `start` 不再赋值 `httpServer`，这两个方法在当前版本下永远走“未运行”分支。
 
@@ -111,12 +111,12 @@ flowchart TB
 
 | 符号 | 位置 |
 | --- | --- |
-| 模块变量 `httpServer`/`listenPort`/`servePath` | `agent/src/generic/http.ts:6` |
-| `log` | `agent/src/generic/http.ts:10` |
-| `dirListingHTML` | `agent/src/generic/http.ts:14` |
-| `start` | `agent/src/generic/http.ts:42` |
-| `stop` | `agent/src/generic/http.ts:103` |
-| `status` | `agent/src/generic/http.ts:117` |
+| 模块变量 `httpServer`/`listenPort`/`servePath` | [`agent/src/generic/http.ts:6`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/generic/http.ts#L6) |
+| `log` | [`agent/src/generic/http.ts:10`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/generic/http.ts#L10) |
+| `dirListingHTML` | [`agent/src/generic/http.ts:14`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/generic/http.ts#L14) |
+| `start` | [`agent/src/generic/http.ts:42`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/generic/http.ts#L42) |
+| `stop` | [`agent/src/generic/http.ts:103`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/generic/http.ts#L103) |
+| `status` | [`agent/src/generic/http.ts:117`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/generic/http.ts#L117) |
 
 ## 🔗 相关文档
 

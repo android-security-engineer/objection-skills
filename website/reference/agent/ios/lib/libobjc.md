@@ -88,10 +88,10 @@ flowchart TD
 ## 🔍 源码索引
 | 符号 | 位置 |
 | --- | --- |
-| `ObjC` 选择 | `agent/src/ios/lib/libobjc.ts:3` |
-| `nativeExports` | `agent/src/ios/lib/libobjc.ts:13` |
-| `api` 缓存表 | `agent/src/ios/lib/libobjc.ts:103` |
-| `libObjc` Proxy | `agent/src/ios/lib/libobjc.ts:124` |
+| `ObjC` 选择 | [`agent/src/ios/lib/libobjc.ts:3`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/lib/libobjc.ts#L3) |
+| `nativeExports` | [`agent/src/ios/lib/libobjc.ts:13`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/lib/libobjc.ts#L13) |
+| `api` 缓存表 | [`agent/src/ios/lib/libobjc.ts:103`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/lib/libobjc.ts#L103) |
+| `libObjc` Proxy | [`agent/src/ios/lib/libobjc.ts:124`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/lib/libobjc.ts#L124) |
 
 ## 🔗 相关文档
 - [Frida 与 Agent](/guide/frida-agent)

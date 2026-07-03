@@ -29,7 +29,7 @@ Python 层只做一件事：取 API 句柄、调 `api.android_deoptimize()`。ag
 
 ### `deoptimise()` — 强制解释执行
 
-源码：`objection/commands/android/general.py:7`
+源码：[`objection/commands/android/general.py:7`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/android/general.py#L7)
 
 无参数。直接 RPC 调用，JSON 模式返回 `action: 'deoptimize'`。
 
@@ -63,7 +63,7 @@ JSON 模式返回 `CommandResult(result={'action': 'deoptimize'})`，无 warning
 
 | 符号 | 位置 |
 | --- | --- |
-| `deoptimise` | `objection/commands/android/general.py:7` |
+| `deoptimise` | [`objection/commands/android/general.py:7`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/android/general.py#L7) |
 
 ## 相关文档
 

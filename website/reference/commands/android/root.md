@@ -30,7 +30,7 @@
 
 ### `disable()` — 关闭 root 检测
 
-源码：`objection/commands/android/root.py:5`
+源码：[`objection/commands/android/root.py:5`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/android/root.py#L5)
 
 无参数。调 `api.android_root_detection_disable()`，让检测方法返回「未 root」结果。
 
@@ -42,7 +42,7 @@ api.android_root_detection_disable()
 
 ### `simulate()` — 模拟 root 环境
 
-源码：`objection/commands/android/root.py:27`
+源码：[`objection/commands/android/root.py:27`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/android/root.py#L27)
 
 无参数。调 `api.android_root_detection_enable()`（注意方法名是 `enable`，对应「启用 root 信号模拟」）。
 
@@ -84,8 +84,8 @@ flowchart LR
 
 | 符号 | 位置 |
 | --- | --- |
-| `disable` | `objection/commands/android/root.py:5` |
-| `simulate` | `objection/commands/android/root.py:27` |
+| `disable` | [`objection/commands/android/root.py:5`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/android/root.py#L5) |
+| `simulate` | [`objection/commands/android/root.py:27`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/android/root.py#L27) |
 
 ## 相关文档
 

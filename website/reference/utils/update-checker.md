@@ -19,7 +19,7 @@
 ## 🏗️ 核心结构
 
 ### 模块级常量与默认状态
-源码：`objection/utils/update_checker.py:11`
+源码：[`objection/utils/update_checker.py:11`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/update_checker.py#L11)
 
 ```python
 objection_path = os.path.join(os.path.expanduser('~'), '.objection')
@@ -38,7 +38,7 @@ date_fmt = '%d%m%y %H:%M:%S'
 - `date_fmt`：缓存里 `last_check` 的序列化格式 `DDMMYY HH:MM:SS`。
 
 ### `cached_version_data` — 读缓存
-源码：`objection/utils/update_checker.py:22`
+源码：[`objection/utils/update_checker.py:22`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/update_checker.py#L22)
 
 ```python
 def cached_version_data() -> version_data:
@@ -56,7 +56,7 @@ def cached_version_data() -> version_data:
 无缓存文件时返回模块级默认 `version_data`（7 天前）；有则读 JSON 并把 `last_check` 从字符串解析回 `datetime`。
 
 ### `update_version_cache` — 写缓存
-源码：`objection/utils/update_checker.py:41`
+源码：[`objection/utils/update_checker.py:41`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/update_checker.py#L41)
 
 ```python
 def update_version_cache(version: str) -> None:
@@ -70,7 +70,7 @@ def update_version_cache(version: str) -> None:
 把远端版本号和「现在」写入磁盘。注意 `version_data` 是模块级可变对象，这里先改它再 dump——下次 `cached_version_data` 若文件被删才会回到默认值。
 
 ### `notify_newer_version` — 打印升级提示
-源码：`objection/utils/update_checker.py:56`
+源码：[`objection/utils/update_checker.py:56`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/update_checker.py#L56)
 
 ```python
 def notify_newer_version() -> None:
@@ -88,7 +88,7 @@ def notify_newer_version() -> None:
 用 `packaging.version.Version` 做语义比较，缓存版本严格大于本地版本才打印。`click.secho` 用绿色 + 加粗 + dim 多级强调。
 
 ### `check_version` — 主入口
-源码：`objection/utils/update_checker.py:75`
+源码：[`objection/utils/update_checker.py:75`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/update_checker.py#L75)
 
 ```python
 def check_version() -> None:
@@ -130,14 +130,14 @@ flowchart TD
 ## 🔍 源码索引
 | 符号 | 位置 |
 | --- | --- |
-| `objection_path` | `objection/utils/update_checker.py:11` |
-| `version_file` | `objection/utils/update_checker.py:12` |
-| `version_data` | `objection/utils/update_checker.py:14` |
-| `date_fmt` | `objection/utils/update_checker.py:19` |
-| `cached_version_data` | `objection/utils/update_checker.py:22` |
-| `update_version_cache` | `objection/utils/update_checker.py:41` |
-| `notify_newer_version` | `objection/utils/update_checker.py:56` |
-| `check_version` | `objection/utils/update_checker.py:75` |
+| `objection_path` | [`objection/utils/update_checker.py:11`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/update_checker.py#L11) |
+| `version_file` | [`objection/utils/update_checker.py:12`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/update_checker.py#L12) |
+| `version_data` | [`objection/utils/update_checker.py:14`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/update_checker.py#L14) |
+| `date_fmt` | [`objection/utils/update_checker.py:19`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/update_checker.py#L19) |
+| `cached_version_data` | [`objection/utils/update_checker.py:22`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/update_checker.py#L22) |
+| `update_version_cache` | [`objection/utils/update_checker.py:41`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/update_checker.py#L41) |
+| `notify_newer_version` | [`objection/utils/update_checker.py:56`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/update_checker.py#L56) |
+| `check_version` | [`objection/utils/update_checker.py:75`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/utils/update_checker.py#L75) |
 
 ## 🔗 相关文档
 - [整体架构](/guide/architecture)

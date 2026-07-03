@@ -114,12 +114,115 @@ if (Java.classFactory.tempFileNaming.prefix == 'frida') {
 - 仅覆盖 Java 层 Pinning。若 App 用 **Native 层（C/C++）** 自行校验证书（如 BoringSSL 自定义校验、Flutter 的 `ssl_crypto_x509_session_verify_cert_chain`），Java Hook 无能为力，需配合 Native Hook；
 - 某些 App 在 Pinning 之外还有**双向 TLS**（mTLS，需客户端证书），绕过 Pinning 后仍需提供客户端证书。
 
+## 🔬 边界情况与失败模式
+
+### `addImplementation` 的"成功才注册"语义
+
+`disable()` 里每个 Hook 函数都可能返回 `undefined`（类不存在时）。`Job.addImplementation` 只在拿到非空值时才把 hook 句柄加入 Job 队列——见 [`agent/src/android/pinning.ts:382`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/pinning.ts#L382) 及注释 `Exceptions can cause undefined values if classes are not found. Thus addImplementation only adds if function was hooked`。这意味着：
+
+- 实际装上多少个 Hook 取决于 App 用了哪些库，可能是 7 个全装，也可能只装上 `SSLContext.init` + `TrustManagerImpl` 这 2 个；
+- `jobs list` 里看到的实现数量不固定是正常现象；
+- 即使只装 1 个也无所谓——`SSLContext.init` 那一发是兜底的，覆盖绝大多数 Java 层 HTTPS 栈。
+
+### `check$okhttp` 的混淆名探测
+
+OkHttp 3.3+ 把 `check()` 重命名为 `check$okhttp`（Kotlin/混淆产物）。agent 用 `certificatePinner.check$okhttp` 直接访问属性的方式探测（[`pinning.ts:158`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/pinning.ts#L158)），而不是 `overload()`。这是因为混淆名在不同版本可能不存在，直接属性访问拿不到就是 `undefined`，安全跳过。两个 Hook 都装是为了同时覆盖新旧 OkHttp 版本。
+
+### PhoneGap 回调的"伪成功"细节
+
+`SSLCertificateChecker.execute` 不只是返回 `true`，还主动调 `callBackContext.success("CONNECTION_SECURE")`（[`pinning.ts:355`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/pinning.ts#L355)）。Cordova 的 JS 侧在等这个回调决定是否放行请求——只 return `true` 不调回调，JS Promise 会一直 pending，App 卡死。这是个容易踩的坑。
+
+## 🔧 与底层 Frida/系统 API 的交互细节
+
+### `Java.registerClass` 的代价
+
+`sslContextEmptyTrustManager` 用 `Java.registerClass` 在运行时合成一个全新类 `com.sensepost.test.TrustManager`（[`pinning.ts:51`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/pinning.ts#L51)）。这背后是 Frida 的 ART ClassFactory 在目标进程里注册一个真类，会进 ClassTable，能被 `Java.use` 二次取到。代价是：第一次注册会触发 ClassLoader 链写入，在加固 App 里可能被 ClassLoader 监控发现。
+
+### `tempFileNaming` 改名的副作用
+
+把 `frida` 改成 `onetwothree`（[`pinning.ts:45`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/pinning.ts#L45)）影响的是 `Java.classFactory.tempFileNaming.prefix`——Frida 在 ART 上做 method tracing 时会写临时 dex 文件，前缀会出现在 `/proc/<pid>/maps` 的文件路径段里。改名只影响**此后**新创建的 trace 文件，已经在 maps 里的旧条目不会消失。所以这条必须在任何 Hook 之前先跑（agent 正是这个顺序）。
+
+### `wrapJavaPerform` 的线程桥接
+
+所有 Hook 函数都包在 `wrapJavaPerform(() => {...})` 里。Frida 的 `Java.perform` 把回调投递到 ART 的 GC-safe 线程上下文执行，避免在 JS 线程直接操作 Java 对象引发 GC 状态不一致。`wrapJavaPerform` 是 agent 的封装（见 `agent/src/android/lib/libjava.js`），额外加了错误上报与 Promise 化。
+
+## ⚡ 性能与并发考量
+
+- **`quiet` 模式不是性能优化**：`qsend(quiet, ...)` 内部仍会构造字符串（模板拼接 + `c.blackBright` 颜色码），只是不调 `send()`。高频 App（每秒上百次 TLS 握手）想真省 CPU 得用 Frida 的 `Interceptor.attach` + 原生计数，而不是这个 Java 层 Hook；
+- **Hook 命中是串行的**：`SSLContext.init` 每次 App 新建 SSL 上下文都会触发，Frida 在 ART 上单线程派发 JS 回调，握手密集时形成背压；
+- **Job identifier 与日志前缀**：每个 Hook 闭包捕获了 `ident`（Job 的数字 ID），日志前缀 `[<ident>]` 用来在多 Job 并存时区分是哪个 `disable` 触发的——因为可以反复跑 `android sslpinning disable` 起多个 Job。
+
+## 📊 绕过命中时的 TLS 握手时序
+
+```mermaid
+sequenceDiagram
+    participant App as App 网络栈
+    participant SSL as SSLContext.init()
+    participant Hook as objection Hook<br/>(Job #N)
+    participant TM as 空 TrustManager
+    participant Srv as 服务器 / Burp
+
+    App->>SSL: init(km, appTM, sr)
+    SSL->>Hook: 触发 implementation
+    Hook->>Hook: qsend 日志 [N]
+    Hook->>SSL: call(this, km, [空TM], sr)
+    SSL->>TM: 替换完成
+    Note over TM: checkServerTrusted() 为空实现
+    App->>Srv: TLS ClientHello
+    Srv-->>App: Burp 证书链
+    App->>TM: checkServerTrusted(chain)
+    TM-->>App: 不抛异常 ✅
+    App->>Srv: 握手完成，明文流量
+```
+
+## 🗂️ Hook 类型与卸载状态机
+
+```mermaid
+stateDiagram-v2
+    [*] --> Unloaded: 类未加载/不存在
+    [*] --> Hooked: addImplementation 成功
+    Unloaded --> [*]: 静默 skip (返回 null)
+    Hooked --> Live: Job 入 jobs 表
+    Live --> Firing: App 触发被 Hook 方法
+    Firing --> Live: qsend 日志 + 放行
+    Live --> Uninstalled: jobs kill <id>
+    Uninstalled --> [*]: implementation=null 恢复原始
+```
+
+## 🧱 OkHttp CertificatePinner 的调用栈布局
+
+```text
++---------------------------------------------------------------+
+|  App 调用 OkHttpClient.newCall(request).execute()             |
++----------------------------+----------------------------------+
+                             |
+                             v
++---------------------------------------------------------------+
+| RealCall.execute()                                            |
+|   -> RealConnection.connectTunnel()                          |
+|       -> RealConnection.connectTls()  <-- TLS 握手在此        |
+|           -> Address.certificatePinner()                     |
++----------------------------+----------------------------------+
+                             |
+                             v
++---------------------------------------------------------------+
+| CertificatePinner.check$okhttp(hostname, peerCertificates)   |
+|   ==[objection Hook 替换为空函数]==============================| <-- 命中点
+|   (原逻辑: 比对 sha256 指纹, 不匹配抛 SSLPeerUnverifiedException)|
++----------------------------+----------------------------------+
+                             |
+                             v
++---------------------------------------------------------------+
+| 不抛异常 => check 通过 => 握手继续 => 明文进入 OkHttp 拦截器链 |
++---------------------------------------------------------------+
+```
+
 ## 源码索引
 
 | 内容 | 位置 |
 | --- | --- |
-| Python 命令入口 | `objection/commands/android/pinning.py:16` |
-| RPC 注册 | `agent/src/rpc/android.ts:84` |
-| agent 主逻辑 | `agent/src/android/pinning.ts:374` |
-| TrustManager 替换 | `agent/src/android/pinning.ts:22` |
-| 反 Frida 改名 | `agent/src/android/pinning.ts:45` |
+| Python 命令入口 | [`objection/commands/android/pinning.py:16`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/android/pinning.py#L16) |
+| RPC 注册 | [`agent/src/rpc/android.ts:84`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/rpc/android.ts#L84) |
+| agent 主逻辑 | [`agent/src/android/pinning.ts:374`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/pinning.ts#L374) |
+| TrustManager 替换 | [`agent/src/android/pinning.ts:22`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/pinning.ts#L22) |
+| 反 Frida 改名 | [`agent/src/android/pinning.ts:45`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/android/pinning.ts#L45) |

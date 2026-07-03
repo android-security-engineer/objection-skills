@@ -21,7 +21,7 @@
 | `iosNsuserDefaultsGet` | 返回 `NSUserDefaults.dictionaryRepresentation()` 的 `toString()` |
 
 ### `rpc.iosNsuserDefaultsGet` — 字典表示转字符串
-源码：`agent/src/ios/nsuserdefaults.ts:8`
+源码：[`agent/src/ios/nsuserdefaults.ts:8`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/nsuserdefaults.ts#L8)
 
 `alloc().init()` 创建标准 `NSUserDefaults` 实例（非 `standardUserDefaults`，确保拿到完整字典），`dictionaryRepresentation()` 合并所有域的键值，最后 `toString()`：
 ```ts
@@ -48,7 +48,7 @@ flowchart TD
 ## 🔍 源码索引
 | 符号 | 位置 |
 | --- | --- |
-| `get` | `agent/src/ios/nsuserdefaults.ts:8` |
+| `get` | [`agent/src/ios/nsuserdefaults.ts:8`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/nsuserdefaults.ts#L8) |
 
 ## 🔗 相关文档
 - [Frida 与 Agent](/guide/frida-agent)

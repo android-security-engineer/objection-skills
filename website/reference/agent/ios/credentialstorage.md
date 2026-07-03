@@ -21,7 +21,7 @@
 | `iosCredentialStorage` | 返回 `ICredential[]`，扁平化两层凭据字典 |
 
 ### `rpc.iosCredentialStorage` — 两层枚举器遍历
-源码：`agent/src/ios/credentialstorage.ts:10`
+源码：[`agent/src/ios/credentialstorage.ts:10`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/credentialstorage.ts#L10)
 
 `allCredentials()` 返回嵌套 `NSDictionary`。先用 `keyEnumerator()` 遍历外层 protection space，再对每个 space 取内层字典的 `keyEnumerator()` 遍历用户名：
 ```ts
@@ -70,7 +70,7 @@ flowchart TD
 ## 🔍 源码索引
 | 符号 | 位置 |
 | --- | --- |
-| `dump` | `agent/src/ios/credentialstorage.ts:10` |
+| `dump` | [`agent/src/ios/credentialstorage.ts:10`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/credentialstorage.ts#L10) |
 
 ## 🔗 相关文档
 - [Frida 与 Agent](/guide/frida-agent)

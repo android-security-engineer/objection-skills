@@ -30,7 +30,7 @@
 
 ### `clazz()` — 输出 Hook Manager 模板
 
-源码：`objection/commands/android/generate.py:10`
+源码：[`objection/commands/android/generate.py:10`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/android/generate.py#L10)
 
 读取打包在 `objection/utils/assets/javahookmanager.js` 的模板源码，非 JSON 模式灰字打印；JSON 模式把源码塞进 `CommandResult.result.source`。
 
@@ -48,7 +48,7 @@ with open(js_path, 'r') as f:
 
 ### `simple()` — 批量生成方法 hook
 
-源码：`objection/commands/android/generate.py:37`
+源码：[`objection/commands/android/generate.py:37`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/android/generate.py#L37)
 
 先校验参数（缺类名报错），再 RPC 取方法列表。空列表时报 `no class / methods found`。之后用集合推导式 `set([x.split('(')[0].split('.')[-1] for x in methods])` 去掉重载签名、只留方法名，套用模板生成每段 hook。
 
@@ -91,8 +91,8 @@ flowchart LR
 
 | 符号 | 位置 |
 | --- | --- |
-| `clazz` | `objection/commands/android/generate.py:10` |
-| `simple` | `objection/commands/android/generate.py:37` |
+| `clazz` | [`objection/commands/android/generate.py:10`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/android/generate.py#L10) |
+| `simple` | [`objection/commands/android/generate.py:37`](https://github.com/android-security-engineer/objection-skills/blob/master/objection/commands/android/generate.py#L37) |
 
 ## 相关文档
 

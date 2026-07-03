@@ -22,7 +22,7 @@
 | `iosMonitorCryptoEnable` | 注册一个 `ios-crypto-monitor` 任务，挂 6 个 Hook |
 
 ### `rpc.iosMonitorCryptoEnable` — 注册监控任务
-源码：`agent/src/ios/crypto.ts:342`
+源码：[`agent/src/ios/crypto.ts:342`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/crypto.ts#L342)
 
 `monitor()` 先查 `jobs.hasIdent` 防重，再建 `ios-crypto-monitor` 任务，依次把 6 个 `Interceptor.attach` 结果加入任务：
 ```ts
@@ -45,7 +45,7 @@ export const monitor = (): void => {
 ```
 
 ### `cccrypt` — 单步加解密
-源码：`agent/src/ios/crypto.ts:150`
+源码：[`agent/src/ios/crypto.ts:150`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/crypto.ts#L150)
 
 Hook `CCCrypt`，`onEnter` 里按 11 个参数位置读取 op/alg/options/key/iv/dataIn，`onLeave` 读 `dataOut`。解密输出转字符串、加密输出留 hex：
 ```ts
@@ -66,7 +66,7 @@ this.cccrpyt.dataIn = this.op ? dataInHex : hexToString(dataInHex);
 `onLeave` 中 `dataOut` 同样按 op 决定 hex/字符串（`:212-216`）。
 
 ### `cccryptorupdate` + `cccryptorfinal` — 分步拼接
-源码：`agent/src/ios/crypto.ts:267`、`:310`
+源码：[`agent/src/ios/crypto.ts:267`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/crypto.ts#L267)、`:310`
 
 分步加密时单次 `Update` 只产出一个 block 的输出，模块用模块级变量 `dataOutBytes` 把 `Update` 与后续 `Final` 的输出拼接。`Update` 在输入长于一个 block 时截断 padding（hacky，源码注释 `:299-301`），`Final` 把末块追加：
 ```ts
@@ -77,12 +77,12 @@ this.cccryptorfinal.dataOut = this.op ? hexToString(dataOutBytes) : dataOutBytes
 `op` / `alg` 由 `CCCryptorCreate` 在 `:230-235` 写入模块级变量，跨调用共享。
 
 ### `cckeyderivationpbkdf` — PBKDF2 派生
-源码：`agent/src/ios/crypto.ts:96`
+源码：[`agent/src/ios/crypto.ts:96`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/crypto.ts#L96)
 
 Hook `CCKeyDerivationPBKDF`，`onEnter` 读 password/salt/prf/rounds/derivedKey 指针，`onLeave` 读派生出的密钥。password 先尝试 `hexToString` 还原为可读文本，失败则留 hex（`:117-121`）。
 
 ### `secrandomcopybytes` — 随机数
-源码：`agent/src/ios/crypto.ts:76`
+源码：[`agent/src/ios/crypto.ts:76`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/crypto.ts#L76)
 
 Hook `SecRandomCopyBytes`，记录 count 与生成的随机字节 hex（`:88-89`）。
 
@@ -116,13 +116,13 @@ flowchart TD
 ## 🔍 源码索引
 | 符号 | 位置 |
 | --- | --- |
-| `secrandomcopybytes` | `agent/src/ios/crypto.ts:76` |
-| `cckeyderivationpbkdf` | `agent/src/ios/crypto.ts:96` |
-| `cccrypt` | `agent/src/ios/crypto.ts:150` |
-| `cccryptorcreate` | `agent/src/ios/crypto.ts:221` |
-| `cccryptorupdate` | `agent/src/ios/crypto.ts:267` |
-| `cccryptorfinal` | `agent/src/ios/crypto.ts:310` |
-| `monitor` | `agent/src/ios/crypto.ts:342` |
+| `secrandomcopybytes` | [`agent/src/ios/crypto.ts:76`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/crypto.ts#L76) |
+| `cckeyderivationpbkdf` | [`agent/src/ios/crypto.ts:96`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/crypto.ts#L96) |
+| `cccrypt` | [`agent/src/ios/crypto.ts:150`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/crypto.ts#L150) |
+| `cccryptorcreate` | [`agent/src/ios/crypto.ts:221`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/crypto.ts#L221) |
+| `cccryptorupdate` | [`agent/src/ios/crypto.ts:267`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/crypto.ts#L267) |
+| `cccryptorfinal` | [`agent/src/ios/crypto.ts:310`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/crypto.ts#L310) |
+| `monitor` | [`agent/src/ios/crypto.ts:342`](https://github.com/android-security-engineer/objection-skills/blob/master/agent/src/ios/crypto.ts#L342) |
 
 ## 🔗 相关文档
 - [Frida 与 Agent](/guide/frida-agent)
