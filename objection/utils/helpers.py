@@ -1,3 +1,4 @@
+import os
 import re
 import shlex
 
@@ -94,6 +95,21 @@ def clean_argument_flags(args: list) -> list:
     return [x for x in args if not x.startswith('--')]
 
 
+def is_unix_absolute_path(path: str) -> bool:
+    """
+        Determines whether a path should be treated as absolute on
+        remote Unix-like targets.
+
+        On Windows hosts, os.path.isabs('/foo') may not behave as expected
+        for remote device paths that are always POSIX style.
+
+        :param path:
+        :return:
+    """
+
+    return path.startswith('/') or os.path.isabs(path)
+
+
 def to_snake_case(w: str) -> str:
     """
         https://stackoverflow.com/a/1176023
@@ -124,6 +140,10 @@ def print_frida_connection_help() -> None:
     click.secho('')
     click.secho('For more information, please refer to the objection wiki at: '
                 'https://github.com/sensepost/objection/wiki', fg='green')
+    
+def sanitize_version(version_str: str) -> str:
+    match = re.search(r"\d+(\.\d+)?", version_str or "")
+    return match.group(0) if match else "0"
 
 
 def warn_about_older_operating_systems() -> None:
@@ -143,12 +163,16 @@ def warn_about_older_operating_systems() -> None:
     ios_supported = '9'
 
     # android & ios version warnings
-    if platform == Android and (
-            Version(version) < Version(android_supported)):
-        click.secho('Warning: You appear to be running Android {0} which may result in '
+    if platform == Android:
+        clean_version = sanitize_version(version)
+        try:
+            if Version(clean_version) < Version(android_supported):
+                click.secho('Warning: You appear to be running Android {0} which may result in '
                     'some hooks failing.\nIt is recommended to use at least an Android '
                     'version {1} device with objection.'.format(version, android_supported),
                     fg='yellow')
+        except Exception:
+            pass
 
     # android & ios version warnings
     if platform == Ios and (
