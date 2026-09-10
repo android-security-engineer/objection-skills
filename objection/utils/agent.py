@@ -93,6 +93,10 @@ class OutputHandlers(object):
                 click.secho(json.dumps(message, indent=2, sort_keys=True), dim=True)
                 click.secho('- [./incoming message] ' + '-' * 16, dim=True)
 
+            # 缓冲异步事件，供 AI Agent / HTTP API 轮询（仅 JSON 模式生效）
+            from .events import record_event
+            record_event(message, data)
+
             # process the response
             if message and 'payload' in message:
                 if len(message['payload']) > 0:

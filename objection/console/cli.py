@@ -9,6 +9,7 @@ from objection.commands.plugin_manager import load_plugin
 from objection.utils.agent import Agent, AgentConfig
 from objection.utils.helpers import debug_print, warn_about_older_operating_systems
 from .repl import Repl
+from .agent_cli import agent as agent_group
 from ..__init__ import __version__
 from ..commands.mobile_packages import patch_ios_ipa, patch_android_apk, sign_android_apk
 from ..state.api import api_state
@@ -263,6 +264,10 @@ def version() -> None:
     """
 
     click.secho('objection: {0}'.format(__version__))
+
+
+# 面向 AI Agent 的子命令组（强制 JSON 输出）
+cli.add_command(agent_group)
 
 
 @cli.command()

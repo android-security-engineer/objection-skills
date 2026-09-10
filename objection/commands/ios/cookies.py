@@ -1,23 +1,13 @@
-import json
+from typing import Optional
 
 import click
 from tabulate import tabulate
 
 from objection.state.connection import state_connection
+from objection.utils.output import CommandResult, output_result, should_output_json
 
 
-def _should_dump_json(args: list) -> bool:
-    """
-        Check if --json is part of the arguments.
-
-        :param args:
-        :return:
-    """
-
-    return '--json' in args
-
-
-def get(args: list) -> None:
+def get(args: list) -> Optional[CommandResult]:
     """
         Gets cookies using the iOS NSHTTPCookieStorage sharedHTTPCookieStorage
         and prints them to the screen.
@@ -29,13 +19,15 @@ def get(args: list) -> None:
     api = state_connection.get_api()
     cookies = api.ios_cookies_get()
 
-    if _should_dump_json(args):
-        print(json.dumps(cookies, indent=4))
-        return
+    if should_output_json(args):
+        return output_result(
+            CommandResult(result={'cookies': cookies, 'count': len(cookies)}),
+            command='ios cookies get',
+        )
 
     if len(cookies) <= 0:
         click.secho('No cookies found')
-        return
+        return None
 
     click.secho(tabulate(
         [[
@@ -48,3 +40,4 @@ def get(args: list) -> None:
             cookie['isHTTPOnly']
         ] for cookie in cookies], headers=['Name', 'Value', 'Expires', 'Domain', 'Path', 'Secure', 'HTTPOnly'],
     ))
+    return None

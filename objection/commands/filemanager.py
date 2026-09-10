@@ -1,6 +1,7 @@
 import os
 import tempfile
 import time
+from typing import Optional
 
 import click
 from tabulate import tabulate
@@ -8,7 +9,9 @@ from tabulate import tabulate
 from ..state.connection import state_connection
 from ..state.device import device_state, Ios, Android
 from ..state.filemanager import file_manager_state
-from ..utils.helpers import sizeof_fmt, is_unix_absolute_path
+from ..utils.helpers import sizeof_fmt
+from ..utils.output import CommandResult, output_result, should_output_json
+from ..utils.helpers import is_unix_absolute_path
 
 # variable used to cache entries from the ls-like
 # commands used in the below helpers. only used
@@ -27,7 +30,7 @@ def _should_download_folder(args: list) -> bool:
     return len(args) > 0 and '--folder' in args
 
 
-def cd(args: list) -> None:
+def cd(args: list) -> Optional[CommandResult]:
     """
         Change the current working directory of the device.
 
@@ -44,15 +47,30 @@ def cd(args: list) -> None:
     """
 
     if len(args) <= 0:
+        if should_output_json(args):
+            return output_result(
+                CommandResult(
+                    result={'error': 'missing destination directory'},
+                    status='error',
+                    human_text='Usage: cd <destination directory>',
+                    exit_code=1,
+                ),
+                command='cd',
+            )
         click.secho('Usage: cd <destination directory>', bold=True)
-        return
+        return None
 
     path = args[0]
     current_dir = pwd()
 
     # nothing to do
     if path == '.':
-        return
+        if should_output_json(args):
+            return output_result(
+                CommandResult(result={'cwd': current_dir, 'changed': False}),
+                command='cd',
+            )
+        return None
 
     # moving one directory back
     device_path_separator = device_state.platform.path_separator
@@ -63,14 +81,24 @@ def cd(args: list) -> None:
 
         # nothing to do if we are already at root
         if len(split_path) == 1:
-            return
+            if should_output_json(args):
+                return output_result(
+                    CommandResult(result={'cwd': current_dir, 'changed': False, 'at_root': True}),
+                    command='cd',
+                )
+            return None
 
         new_path = ''.join(split_path[:-1])
         click.secho(new_path, fg='green', bold=True)
 
         file_manager_state.cwd = new_path
 
-        return
+        if should_output_json(args):
+            return output_result(
+                CommandResult(result={'cwd': new_path, 'changed': True}),
+                command='cd',
+            )
+        return None
 
     # if we got an absolute path, check if the path
     # actually exists, and then cd to it if we can
@@ -97,10 +125,25 @@ def cd(args: list) -> None:
             click.secho(path, fg='green', bold=True)
 
             file_manager_state.cwd = path
-            return
+            if should_output_json(args):
+                return output_result(
+                    CommandResult(result={'cwd': path, 'changed': True}),
+                    command='cd',
+                )
+            return None
 
         else:
+            if should_output_json(args):
+                return output_result(
+                    CommandResult(
+                        result={'error': 'invalid path', 'path': path},
+                        status='error',
+                        exit_code=1,
+                    ),
+                    command='cd',
+                )
             click.secho('Invalid path: `{0}`'.format(path), fg='red')
+            return None
 
     # directory is not absolute, tack it on at the end and
     # see if its legit.
@@ -112,7 +155,12 @@ def cd(args: list) -> None:
         if '..'+device_path_separator in proposed_path:
             proposed_path = os.path.normpath(proposed_path).replace('\\', device_path_separator)
             if proposed_path == '//':
-                return
+                if should_output_json(args):
+                    return output_result(
+                        CommandResult(result={'cwd': current_dir, 'changed': False}),
+                        command='cd',
+                    )
+                return None
 
         # assume the proposed_path does not exist by default
         does_exist = False
@@ -131,10 +179,25 @@ def cd(args: list) -> None:
             click.secho(proposed_path, fg='green', bold=True)
 
             file_manager_state.cwd = proposed_path
-            return
+            if should_output_json(args):
+                return output_result(
+                    CommandResult(result={'cwd': proposed_path, 'changed': True}),
+                    command='cd',
+                )
+            return None
 
         else:
+            if should_output_json(args):
+                return output_result(
+                    CommandResult(
+                        result={'error': 'invalid path', 'path': proposed_path},
+                        status='error',
+                        exit_code=1,
+                    ),
+                    command='cd',
+                )
             click.secho('Invalid path: `{0}`'.format(proposed_path), fg='red')
+            return None
 
 
 def path_exists(path: str) -> bool:
@@ -199,7 +262,7 @@ def pwd(args: list = None) -> str:
         return _pwd_android()
 
 
-def pwd_print(args: list = None) -> None:
+def pwd_print(args: list = None) -> Optional[CommandResult]:
     """
         Prints the current working directory.
 
@@ -207,7 +270,15 @@ def pwd_print(args: list = None) -> None:
         :return:
     """
 
-    click.secho('Current directory: {0}'.format(pwd()))
+    cwd = pwd()
+    if should_output_json(args):
+        return output_result(
+            CommandResult(result={'cwd': cwd}),
+            command='pwd',
+        )
+
+    click.secho('Current directory: {0}'.format(cwd))
+    return None
 
 
 def _pwd_ios() -> str:
@@ -244,7 +315,7 @@ def _pwd_android() -> str:
     return cwd
 
 
-def ls(args: list) -> None:
+def ls(args: list) -> Optional[CommandResult]:
     """
         Get a directory listing for a path on a device.
         If no path is provided, the current working directory is used.
@@ -261,12 +332,34 @@ def ls(args: list) -> None:
         if not is_unix_absolute_path(path):
             path = device_state.platform.path_separator.join([pwd(), path])
 
+    # JSON 模式：直接返回原始 listing，跳过表格渲染
+    if should_output_json(args):
+        api = state_connection.get_api()
+        if device_state.platform == Ios:
+            data = api.ios_file_ls(path)
+        elif device_state.platform == Android:
+            data = api.android_file_ls(path)
+        else:
+            return output_result(
+                CommandResult(result={'error': 'unknown platform'}, status='error', exit_code=1),
+                command='ls',
+            )
+        return output_result(
+            CommandResult(
+                result={'path': path, 'readable': data.get('readable'),
+                        'writable': data.get('writable'), 'files': data.get('files')},
+            ),
+            command='ls',
+        )
+
     # based on the runtime, execute the correct ls method.
     if device_state.platform == Ios:
         _ls_ios(path)
 
     if device_state.platform == Android:
         _ls_android(path)
+
+    return None
 
 
 def _ls_ios(path: str) -> None:
@@ -394,7 +487,7 @@ def _ls_android(path: str) -> None:
     click.secho('\nReadable: {0}  Writable: {1}'.format(data['readable'], data['writable']), bold=True)
 
 
-def download(args: list) -> None:
+def download(args: list) -> Optional[CommandResult]:
     """
         Downloads a file from a remote filesystem and stores
         it locally.
@@ -407,8 +500,18 @@ def download(args: list) -> None:
     """
 
     if len(args) < 1:
+        if should_output_json(args):
+            return output_result(
+                CommandResult(
+                    result={'error': 'missing remote location'},
+                    status='error',
+                    human_text='Usage: filesystem download <remote location> (optional: <local destination>)',
+                    exit_code=1,
+                ),
+                command='filesystem download',
+            )
         click.secho('Usage: filesystem download <remote location> (optional: <local destination>)', bold=True)
-        return
+        return None
 
     # determine the source and destination file names.
     # if we didnt get a specification of where to dump the file,
@@ -426,6 +529,16 @@ def download(args: list) -> None:
 
     if device_state.platform == Android:
         _download_android(source, destination, should_download_folder)
+
+    if should_output_json(args):
+        return output_result(
+            CommandResult(
+                result={'action': 'downloaded', 'source': source, 'destination': destination,
+                        'folder': should_download_folder},
+            ),
+            command='filesystem download',
+        )
+    return None
 
 
 def _download_ios(path: str, destination: str, should_download_folder: bool, path_root: bool = True) -> None:
@@ -463,7 +576,7 @@ def _download_ios(path: str, destination: str, should_download_folder: bool, pat
         os.makedirs(destination)
 
         if path_root:
-            if not click.confirm('Do you want to download the full directory?', default=True):
+            if not should_output_json(None) and not click.confirm('Do you want to download the full directory?', default=True):
                 click.secho('Download aborted.', fg='yellow')
                 return
             click.secho('Downloading directory recursively...', fg='green')
@@ -527,7 +640,7 @@ def _download_android(path: str, destination: str, should_download_folder: bool,
         os.makedirs(destination)
 
         if path_root:
-            if not click.confirm('Do you want to download the full directory?', default=True):
+            if not should_output_json(None) and not click.confirm('Do you want to download the full directory?', default=True):
                 click.secho('Download aborted.', fg='yellow')
                 return
             click.secho('Downloading directory recursively...', fg='green')
@@ -555,7 +668,7 @@ def _download_android(path: str, destination: str, should_download_folder: bool,
     click.secho('Successfully downloaded {0} to {1}'.format(path, destination), bold=True)
 
 
-def upload(args: list) -> None:
+def upload(args: list) -> Optional[CommandResult]:
     """
         Uploads a local file to the remote operating system.
 
@@ -567,8 +680,18 @@ def upload(args: list) -> None:
     """
 
     if len(args) < 1:
+        if should_output_json(args):
+            return output_result(
+                CommandResult(
+                    result={'error': 'missing local source'},
+                    status='error',
+                    human_text='Usage: filesystem upload <local source> (optional: <remote destination>)',
+                    exit_code=1,
+                ),
+                command='filesystem upload',
+            )
         click.secho('Usage: filesystem upload <local source> (optional: <remote destination>)', bold=True)
-        return
+        return None
 
     source = args[0]
     destination = args[1] if len(args) > 1 else device_state.platform.path_separator.join(
@@ -579,6 +702,15 @@ def upload(args: list) -> None:
 
     if device_state.platform == Android:
         _upload_android(source, destination)
+
+    if should_output_json(args):
+        return output_result(
+            CommandResult(
+                result={'action': 'uploaded', 'source': source, 'destination': destination},
+            ),
+            command='filesystem upload',
+        )
+    return None
 
 
 def _upload_ios(path: str, destination: str) -> None:
@@ -651,7 +783,7 @@ def _upload_android(path: str, destination: str) -> None:
         del _ls_cache[os.path.dirname(destination)]
 
 
-def rm(args: list) -> None:
+def rm(args: list) -> Optional[CommandResult]:
     """
         Remove a file from the remote filesystem.
 
@@ -660,26 +792,46 @@ def rm(args: list) -> None:
     """
 
     if len(args) < 1:
+        if should_output_json(args):
+            return output_result(
+                CommandResult(
+                    result={'error': 'missing target file'},
+                    status='error',
+                    human_text='Usage: rm <target remote file>',
+                    exit_code=1,
+                ),
+                command='rm',
+            )
         click.secho('Usage: rm <target remote file>', bold=True)
-        return
+        return None
 
     target = args[0]
 
     if not is_unix_absolute_path(target):
         target = device_state.platform.path_separator.join([pwd(), target])
 
-    if not click.confirm('Really delete {0} ?'.format(target)):
-        click.secho('Not deleting {0}'.format(target), dim=True)
-        return
+    # JSON 模式下跳过交互确认
+    if not should_output_json(args):
+        if not click.confirm('Really delete {0} ?'.format(target)):
+            click.secho('Not deleting {0}'.format(target), dim=True)
+            return None
 
+    deleted = False
     if device_state.platform == Ios:
-        _rm_ios(target)
+        deleted = _rm_ios(target)
 
     if device_state.platform == Android:
-        _rm_android(target)
+        deleted = _rm_android(target)
+
+    if should_output_json(args):
+        return output_result(
+            CommandResult(result={'action': 'deleted', 'target': target, 'deleted': bool(deleted)}),
+            command='rm',
+        )
+    return None
 
 
-def _rm_android(t: str) -> None:
+def _rm_android(t: str) -> bool:
     """
         Removes a file from an Android device.
 
@@ -691,17 +843,20 @@ def _rm_android(t: str) -> None:
 
     if not _path_exists_android(t):
         click.secho('{0} does not exist'.format(t), fg='red')
-        return
+        return False
 
-    if api.android_file_delete(t):
+    deleted = api.android_file_delete(t)
+    if deleted:
         click.secho('{0} successfully deleted'.format(t), fg='green')
 
     # update the file system cache entry
     if os.path.dirname(t) in _ls_cache:
         del _ls_cache[os.path.dirname(t)]
 
+    return bool(deleted)
 
-def _rm_ios(t: str) -> None:
+
+def _rm_ios(t: str) -> bool:
     """
         Removes a file from an iOS device.
 
@@ -713,17 +868,20 @@ def _rm_ios(t: str) -> None:
 
     if not _path_exists_ios(t):
         click.secho('{0} does not exist'.format(t), fg='red')
-        return
+        return False
 
-    if api.ios_file_delete(t):
+    deleted = api.ios_file_delete(t)
+    if deleted:
         click.secho('{0} successfully deleted'.format(t), fg='green')
 
     # update the file system cache entry
     if os.path.dirname(t) in _ls_cache:
         del _ls_cache[os.path.dirname(t)]
 
+    return bool(deleted)
 
-def cat(args: list):
+
+def cat(args: list) -> Optional[CommandResult]:
     """
         Downloads a file from a remote filesystem and echos
         it's contents
@@ -736,8 +894,18 @@ def cat(args: list):
     """
 
     if len(args) < 1:
+        if should_output_json(args):
+            return output_result(
+                CommandResult(
+                    result={'error': 'missing remote location'},
+                    status='error',
+                    human_text='Usage: filesystem cat <remote location>',
+                    exit_code=1,
+                ),
+                command='filesystem cat',
+            )
         click.secho('Usage: filesystem cat <remote location>', bold=True)
-        return
+        return None
 
     # determine the source and destination file names.
     # if we didnt get a specification of where to dump the file,
@@ -751,12 +919,22 @@ def cat(args: list):
     if device_state.platform == Android:
         _download_android(source, destination, False)
 
+    if should_output_json(args):
+        with open(destination, 'r', encoding='utf-8', errors='ignore') as f:
+            content = f.read()
+        os.remove(destination)
+        return output_result(
+            CommandResult(result={'path': source, 'content': content}),
+            command='filesystem cat',
+        )
+
     click.secho('====', dim=True)
     with open(destination, 'r', encoding='utf-8', errors='ignore') as f:
         print(f.read(), end='', )
     click.secho('====', dim=True)
 
     os.remove(destination)
+    return None
 
 
 def _get_short_ios_listing() -> list:

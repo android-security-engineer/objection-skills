@@ -1,10 +1,13 @@
+from typing import Optional
+
 import click
 
 from ..commands.filemanager import pwd
 from ..state.connection import state_connection
+from objection.utils.output import CommandResult, output_result, should_output_json
 
 
-def start(args: list) -> None:
+def start(args: list) -> Optional[CommandResult]:
     """
         Start's an http server, exposing the mobile devices filesystem.
 
@@ -22,8 +25,15 @@ def start(args: list) -> None:
     api = state_connection.get_api()
     api.http_server_start(pwd(), port)
 
+    if should_output_json(args):
+        return output_result(
+            CommandResult(result={'action': 'http_start', 'port': port, 'root': pwd()}),
+            command='http start',
+        )
+    return None
 
-def stop(args: list) -> None:
+
+def stop(args: list) -> Optional[CommandResult]:
     """
         Stops the on device HTTP server
 
@@ -34,8 +44,15 @@ def stop(args: list) -> None:
     api = state_connection.get_api()
     api.http_server_stop()
 
+    if should_output_json(args):
+        return output_result(
+            CommandResult(result={'action': 'http_stop'}),
+            command='http stop',
+        )
+    return None
 
-def status(args: list) -> None:
+
+def status(args: list) -> Optional[CommandResult]:
     """
         Get the status of the HTTP server
 
@@ -45,3 +62,10 @@ def status(args: list) -> None:
 
     api = state_connection.get_api()
     api.http_server_status()
+
+    if should_output_json(args):
+        return output_result(
+            CommandResult(result={'action': 'http_status'}),
+            command='http status',
+        )
+    return None

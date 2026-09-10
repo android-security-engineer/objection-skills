@@ -1,6 +1,7 @@
 import binascii
 import os
 import tempfile
+from typing import Optional
 
 import click
 import litecli
@@ -8,6 +9,7 @@ from litecli.main import LiteCli
 
 from ..commands.filemanager import download, upload, pwd, path_exists
 from ..utils.helpers import is_unix_absolute_path
+from ..utils.output import CommandResult, output_result, should_output_json
 
 
 def modify_config(rc):
@@ -52,7 +54,7 @@ def _should_sync_once_done(args: list) -> bool:
     return '--sync' in args
 
 
-def connect(args: list) -> None:
+def connect(args: list) -> Optional[CommandResult]:
     """
         Connects to a SQLite database by downloading a copy of the database
         from the device and storing it locally in a temporary directory.
@@ -62,8 +64,32 @@ def connect(args: list) -> None:
     """
 
     if len(args) <= 0:
+        if should_output_json(args):
+            return output_result(
+                CommandResult(
+                    result={'error': 'missing remote file'},
+                    status='error',
+                    human_text='Usage: sqlite connect <remote_file> (optional: --sync)',
+                    exit_code=1,
+                ),
+                command='sqlite connect',
+            )
         click.secho('Usage: sqlite connect <remote_file> (optional: --sync)', bold=True)
-        return
+        return None
+
+    # Agent / JSON 模式：交互式 litecli 不可用，引导用 filesystem download 取回
+    if should_output_json(args):
+        return output_result(
+            CommandResult(
+                result={'error': 'interactive sqlite shell unavailable in JSON mode'},
+                status='error',
+                exit_code=1,
+                human_text=('Use `filesystem download <remote_file> <local.sqlite>` '
+                            'to pull the database, then inspect locally.'),
+                warnings=['The interactive litecli shell cannot run under an AI Agent.'],
+            ),
+            command='sqlite connect',
+        )
 
     db_location = args[0]
     _, local_path = tempfile.mkstemp('.sqlite')

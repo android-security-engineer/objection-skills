@@ -1,11 +1,13 @@
 import os
+from typing import Optional
 
 import click
 
 from ..state.app import app_state
+from objection.utils.output import CommandResult, output_result, should_output_json
 
 
-def history(args: list) -> None:
+def history(args: list) -> Optional[CommandResult]:
     """
         Lists the commands that have been run in the current session.
 
@@ -18,8 +20,16 @@ def history(args: list) -> None:
     for command in app_state.successful_commands:
         click.secho(command)
 
+    if should_output_json(args):
+        return output_result(
+            CommandResult(result={'commands': app_state.successful_commands,
+                                  'count': len(app_state.successful_commands)}),
+            command='commands history',
+        )
+    return None
 
-def save(args: list) -> None:
+
+def save(args: list) -> Optional[CommandResult]:
     """
         Save the current sessions command history to a file.
 
@@ -29,7 +39,12 @@ def save(args: list) -> None:
 
     if len(args) <= 0:
         click.secho('Usage: commands save <local destination>', bold=True)
-        return
+        if should_output_json(args):
+            return output_result(
+                CommandResult(status='error', result={'error': 'missing local destination'}),
+                command='commands save',
+            )
+        return None
 
     destination = os.path.expanduser(args[0]) if args[0].startswith('~') else args[0]
 
@@ -39,8 +54,15 @@ def save(args: list) -> None:
 
     click.secho('Saved commands to: {0}'.format(destination), fg='green')
 
+    if should_output_json(args):
+        return output_result(
+            CommandResult(result={'saved_to': destination, 'count': len(app_state.successful_commands)}),
+            command='commands save',
+        )
+    return None
 
-def clear(args: list) -> None:
+
+def clear(args: list) -> Optional[CommandResult]:
     """
         Clears the current sessions command history.
 
@@ -50,3 +72,10 @@ def clear(args: list) -> None:
 
     app_state.clear_command_history()
     click.secho('Command history cleared.', fg='green')
+
+    if should_output_json(args):
+        return output_result(
+            CommandResult(result={'cleared': True}),
+            command='commands clear',
+        )
+    return None

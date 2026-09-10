@@ -1,8 +1,11 @@
+from typing import Optional
+
 import click
 from tabulate import tabulate
 
 from objection.state.connection import state_connection
 from objection.utils.helpers import pretty_concat
+from objection.utils.output import CommandResult, output_result, should_output_json
 
 
 def _should_include_apple_bundles(args: list) -> bool:
@@ -47,7 +50,7 @@ def _is_apple_bundle(bundle: str) -> bool:
     return False
 
 
-def show_frameworks(args: list = None) -> None:
+def show_frameworks(args: list = None) -> Optional[CommandResult]:
     """
         Prints information about bundles that represent frameworks.
 
@@ -64,6 +67,15 @@ def show_frameworks(args: list = None) -> None:
     if not _should_include_apple_bundles(args):
         frameworks = [f for f in frameworks if not _is_apple_bundle(f['bundle'])]
 
+    if should_output_json(args):
+        return output_result(
+            CommandResult(
+                result={'frameworks': frameworks, 'count': len(frameworks),
+                        'include_apple': _should_include_apple_bundles(args)},
+            ),
+            command='ios bundles list frameworks',
+        )
+
     # Just dump it to the screen
     click.secho(tabulate(
         [[
@@ -74,9 +86,10 @@ def show_frameworks(args: list = None) -> None:
         ] for entry in frameworks
         ], headers=['Executable', 'Bundle', 'Version', 'Path'],
     ))
+    return None
 
 
-def show_bundles(args: list = None) -> None:
+def show_bundles(args: list = None) -> Optional[CommandResult]:
     """
         Prints information about bundles that are not necessarily frameworks
 
@@ -89,6 +102,12 @@ def show_bundles(args: list = None) -> None:
     api = state_connection.get_api()
     bundles = api.ios_bundles_get_bundles()
 
+    if should_output_json(args):
+        return output_result(
+            CommandResult(result={'bundles': bundles, 'count': len(bundles)}),
+            command='ios bundles list bundles',
+        )
+
     # Just dump it to the screen
     click.secho(tabulate(
         [[
@@ -99,3 +118,4 @@ def show_bundles(args: list = None) -> None:
         ] for entry in bundles
         ], headers=['Executable', 'Bundle', 'Version', 'Path'],
     ))
+    return None

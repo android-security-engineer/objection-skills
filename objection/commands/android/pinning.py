@@ -1,4 +1,5 @@
 from objection.state.connection import state_connection
+from objection.utils.output import CommandResult, output_result, should_output_json
 
 
 def _should_be_quiet(args: list) -> bool:
@@ -24,3 +25,13 @@ def android_disable(args: list = None) -> None:
 
     api = state_connection.get_api()
     api.android_ssl_pinning_disable(_should_be_quiet(args))
+
+    if should_output_json(args):
+        return output_result(
+            CommandResult(
+                result={'action': 'ssl_pinning_disabled', 'quiet': _should_be_quiet(args)},
+                warnings=['Job id not surfaced; use `agent state` to list running jobs.'],
+            ),
+            command='android sslpinning disable',
+        )
+    return None

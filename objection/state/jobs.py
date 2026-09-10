@@ -21,7 +21,11 @@ class Job(object):
             :return:
         """
         if uuid is not None:
-            self.uuid = int(uuid)
+            try:
+                self.uuid = int(uuid)
+            except (ValueError, TypeError):
+                # identifier 可能是 base36 字符串（如 rdcjq16g8xi），原样保留
+                self.uuid = uuid
         else:
             self.uuid = randint(100000, 999999)
         self.name = name
