@@ -16,13 +16,12 @@ def monitor(args: list = None) -> Optional[CommandResult]:
     api = state_connection.get_api()
     api.ios_monitor_pasteboard()
 
-    if should_output_json(args):
-        return output_result(
-            CommandResult(
-                result={'action': 'monitoring_pasteboard'},
-                warnings=['Job id not surfaced; use `agent state` to list running jobs.',
-                          'New pasteboard strings arrive as async messages.'],
-            ),
-            command='ios pasteboard monitor',
-        )
-    return None
+    return output_result(
+        CommandResult(
+            result={'action': 'monitoring_pasteboard'},
+            human_text='Monitoring iOS pasteboard',
+            warnings=['Job id not surfaced; use `agent state` to list running jobs.',
+                      'New pasteboard strings arrive as async messages.'],
+        ),
+        command='ios pasteboard monitor',
+    )

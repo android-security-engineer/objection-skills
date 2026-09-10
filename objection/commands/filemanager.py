@@ -47,30 +47,25 @@ def cd(args: list) -> Optional[CommandResult]:
     """
 
     if len(args) <= 0:
-        if should_output_json(args):
-            return output_result(
-                CommandResult(
-                    result={'error': 'missing destination directory'},
-                    status='error',
-                    human_text='Usage: cd <destination directory>',
-                    exit_code=1,
-                ),
-                command='cd',
-            )
-        click.secho('Usage: cd <destination directory>', bold=True)
-        return None
+        return output_result(
+            CommandResult(
+                result={'error': 'missing destination directory'},
+                status='error',
+                human_text='Usage: cd <destination directory>',
+                exit_code=1,
+            ),
+            command='cd',
+        )
 
     path = args[0]
     current_dir = pwd()
 
     # nothing to do
     if path == '.':
-        if should_output_json(args):
-            return output_result(
-                CommandResult(result={'cwd': current_dir, 'changed': False}),
-                command='cd',
-            )
-        return None
+        return output_result(
+            CommandResult(result={'cwd': current_dir, 'changed': False}),
+            command='cd',
+        )
 
     # moving one directory back
     device_path_separator = device_state.platform.path_separator
@@ -81,24 +76,20 @@ def cd(args: list) -> Optional[CommandResult]:
 
         # nothing to do if we are already at root
         if len(split_path) == 1:
-            if should_output_json(args):
-                return output_result(
-                    CommandResult(result={'cwd': current_dir, 'changed': False, 'at_root': True}),
-                    command='cd',
-                )
-            return None
+            return output_result(
+                CommandResult(result={'cwd': current_dir, 'changed': False, 'at_root': True}),
+                command='cd',
+            )
 
         new_path = ''.join(split_path[:-1])
-        click.secho(new_path, fg='green', bold=True)
 
         file_manager_state.cwd = new_path
 
-        if should_output_json(args):
-            return output_result(
-                CommandResult(result={'cwd': new_path, 'changed': True}),
-                command='cd',
-            )
-        return None
+        return output_result(
+            CommandResult(result={'cwd': new_path, 'changed': True},
+                          human_text=new_path),
+            command='cd',
+        )
 
     # if we got an absolute path, check if the path
     # actually exists, and then cd to it if we can
@@ -122,28 +113,23 @@ def cd(args: list) -> Optional[CommandResult]:
         # and it did, update the state manager, otherwise
         # show an error that the path may be invalid
         if does_exist:
-            click.secho(path, fg='green', bold=True)
 
             file_manager_state.cwd = path
-            if should_output_json(args):
-                return output_result(
-                    CommandResult(result={'cwd': path, 'changed': True}),
-                    command='cd',
-                )
-            return None
+            return output_result(
+                CommandResult(result={'cwd': path, 'changed': True},
+                              human_text=path),
+                command='cd',
+            )
 
-        else:
-            if should_output_json(args):
-                return output_result(
-                    CommandResult(
-                        result={'error': 'invalid path', 'path': path},
-                        status='error',
-                        exit_code=1,
-                    ),
-                    command='cd',
-                )
-            click.secho('Invalid path: `{0}`'.format(path), fg='red')
-            return None
+        return output_result(
+            CommandResult(
+                result={'error': 'invalid path', 'path': path},
+                status='error',
+                human_text='Invalid path: `{0}`'.format(path),
+                exit_code=1,
+            ),
+            command='cd',
+        )
 
     # directory is not absolute, tack it on at the end and
     # see if its legit.
@@ -155,12 +141,10 @@ def cd(args: list) -> Optional[CommandResult]:
         if '..'+device_path_separator in proposed_path:
             proposed_path = os.path.normpath(proposed_path).replace('\\', device_path_separator)
             if proposed_path == '//':
-                if should_output_json(args):
-                    return output_result(
-                        CommandResult(result={'cwd': current_dir, 'changed': False}),
-                        command='cd',
-                    )
-                return None
+                return output_result(
+                    CommandResult(result={'cwd': current_dir, 'changed': False}),
+                    command='cd',
+                )
 
         # assume the proposed_path does not exist by default
         does_exist = False
@@ -176,28 +160,23 @@ def cd(args: list) -> Optional[CommandResult]:
         # and it did, update the state manager, otherwise
         # show an error that the path may be invalid
         if does_exist:
-            click.secho(proposed_path, fg='green', bold=True)
 
             file_manager_state.cwd = proposed_path
-            if should_output_json(args):
-                return output_result(
-                    CommandResult(result={'cwd': proposed_path, 'changed': True}),
-                    command='cd',
-                )
-            return None
+            return output_result(
+                CommandResult(result={'cwd': proposed_path, 'changed': True},
+                              human_text=proposed_path),
+                command='cd',
+            )
 
-        else:
-            if should_output_json(args):
-                return output_result(
-                    CommandResult(
-                        result={'error': 'invalid path', 'path': proposed_path},
-                        status='error',
-                        exit_code=1,
-                    ),
-                    command='cd',
-                )
-            click.secho('Invalid path: `{0}`'.format(proposed_path), fg='red')
-            return None
+        return output_result(
+            CommandResult(
+                result={'error': 'invalid path', 'path': proposed_path},
+                status='error',
+                human_text='Invalid path: `{0}`'.format(proposed_path),
+                exit_code=1,
+            ),
+            command='cd',
+        )
 
 
 def path_exists(path: str) -> bool:
@@ -271,14 +250,10 @@ def pwd_print(args: list = None) -> Optional[CommandResult]:
     """
 
     cwd = pwd()
-    if should_output_json(args):
-        return output_result(
-            CommandResult(result={'cwd': cwd}),
-            command='pwd',
-        )
-
-    click.secho('Current directory: {0}'.format(cwd))
-    return None
+    return output_result(
+        CommandResult(result={'cwd': cwd}, human_text='Current directory: {0}'.format(cwd)),
+        command='pwd',
+    )
 
 
 def _pwd_ios() -> str:
@@ -332,37 +307,37 @@ def ls(args: list) -> Optional[CommandResult]:
         if not is_unix_absolute_path(path):
             path = device_state.platform.path_separator.join([pwd(), path])
 
-    # JSON 模式：直接返回原始 listing，跳过表格渲染
-    if should_output_json(args):
-        api = state_connection.get_api()
-        if device_state.platform == Ios:
-            data = api.ios_file_ls(path)
-        elif device_state.platform == Android:
-            data = api.android_file_ls(path)
-        else:
-            return output_result(
-                CommandResult(result={'error': 'unknown platform'}, status='error', exit_code=1),
-                command='ls',
-            )
+    api = state_connection.get_api()
+    if device_state.platform == Ios:
+        data = api.ios_file_ls(path)
+    elif device_state.platform == Android:
+        data = api.android_file_ls(path)
+    else:
         return output_result(
-            CommandResult(
-                result={'path': path, 'readable': data.get('readable'),
-                        'writable': data.get('writable'), 'files': data.get('files')},
-            ),
+            CommandResult(result={'error': 'unknown platform'}, status='error', exit_code=1),
             command='ls',
         )
 
-    # based on the runtime, execute the correct ls method.
-    if device_state.platform == Ios:
-        _ls_ios(path)
+    if should_output_json(args):
+        human_text = None
+    else:
+        if device_state.platform == Ios:
+            human_text = _ls_ios(path, data)
 
-    if device_state.platform == Android:
-        _ls_android(path)
+        if device_state.platform == Android:
+            human_text = _ls_android(path, data)
 
-    return None
+    return output_result(
+        CommandResult(
+            result={'path': path, 'readable': data.get('readable'),
+                    'writable': data.get('writable'), 'files': data.get('files')},
+            human_text=human_text,
+        ),
+        command='ls',
+    )
 
 
-def _ls_ios(path: str) -> None:
+def _ls_ios(path: str, data: dict = None) -> str:
     """
         List files implementation for iOS.
 
@@ -370,11 +345,13 @@ def _ls_ios(path: str) -> None:
             http://www.stanford.edu/class/cs193p/cgi-bin/drupal/system/files/lectures/09_Data.pdf
 
         :param path:
+        :param data:
         :return:
     """
 
     api = state_connection.get_api()
-    data = api.ios_file_ls(path)
+    if data is None:
+        data = api.ios_file_ls(path)
 
     def _get_key_if_exists(attribs, key):
         """
@@ -404,7 +381,7 @@ def _ls_ios(path: str) -> None:
 
     # if the directory was readable, dump the filesystem listing
     # and attributes to screen.
-    click.secho(tabulate(
+    human_text = tabulate(
         [[
             _get_key_if_exists(file_data['attributes'], 'NSFileType').replace('NSFileType', ''),
             _get_key_if_exists(file_data['attributes'], 'NSFilePosixPermissions'),
@@ -430,22 +407,25 @@ def _ls_ios(path: str) -> None:
         ] for file_name, file_data in data['files'].items()], headers=[
             'NSFileType', 'Perms', 'NSFileProtection', 'Read', 'Write', 'Owner', 'Group', 'Size', 'Creation', 'Name'
         ],
-    )) if data['readable'] else None
+    ) if data['readable'] else ''
 
     # handle the permissions summary for this directory
-    click.secho('\nReadable: {0}  Writable: {1}'.format(data['readable'], data['writable']), bold=True)
+    human_text += '\nReadable: {0}  Writable: {1}'.format(data['readable'], data['writable'])
+    return human_text
 
 
-def _ls_android(path: str) -> None:
+def _ls_android(path: str, data: dict = None) -> str:
     """
         Lit files implementation for Android devices.
 
         :param path:
+        :param data:
         :return:
     """
 
     api = state_connection.get_api()
-    data = api.android_file_ls(path)
+    if data is None:
+        data = api.android_file_ls(path)
 
     def _timestamp_to_str(stamp: str) -> str:
         """
@@ -464,7 +444,7 @@ def _ls_android(path: str) -> None:
 
         return 'n/a'
 
-    click.secho(tabulate(
+    human_text = tabulate(
         [[
             'Directory' if file_data['attributes']['isDirectory'] else 'File',
 
@@ -482,9 +462,10 @@ def _ls_android(path: str) -> None:
         ] for file_name, file_data in data['files'].items()], headers=[
             'Type', 'Last Modified', 'Read', 'Write', 'Hidden', 'Size', 'Name'
         ],
-    )) if data['readable'] else None
+    ) if data['readable'] else ''
 
-    click.secho('\nReadable: {0}  Writable: {1}'.format(data['readable'], data['writable']), bold=True)
+    human_text += '\nReadable: {0}  Writable: {1}'.format(data['readable'], data['writable'])
+    return human_text
 
 
 def download(args: list) -> Optional[CommandResult]:
@@ -500,18 +481,15 @@ def download(args: list) -> Optional[CommandResult]:
     """
 
     if len(args) < 1:
-        if should_output_json(args):
-            return output_result(
-                CommandResult(
-                    result={'error': 'missing remote location'},
-                    status='error',
-                    human_text='Usage: filesystem download <remote location> (optional: <local destination>)',
-                    exit_code=1,
-                ),
-                command='filesystem download',
-            )
-        click.secho('Usage: filesystem download <remote location> (optional: <local destination>)', bold=True)
-        return None
+        return output_result(
+            CommandResult(
+                result={'error': 'missing remote location'},
+                status='error',
+                human_text='Usage: filesystem download <remote location> (optional: <local destination>)',
+                exit_code=1,
+            ),
+            command='filesystem download',
+        )
 
     # determine the source and destination file names.
     # if we didnt get a specification of where to dump the file,
@@ -530,15 +508,14 @@ def download(args: list) -> Optional[CommandResult]:
     if device_state.platform == Android:
         _download_android(source, destination, should_download_folder)
 
-    if should_output_json(args):
-        return output_result(
-            CommandResult(
-                result={'action': 'downloaded', 'source': source, 'destination': destination,
-                        'folder': should_download_folder},
-            ),
-            command='filesystem download',
-        )
-    return None
+    return output_result(
+        CommandResult(
+            result={'action': 'downloaded', 'source': source, 'destination': destination,
+                    'folder': should_download_folder},
+            human_text='Downloaded {0} to {1}'.format(source, destination),
+        ),
+        command='filesystem download',
+    )
 
 
 def _download_ios(path: str, destination: str, should_download_folder: bool, path_root: bool = True) -> None:
@@ -680,18 +657,15 @@ def upload(args: list) -> Optional[CommandResult]:
     """
 
     if len(args) < 1:
-        if should_output_json(args):
-            return output_result(
-                CommandResult(
-                    result={'error': 'missing local source'},
-                    status='error',
-                    human_text='Usage: filesystem upload <local source> (optional: <remote destination>)',
-                    exit_code=1,
-                ),
-                command='filesystem upload',
-            )
-        click.secho('Usage: filesystem upload <local source> (optional: <remote destination>)', bold=True)
-        return None
+        return output_result(
+            CommandResult(
+                result={'error': 'missing local source'},
+                status='error',
+                human_text='Usage: filesystem upload <local source> (optional: <remote destination>)',
+                exit_code=1,
+            ),
+            command='filesystem upload',
+        )
 
     source = args[0]
     destination = args[1] if len(args) > 1 else device_state.platform.path_separator.join(
@@ -703,14 +677,13 @@ def upload(args: list) -> Optional[CommandResult]:
     if device_state.platform == Android:
         _upload_android(source, destination)
 
-    if should_output_json(args):
-        return output_result(
-            CommandResult(
-                result={'action': 'uploaded', 'source': source, 'destination': destination},
-            ),
-            command='filesystem upload',
-        )
-    return None
+    return output_result(
+        CommandResult(
+            result={'action': 'uploaded', 'source': source, 'destination': destination},
+            human_text='Uploaded {0} to {1}'.format(source, destination),
+        ),
+        command='filesystem upload',
+    )
 
 
 def _upload_ios(path: str, destination: str) -> None:
@@ -792,29 +765,29 @@ def rm(args: list) -> Optional[CommandResult]:
     """
 
     if len(args) < 1:
-        if should_output_json(args):
-            return output_result(
-                CommandResult(
-                    result={'error': 'missing target file'},
-                    status='error',
-                    human_text='Usage: rm <target remote file>',
-                    exit_code=1,
-                ),
-                command='rm',
-            )
-        click.secho('Usage: rm <target remote file>', bold=True)
-        return None
+        return output_result(
+            CommandResult(
+                result={'error': 'missing target file'},
+                status='error',
+                human_text='Usage: rm <target remote file>',
+                exit_code=1,
+            ),
+            command='rm',
+        )
 
     target = args[0]
 
     if not is_unix_absolute_path(target):
         target = device_state.platform.path_separator.join([pwd(), target])
 
-    # JSON 模式下跳过交互确认
+    # human mode 下保留交互确认
     if not should_output_json(args):
         if not click.confirm('Really delete {0} ?'.format(target)):
-            click.secho('Not deleting {0}'.format(target), dim=True)
-            return None
+            return output_result(
+                CommandResult(result={'action': 'deleted', 'target': target, 'deleted': False},
+                              human_text='Not deleting {0}'.format(target)),
+                command='rm',
+            )
 
     deleted = False
     if device_state.platform == Ios:
@@ -823,12 +796,11 @@ def rm(args: list) -> Optional[CommandResult]:
     if device_state.platform == Android:
         deleted = _rm_android(target)
 
-    if should_output_json(args):
-        return output_result(
-            CommandResult(result={'action': 'deleted', 'target': target, 'deleted': bool(deleted)}),
-            command='rm',
-        )
-    return None
+    return output_result(
+        CommandResult(result={'action': 'deleted', 'target': target, 'deleted': bool(deleted)},
+                      human_text='{0} successfully deleted'.format(target) if deleted else '{0} does not exist'.format(target)),
+        command='rm',
+    )
 
 
 def _rm_android(t: str) -> bool:
@@ -842,12 +814,9 @@ def _rm_android(t: str) -> bool:
     api = state_connection.get_api()
 
     if not _path_exists_android(t):
-        click.secho('{0} does not exist'.format(t), fg='red')
         return False
 
     deleted = api.android_file_delete(t)
-    if deleted:
-        click.secho('{0} successfully deleted'.format(t), fg='green')
 
     # update the file system cache entry
     if os.path.dirname(t) in _ls_cache:
@@ -867,12 +836,9 @@ def _rm_ios(t: str) -> bool:
     api = state_connection.get_api()
 
     if not _path_exists_ios(t):
-        click.secho('{0} does not exist'.format(t), fg='red')
         return False
 
     deleted = api.ios_file_delete(t)
-    if deleted:
-        click.secho('{0} successfully deleted'.format(t), fg='green')
 
     # update the file system cache entry
     if os.path.dirname(t) in _ls_cache:
@@ -894,18 +860,15 @@ def cat(args: list) -> Optional[CommandResult]:
     """
 
     if len(args) < 1:
-        if should_output_json(args):
-            return output_result(
-                CommandResult(
-                    result={'error': 'missing remote location'},
-                    status='error',
-                    human_text='Usage: filesystem cat <remote location>',
-                    exit_code=1,
-                ),
-                command='filesystem cat',
-            )
-        click.secho('Usage: filesystem cat <remote location>', bold=True)
-        return None
+        return output_result(
+            CommandResult(
+                result={'error': 'missing remote location'},
+                status='error',
+                human_text='Usage: filesystem cat <remote location>',
+                exit_code=1,
+            ),
+            command='filesystem cat',
+        )
 
     # determine the source and destination file names.
     # if we didnt get a specification of where to dump the file,
@@ -919,22 +882,15 @@ def cat(args: list) -> Optional[CommandResult]:
     if device_state.platform == Android:
         _download_android(source, destination, False)
 
-    if should_output_json(args):
-        with open(destination, 'r', encoding='utf-8', errors='ignore') as f:
-            content = f.read()
-        os.remove(destination)
-        return output_result(
-            CommandResult(result={'path': source, 'content': content}),
-            command='filesystem cat',
-        )
-
-    click.secho('====', dim=True)
     with open(destination, 'r', encoding='utf-8', errors='ignore') as f:
-        print(f.read(), end='', )
-    click.secho('====', dim=True)
-
+        content = f.read()
     os.remove(destination)
-    return None
+
+    return output_result(
+        CommandResult(result={'path': source, 'content': content},
+                      human_text='====\n{0}\n===='.format(content)),
+        command='filesystem cat',
+    )
 
 
 def _get_short_ios_listing() -> list:

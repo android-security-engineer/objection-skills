@@ -19,18 +19,15 @@ def cat(args: list = None) -> Optional[CommandResult]:
     """
 
     if len(args) <= 0:
-        if should_output_json(args):
-            return output_result(
-                CommandResult(
-                    result={'error': 'missing plist path'},
-                    status='error',
-                    human_text='Usage: ios plist cat <remote_plist>',
-                    exit_code=1,
-                ),
-                command='ios plist cat',
-            )
-        click.secho('Usage: ios plist cat <remote_plist>', bold=True)
-        return None
+        return output_result(
+            CommandResult(
+                result={'error': 'missing plist path'},
+                status='error',
+                human_text='Usage: ios plist cat <remote_plist>',
+                exit_code=1,
+            ),
+            command='ios plist cat',
+        )
 
     plist = args[0]
 
@@ -41,11 +38,7 @@ def cat(args: list = None) -> Optional[CommandResult]:
     api = state_connection.get_api()
     plist_data = api.ios_plist_read(plist)
 
-    if should_output_json(args):
-        return output_result(
-            CommandResult(result={'path': plist, 'data': plist_data}),
-            command='ios plist cat',
-        )
-
-    click.secho(plist_data, bold=True)
-    return None
+    return output_result(
+        CommandResult(result={'path': plist, 'data': plist_data}, human_text=str(plist_data)),
+        command='ios plist cat',
+    )

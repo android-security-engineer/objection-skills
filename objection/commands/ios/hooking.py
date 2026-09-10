@@ -209,11 +209,12 @@ def show_ios_classes(args: list = None) -> Optional[CommandResult]:
     api = state_connection.get_api()
     classes = api.ios_hooking_get_classes()
 
+    if _should_ignore_native_classes(args):
+        classes = sorted([c for c in classes if not _class_is_prefixed_with_native(c)])
+    else:
+        classes = sorted(classes)
+
     if should_output_json(args):
-        if _should_ignore_native_classes(args):
-            classes = sorted([c for c in classes if not _class_is_prefixed_with_native(c)])
-        else:
-            classes = sorted(classes)
         return output_result(
             CommandResult(
                 result={'classes': classes, 'count': len(classes), 'ignored_native': _should_ignore_native_classes(args)},
@@ -221,18 +222,15 @@ def show_ios_classes(args: list = None) -> Optional[CommandResult]:
             command='ios hooking list classes',
         )
 
-    # loop the class names and check if we should be ignoring it.
-    for class_name in sorted(classes):
-        if _should_ignore_native_classes(args):
-            if not _class_is_prefixed_with_native(class_name):
-                click.secho(class_name)
-                continue
-
-        else:
-            click.secho(class_name)
-
-    click.secho('\nFound {0} classes'.format(len(classes)), bold=True)
-    return None
+    human_text = '\n'.join(classes)
+    human_text += '\n\nFound {0} classes'.format(len(classes))
+    return output_result(
+        CommandResult(
+            result={'classes': classes, 'count': len(classes), 'ignored_native': _should_ignore_native_classes(args)},
+            human_text=human_text,
+        ),
+        command='ios hooking list classes',
+    )
 
 
 def show_ios_class_methods(args: list) -> Optional[CommandResult]:
@@ -244,18 +242,15 @@ def show_ios_class_methods(args: list) -> Optional[CommandResult]:
     """
 
     if len(clean_argument_flags(args)) <= 0:
-        if should_output_json(args):
-            return output_result(
-                CommandResult(
-                    result={'error': 'missing class name'},
-                    status='error',
-                    human_text='Usage: ios hooking list class_methods <class name> (--include-parents)',
-                    exit_code=1,
-                ),
-                command='ios hooking list class_methods',
-            )
-        click.secho('Usage: ios hooking list class_methods <class name> (--include-parents)', bold=True)
-        return None
+        return output_result(
+            CommandResult(
+                result={'error': 'missing class name'},
+                status='error',
+                human_text='Usage: ios hooking list class_methods <class name> (--include-parents)',
+                exit_code=1,
+            ),
+            command='ios hooking list class_methods',
+        )
 
     classname = args[0]
 
@@ -271,17 +266,16 @@ def show_ios_class_methods(args: list) -> Optional[CommandResult]:
             command='ios hooking list class_methods',
         )
 
-    if len(methods) > 0:
-
-        # dump the methods to screen
-        for method in methods:
-            click.secho(method)
-
-        click.secho('\nFound {0} methods'.format(len(methods)), bold=True)
-
-    else:
-        click.secho('No class / methods found')
-    return None
+    human_text = '\n'.join(methods)
+    human_text += '\n\nFound {0} methods'.format(len(methods))
+    return output_result(
+        CommandResult(
+            result={'class': classname, 'methods': methods, 'count': len(methods),
+                    'include_parents': _should_include_parent_methods(args)},
+            human_text=human_text,
+        ),
+        command='ios hooking list class_methods',
+    )
 
 
 def set_method_return_value(args: list) -> Optional[CommandResult]:
@@ -294,19 +288,15 @@ def set_method_return_value(args: list) -> Optional[CommandResult]:
     """
 
     if len(clean_argument_flags(args)) < 2:
-        if should_output_json(args):
-            return output_result(
-                CommandResult(
-                    result={'error': 'missing arguments'},
-                    status='error',
-                    human_text='Usage: ios hooking set_method_return "<selector>" (eg: "-[ClassName methodName:]") <true/false>',
-                    exit_code=1,
-                ),
-                command='ios hooking set_method_return',
-            )
-        click.secho('Usage: ios hooking set_method_return "<selector>" (eg: "-[ClassName methodName:]") <true/false>',
-                    bold=True)
-        return None
+        return output_result(
+            CommandResult(
+                result={'error': 'missing arguments'},
+                status='error',
+                human_text='Usage: ios hooking set_method_return "<selector>" (eg: "-[ClassName methodName:]") <true/false>',
+                exit_code=1,
+            ),
+            command='ios hooking set_method_return',
+        )
 
     selector = args[0]
     retval = args[1]
@@ -314,16 +304,14 @@ def set_method_return_value(args: list) -> Optional[CommandResult]:
     api = state_connection.get_api()
     api.ios_hooking_set_return_value(selector, _string_is_true(retval))
 
-    if should_output_json(args):
-        return output_result(
-            CommandResult(
-                result={'action': 'set_return_value', 'selector': selector, 'value': _string_is_true(retval)},
-                warnings=['Hook installed; existing invocations are affected immediately.',
-                          'Job id not surfaced; use `agent state` to list running jobs.'],
-            ),
-            command='ios hooking set_method_return',
-        )
-    return None
+    return output_result(
+        CommandResult(
+            result={'action': 'set_return_value', 'selector': selector, 'value': _string_is_true(retval)},
+            warnings=['Hook installed; existing invocations are affected immediately.',
+                      'Job id not surfaced; use `agent state` to list running jobs.'],
+        ),
+        command='ios hooking set_method_return',
+    )
 
 
 def watch(args: list) -> Optional[CommandResult]:
@@ -335,18 +323,15 @@ def watch(args: list) -> Optional[CommandResult]:
     """
 
     if len(clean_argument_flags(args)) <= 0:
-        if should_output_json(args):
-            return output_result(
-                CommandResult(
-                    result={'error': 'missing pattern'},
-                    status='error',
-                    human_text='Usage: ios hooking watch <pattern>',
-                    exit_code=1,
-                ),
-                command='ios hooking watch',
-            )
-        click.secho('Usage: ios hooking watch <pattern>', bold=True)
-        return None
+        return output_result(
+            CommandResult(
+                result={'error': 'missing pattern'},
+                status='error',
+                human_text='Usage: ios hooking watch <pattern>',
+                exit_code=1,
+            ),
+            command='ios hooking watch',
+        )
 
     pattern = args[0]
 
@@ -357,23 +342,21 @@ def watch(args: list) -> Optional[CommandResult]:
                           _should_dump_return_value(args),
                           _should_include_parent_methods(args))
 
-    if should_output_json(args):
-        return output_result(
-            CommandResult(
-                result={
-                    'action': 'watching',
-                    'pattern': pattern,
-                    'dump_args': _should_dump_args(args),
-                    'dump_backtrace': _should_dump_backtrace(args),
-                    'dump_return': _should_dump_return_value(args),
-                    'include_parents': _should_include_parent_methods(args),
-                },
-                warnings=['Job id not surfaced; use `agent state` to list running jobs.',
-                          'Hook invocations arrive as async messages; poll via `agent state` or HTTP /events.'],
-            ),
-            command='ios hooking watch',
-        )
-    return None
+    return output_result(
+        CommandResult(
+            result={
+                'action': 'watching',
+                'pattern': pattern,
+                'dump_args': _should_dump_args(args),
+                'dump_backtrace': _should_dump_backtrace(args),
+                'dump_return': _should_dump_return_value(args),
+                'include_parents': _should_include_parent_methods(args),
+            },
+            warnings=['Job id not surfaced; use `agent state` to list running jobs.',
+                      'Hook invocations arrive as async messages; poll via `agent state` or HTTP /events.'],
+        ),
+        command='ios hooking watch',
+    )
 
 
 def search(args: list) -> Optional[CommandResult]:
@@ -385,18 +368,15 @@ def search(args: list) -> Optional[CommandResult]:
     """
 
     if len(clean_argument_flags(args)) <= 0:
-        if should_output_json(args):
-            return output_result(
-                CommandResult(
-                    result={'error': 'missing pattern'},
-                    status='error',
-                    human_text="Usage: ios hooking search '<pattern/string>'",
-                    exit_code=1,
-                ),
-                command='ios hooking search',
-            )
-        click.secho('Usage: ios hooking search \'<pattern/string>\'', bold=True)
-        return None
+        return output_result(
+            CommandResult(
+                result={'error': 'missing pattern'},
+                status='error',
+                human_text="Usage: ios hooking search '<pattern/string>'",
+                exit_code=1,
+            ),
+            command='ios hooking search',
+        )
 
     api = state_connection.get_api()
     pattern = args[0]
@@ -404,7 +384,6 @@ def search(args: list) -> Optional[CommandResult]:
     results = api.ios_hooking_search(pattern)
     data = {}
 
-    # build a list of results to print / dump later
     for func in results:
         fullname = func['name']
         start_bracket = fullname.find('[') + 1
@@ -414,36 +393,36 @@ def search(args: list) -> Optional[CommandResult]:
         else:
             data[class_name] = [fullname]
 
-    if should_output_json(args):
-        target_file = _get_flag_value('--json', args)
-        # --json <filename> 保留旧行为：写文件
-        if target_file:
-            with open(target_file, 'w') as fd:
-                fd.write(json.dumps({
-                    'meta': {
-                        'runtime': 'objc'
-                    },
-                    'classes': data
-                }))
-            return output_result(
-                CommandResult(result={'dumped_to': target_file, 'class_count': len(data)}),
-                command='ios hooking search',
-            )
-
-        # 全局 JSON 模式（agent exec）：走统一输出层到 stdout
+    target_file = _get_flag_value('--json', args)
+    if target_file:
+        with open(target_file, 'w') as fd:
+            fd.write(json.dumps({
+                'meta': {
+                    'runtime': 'objc'
+                },
+                'classes': data
+            }))
         return output_result(
-            CommandResult(result={'runtime': 'objc', 'classes': data, 'class_count': len(data)}),
+            CommandResult(result={'dumped_to': target_file, 'class_count': len(data)}),
             command='ios hooking search',
         )
 
-    # Print the matching methods
+    if _should_print_only_classes(args):
+        classes = list(data.keys())
+        return output_result(
+            CommandResult(result={'runtime': 'objc', 'classes': classes, 'class_count': len(classes)}),
+            command='ios hooking search',
+        )
+
+    human_items = []
     for klass in data.keys():
-        if _should_print_only_classes(args):
-            print(klass)
-            continue
+        for method in data[klass]:
+            human_items.append(method)
 
-        methods = data[klass]
-        for method in methods:
-            print(f'{method}')
-
-    return None
+    return output_result(
+        CommandResult(
+            result={'runtime': 'objc', 'classes': data, 'class_count': len(data)},
+            human_text='\n'.join(human_items),
+        ),
+        command='ios hooking search',
+    )

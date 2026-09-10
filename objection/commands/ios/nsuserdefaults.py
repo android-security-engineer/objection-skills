@@ -18,11 +18,7 @@ def get(args: list = None) -> Optional[CommandResult]:
     api = state_connection.get_api()
     defaults = api.ios_nsuser_defaults_get()
 
-    if should_output_json(args):
-        return output_result(
-            CommandResult(result=defaults),
-            command='ios nsuserdefaults get',
-        )
-
-    click.secho(defaults, bold=True)
-    return None
+    return output_result(
+        CommandResult(result=defaults, human_text=str(defaults) if not should_output_json(args) else None),
+        command='ios nsuserdefaults get',
+    )

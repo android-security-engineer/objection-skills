@@ -24,7 +24,7 @@ def dump(args: list = None) -> Optional[CommandResult]:
             command='ios nsurlcredentialstorage dump',
         )
 
-    click.secho(tabulate(
+    human_lines = tabulate(
         [[
             entry['protocol'],
             entry['host'],
@@ -35,5 +35,8 @@ def dump(args: list = None) -> Optional[CommandResult]:
         ] for entry in cookies], headers=[
             'Protocol', 'Host', 'Port', 'Authentication Method', 'User', 'Password'
         ],
-    ))
-    return None
+    )
+    return output_result(
+        CommandResult(result={'credentials': cookies, 'count': len(cookies)}, human_text=human_lines),
+        command='ios nsurlcredentialstorage dump',
+    )

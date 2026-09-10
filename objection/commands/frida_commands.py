@@ -1,7 +1,6 @@
 import os
 from typing import Optional
 
-import click
 from tabulate import tabulate
 
 from objection.state.connection import state_connection
@@ -37,15 +36,18 @@ def frida_environment(args: list = None) -> Optional[CommandResult]:
             command='frida_environment',
         )
 
-    click.secho(tabulate([
+    human_text = tabulate([
         ('Frida Version', frida_env['version']),
         ('Process Architecture', frida_env['arch']),
         ('Process Platform', frida_env['platform']),
         ('Debugger Attached', frida_env['debugger']),
         ('Script Runtime', frida_env['runtime']),
         ('Frida Heap Size', sizeof_fmt(frida_env['heap']))
-    ]))
-    return None
+    ])
+    return output_result(
+        CommandResult(result=frida_env, human_text=human_text),
+        command='frida_environment',
+    )
 
 
 def ping(args: list = None) -> Optional[CommandResult]:
@@ -65,11 +67,11 @@ def ping(args: list = None) -> Optional[CommandResult]:
             command='ping',
         )
 
-    if ok:
-        click.secho('The agent responds ok!', fg='green')
-    else:
-        click.secho('The agent did not respond ok!', fg='red')
-    return None
+    human_text = 'The agent responds ok!' if ok else 'The agent did not respond ok!'
+    return output_result(
+        CommandResult(result={'ok': bool(ok)}, status='ok' if ok else 'error', human_text=human_text),
+        command='ping',
+    )
 
 
 def load_background(args: list = None) -> Optional[CommandResult]:
@@ -81,19 +83,15 @@ def load_background(args: list = None) -> Optional[CommandResult]:
     """
 
     if len(clean_argument_flags(args)) <= 0:
-        if should_output_json(args):
-            return output_result(
-                CommandResult(
-                    result={'error': 'missing script path'},
-                    status='error',
-                    human_text='Usage: import <local path to frida-script> (optional name)',
-                    exit_code=1,
-                ),
-                command='import',
-            )
-        click.secho('Usage: import <local path to frida-script> (optional name)',
-                    bold=True)
-        return None
+        return output_result(
+            CommandResult(
+                result={'error': 'missing script path'},
+                status='error',
+                human_text='Usage: import <local path to frida-script> (optional name)',
+                exit_code=1,
+            ),
+            command='import',
+        )
 
     source = args[0]
 
@@ -102,17 +100,15 @@ def load_background(args: list = None) -> Optional[CommandResult]:
         source = os.path.expanduser(source)
 
     if not os.path.isfile(source):
-        if should_output_json(args):
-            return output_result(
-                CommandResult(
-                    result={'error': 'file not found', 'path': source},
-                    status='error',
-                    exit_code=1,
-                ),
-                command='import',
-            )
-        click.secho('Unable to import file {0}'.format(source), fg='red')
-        return None
+        return output_result(
+            CommandResult(
+                result={'error': 'file not found', 'path': source},
+                status='error',
+                human_text='Unable to import file {0}'.format(source),
+                exit_code=1,
+            ),
+            command='import',
+        )
 
     # read the hook sources
     with open(source, 'r') as f:
@@ -121,13 +117,12 @@ def load_background(args: list = None) -> Optional[CommandResult]:
     agent = state_connection.get_agent()
     agent.attach_script(source, hook)
 
-    if should_output_json(args):
-        return output_result(
-            CommandResult(
-                result={'action': 'imported', 'source': source},
-                warnings=['Background script output arrives as async messages; poll via `agent state` or HTTP /events.'],
-            ),
-            command='import',
-        )
-    return None
+    return output_result(
+        CommandResult(
+            result={'action': 'imported', 'source': source},
+            human_text='Background script loaded: {0}'.format(source),
+            warnings=['Background script output arrives as async messages; poll via `agent state` or HTTP /events.'],
+        ),
+        command='import',
+    )
 

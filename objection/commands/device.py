@@ -24,7 +24,10 @@ def get_environment(args: list = None) -> Optional[CommandResult]:
     if device_state.platform == Android:
         return _get_android_environment(args)
 
-    return None
+    return output_result(
+        CommandResult(result={'error': 'unknown platform'}, status='error', exit_code=1),
+        command='env',
+    )
 
 
 def _get_ios_environment(args: list = None) -> Optional[CommandResult]:
@@ -46,9 +49,11 @@ def _get_ios_environment(args: list = None) -> Optional[CommandResult]:
             command='env',
         )
 
-    click.secho('')
-    click.secho(tabulate(paths.items(), headers=['Name', 'Path']))
-    return None
+    human_text = tabulate(paths.items(), headers=['Name', 'Path'])
+    return output_result(
+        CommandResult(result={'platform': 'ios', 'paths': paths}, human_text=human_text),
+        command='env',
+    )
 
 
 def _get_android_environment(args: list = None) -> Optional[CommandResult]:
@@ -66,6 +71,8 @@ def _get_android_environment(args: list = None) -> Optional[CommandResult]:
             command='env',
         )
 
-    click.secho('')
-    click.secho(tabulate(paths.items(), headers=['Name', 'Path']))
-    return None
+    human_text = tabulate(paths.items(), headers=['Name', 'Path'])
+    return output_result(
+        CommandResult(result={'platform': 'android', 'paths': paths}, human_text=human_text),
+        command='env',
+    )

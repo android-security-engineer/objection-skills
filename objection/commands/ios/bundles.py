@@ -63,7 +63,6 @@ def show_frameworks(args: list = None) -> Optional[CommandResult]:
     api = state_connection.get_api()
     frameworks = api.ios_bundles_get_frameworks()
 
-    # apply filters
     if not _should_include_apple_bundles(args):
         frameworks = [f for f in frameworks if not _is_apple_bundle(f['bundle'])]
 
@@ -76,8 +75,7 @@ def show_frameworks(args: list = None) -> Optional[CommandResult]:
             command='ios bundles list frameworks',
         )
 
-    # Just dump it to the screen
-    click.secho(tabulate(
+    human_lines = tabulate(
         [[
             entry['executable'],
             entry['bundle'],
@@ -85,8 +83,15 @@ def show_frameworks(args: list = None) -> Optional[CommandResult]:
             entry['path'] if _should_print_full_path(args) else pretty_concat(entry['path'], 40, True),
         ] for entry in frameworks
         ], headers=['Executable', 'Bundle', 'Version', 'Path'],
-    ))
-    return None
+    )
+    return output_result(
+        CommandResult(
+            result={'frameworks': frameworks, 'count': len(frameworks),
+                    'include_apple': _should_include_apple_bundles(args)},
+            human_text=human_lines,
+        ),
+        command='ios bundles list frameworks',
+    )
 
 
 def show_bundles(args: list = None) -> Optional[CommandResult]:
@@ -108,8 +113,7 @@ def show_bundles(args: list = None) -> Optional[CommandResult]:
             command='ios bundles list bundles',
         )
 
-    # Just dump it to the screen
-    click.secho(tabulate(
+    human_lines = tabulate(
         [[
             entry['executable'],
             entry['bundle'],
@@ -117,5 +121,8 @@ def show_bundles(args: list = None) -> Optional[CommandResult]:
             entry['path'] if _should_print_full_path(args) else pretty_concat(entry['path'], 40, True),
         ] for entry in bundles
         ], headers=['Executable', 'Bundle', 'Version', 'Path'],
-    ))
-    return None
+    )
+    return output_result(
+        CommandResult(result={'bundles': bundles, 'count': len(bundles)}, human_text=human_lines),
+        command='ios bundles list bundles',
+    )

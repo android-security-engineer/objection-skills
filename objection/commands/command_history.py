@@ -1,8 +1,6 @@
 import os
 from typing import Optional
 
-import click
-
 from ..state.app import app_state
 from objection.utils.output import CommandResult, output_result, should_output_json
 
@@ -15,18 +13,19 @@ def history(args: list) -> Optional[CommandResult]:
         :return:
     """
 
-    click.secho('Unique commands run in current session:', dim=True)
-
-    for command in app_state.successful_commands:
-        click.secho(command)
-
     if should_output_json(args):
         return output_result(
             CommandResult(result={'commands': app_state.successful_commands,
                                   'count': len(app_state.successful_commands)}),
             command='commands history',
         )
-    return None
+
+    human_text = 'Unique commands run in current session:\n' + '\n'.join(app_state.successful_commands)
+    return output_result(
+        CommandResult(result={'commands': app_state.successful_commands,
+                              'count': len(app_state.successful_commands)}, human_text=human_text),
+        command='commands history',
+    )
 
 
 def save(args: list) -> Optional[CommandResult]:
@@ -38,13 +37,11 @@ def save(args: list) -> Optional[CommandResult]:
     """
 
     if len(args) <= 0:
-        click.secho('Usage: commands save <local destination>', bold=True)
-        if should_output_json(args):
-            return output_result(
-                CommandResult(status='error', result={'error': 'missing local destination'}),
-                command='commands save',
-            )
-        return None
+        return output_result(
+            CommandResult(status='error', result={'error': 'missing local destination'},
+                          human_text='Usage: commands save <local destination>'),
+            command='commands save',
+        )
 
     destination = os.path.expanduser(args[0]) if args[0].startswith('~') else args[0]
 
@@ -52,14 +49,11 @@ def save(args: list) -> Optional[CommandResult]:
         for command in app_state.successful_commands:
             f.write('{0}\n'.format(command))
 
-    click.secho('Saved commands to: {0}'.format(destination), fg='green')
-
-    if should_output_json(args):
-        return output_result(
-            CommandResult(result={'saved_to': destination, 'count': len(app_state.successful_commands)}),
-            command='commands save',
-        )
-    return None
+    return output_result(
+        CommandResult(result={'saved_to': destination, 'count': len(app_state.successful_commands)},
+                      human_text='Saved commands to: {0}'.format(destination)),
+        command='commands save',
+    )
 
 
 def clear(args: list) -> Optional[CommandResult]:
@@ -71,11 +65,7 @@ def clear(args: list) -> Optional[CommandResult]:
     """
 
     app_state.clear_command_history()
-    click.secho('Command history cleared.', fg='green')
-
-    if should_output_json(args):
-        return output_result(
-            CommandResult(result={'cleared': True}),
-            command='commands clear',
-        )
-    return None
+    return output_result(
+        CommandResult(result={'cleared': True}, human_text='Command history cleared.'),
+        command='commands clear',
+    )

@@ -26,10 +26,12 @@ def get(args: list) -> Optional[CommandResult]:
         )
 
     if len(cookies) <= 0:
-        click.secho('No cookies found')
-        return None
+        return output_result(
+            CommandResult(result={'cookies': [], 'count': 0}, human_text='No cookies found'),
+            command='ios cookies get',
+        )
 
-    click.secho(tabulate(
+    human_lines = tabulate(
         [[
             cookie['name'],
             cookie['value'],
@@ -39,5 +41,8 @@ def get(args: list) -> Optional[CommandResult]:
             cookie['isSecure'],
             cookie['isHTTPOnly']
         ] for cookie in cookies], headers=['Name', 'Value', 'Expires', 'Domain', 'Path', 'Secure', 'HTTPOnly'],
-    ))
-    return None
+    )
+    return output_result(
+        CommandResult(result={'cookies': cookies, 'count': len(cookies)}, human_text=human_lines),
+        command='ios cookies get',
+    )

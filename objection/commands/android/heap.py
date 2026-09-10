@@ -42,18 +42,15 @@ def instances(args: list) -> Optional[CommandResult]:
     """
 
     if len(args) < 1:
-        if should_output_json(args):
-            return output_result(
-                CommandResult(
-                    result={'error': 'missing class name'},
-                    status='error',
-                    human_text='Usage: android heap search instances <class> (eg: com.example.test)',
-                    exit_code=1,
-                ),
-                command='android heap search instances',
-            )
-        click.secho('Usage: android heap search instances <class> (eg: com.example.test)', bold=True)
-        return None
+        return output_result(
+            CommandResult(
+                result={'error': 'missing class name'},
+                status='error',
+                human_text='Usage: android heap search instances <class> (eg: com.example.test)',
+                exit_code=1,
+            ),
+            command='android heap search instances',
+        )
 
     target_class = args[0]
 
@@ -67,16 +64,25 @@ def instances(args: list) -> Optional[CommandResult]:
         )
 
     if len(instance_results) <= 0:
-        return None
+        return output_result(
+            CommandResult(result={'class': target_class, 'instances': [], 'count': 0}),
+            command='android heap search instances',
+        )
 
-    click.secho(tabulate(
+    human_lines = tabulate(
         [[
             entry['hashcode'],
             entry['classname'],
             entry['tostring'],
         ] for entry in instance_results], headers=['Hashcode', 'Class', 'toString()'],
-    ))
-    return None
+    )
+    return output_result(
+        CommandResult(
+            result={'class': target_class, 'instances': instance_results, 'count': len(instance_results)},
+            human_text=human_lines,
+        ),
+        command='android heap search instances',
+    )
 
 
 def methods(args: list) -> Optional[CommandResult]:
@@ -88,18 +94,15 @@ def methods(args: list) -> Optional[CommandResult]:
     """
 
     if len(args) < 1:
-        if should_output_json(args):
-            return output_result(
-                CommandResult(
-                    result={'error': 'missing hashcode'},
-                    status='error',
-                    human_text='Usage: android heap print methods <hashcode> (eg: 24688232)',
-                    exit_code=1,
-                ),
-                command='android heap print methods',
-            )
-        click.secho('Usage: android heap print methods <hashcode> (eg: 24688232)', bold=True)
-        return None
+        return output_result(
+            CommandResult(
+                result={'error': 'missing hashcode'},
+                status='error',
+                human_text='Usage: android heap print methods <hashcode> (eg: 24688232)',
+                exit_code=1,
+            ),
+            command='android heap print methods',
+        )
 
     target_handle = int(args[0])
 
@@ -120,12 +123,17 @@ def methods(args: list) -> Optional[CommandResult]:
             command='android heap print methods',
         )
 
-    click.secho(tabulate(
-        [[
-            entry,
-        ] for entry in method_results], headers=['Method'],
-    ))
-    return None
+    human_lines = tabulate(
+        [[entry] for entry in method_results], headers=['Method'],
+    )
+    return output_result(
+        CommandResult(
+            result={'handle': target_handle, 'methods': method_results[1], 'class': method_results[0],
+                    'count': len(method_results[1])},
+            human_text=human_lines,
+        ),
+        command='android heap print methods',
+    )
 
 
 def execute(args: list) -> Optional[CommandResult]:
@@ -138,18 +146,15 @@ def execute(args: list) -> Optional[CommandResult]:
     """
 
     if len(args) < 1:
-        if should_output_json(args):
-            return output_result(
-                CommandResult(
-                    result={'error': 'missing arguments'},
-                    status='error',
-                    human_text='Usage: android heap execute method <hashcode> <method> (eg: 24688232)',
-                    exit_code=1,
-                ),
-                command='android heap execute method',
-            )
-        click.secho('Usage: android heap execute method <hashcode> <method> (eg: 24688232)', bold=True)
-        return None
+        return output_result(
+            CommandResult(
+                result={'error': 'missing arguments'},
+                status='error',
+                human_text='Usage: android heap execute method <hashcode> <method> (eg: 24688232)',
+                exit_code=1,
+            ),
+            command='android heap execute method',
+        )
 
     target_handle = int(args[0])
     method = args[1]
@@ -169,10 +174,24 @@ def execute(args: list) -> Optional[CommandResult]:
 
     if exec_results:
         if isinstance(exec_results, dict):
-            click.secho(pprint.pformat(exec_results))
+            human_text = pprint.pformat(exec_results)
         else:
-            click.secho(str(exec_results))
-    return None
+            human_text = str(exec_results)
+        return output_result(
+            CommandResult(
+                result={'handle': target_handle, 'method': method, 'result': exec_results,
+                        'as_string': _should_return_as_string(args)},
+                human_text=human_text,
+            ),
+            command='android heap execute method',
+        )
+    return output_result(
+        CommandResult(
+            result={'handle': target_handle, 'method': method, 'result': None,
+                    'as_string': _should_return_as_string(args)},
+        ),
+        command='android heap execute method',
+    )
 
 
 def fields(args: list) -> Optional[CommandResult]:
@@ -184,18 +203,15 @@ def fields(args: list) -> Optional[CommandResult]:
     """
 
     if len(args) < 1:
-        if should_output_json(args):
-            return output_result(
-                CommandResult(
-                    result={'error': 'missing hashcode'},
-                    status='error',
-                    human_text='Usage: android heap print fields <hashcode> (eg: 24688232)',
-                    exit_code=1,
-                ),
-                command='android heap print fields',
-            )
-        click.secho('Usage: android heap print fields <hashcode> (eg: 24688232)', bold=True)
-        return None
+        return output_result(
+            CommandResult(
+                result={'error': 'missing hashcode'},
+                status='error',
+                human_text='Usage: android heap print fields <hashcode> (eg: 24688232)',
+                exit_code=1,
+            ),
+            command='android heap print fields',
+        )
 
     target_handle = int(args[0])
 
@@ -208,13 +224,14 @@ def fields(args: list) -> Optional[CommandResult]:
             command='android heap print fields',
         )
 
-    click.secho(tabulate(
-        [[
-            value['name'],
-            value['value']
-        ] for value in field_results], headers=['Name', 'Value'],
-    ))
-    return None
+    human_lines = tabulate(
+        [[value['name'], value['value']] for value in field_results], headers=['Name', 'Value'],
+    )
+    return output_result(
+        CommandResult(result={'handle': target_handle, 'fields': field_results, 'count': len(field_results)},
+                      human_text=human_lines),
+        command='android heap print fields',
+    )
 
 
 def evaluate(args: list) -> Optional[CommandResult]:
@@ -226,18 +243,15 @@ def evaluate(args: list) -> Optional[CommandResult]:
     """
 
     if len(args) < 1:
-        if should_output_json(args):
-            return output_result(
-                CommandResult(
-                    result={'error': 'missing hashcode'},
-                    status='error',
-                    human_text='Usage: android heap execute js <hashcode> [--inline <js>]',
-                    exit_code=1,
-                ),
-                command='android heap execute js',
-            )
-        click.secho('Usage: android heap execute js <hashcode> (eg: 24688232)', bold=True)
-        return None
+        return output_result(
+            CommandResult(
+                result={'error': 'missing hashcode'},
+                status='error',
+                human_text='Usage: android heap execute js <hashcode> [--inline <js>]',
+                exit_code=1,
+            ),
+            command='android heap execute js',
+        )
 
     target_handle = int(args[0])
 
@@ -263,17 +277,11 @@ def evaluate(args: list) -> Optional[CommandResult]:
             multiline=True, lexer=PygmentsLexer(JavascriptLexer),
             bottom_toolbar='JavaScript edit mode. [ESC] and then [ENTER] to accept. [CTRL] + C to cancel.').strip()
 
-    click.secho('JavaScript capture complete. Evaluating...', dim=True)
-
-    api = state_connection.get_api()
-    api.android_heap_evaluate_handle_method(target_handle, js)
-
-    if should_output_json(args):
-        return output_result(
-            CommandResult(
-                result={'action': 'evaluated_js', 'handle': target_handle},
-                warnings=['JS evaluation results, if any, are emitted by the agent as async messages.'],
-            ),
-            command='android heap execute js',
-        )
-    return None
+    return output_result(
+        CommandResult(
+            result={'action': 'evaluated_js', 'handle': target_handle},
+            human_text='JavaScript capture complete. Evaluating...',
+            warnings=['JS evaluation results, if any, are emitted by the agent as async messages.'],
+        ),
+        command='android heap execute js',
+    )

@@ -16,13 +16,12 @@ def monitor(args: list = None) -> Optional[CommandResult]:
     api = state_connection.get_api()
     api.android_monitor_clipboard()
 
-    if should_output_json(args):
-        return output_result(
-            CommandResult(
-                result={'action': 'monitoring_clipboard'},
-                warnings=['Job id not surfaced; use `agent state` to list running jobs.',
-                          'New clipboard strings arrive as async messages.'],
-            ),
-            command='android clipboard monitor',
-        )
-    return None
+    return output_result(
+        CommandResult(
+            result={'action': 'monitoring_clipboard'},
+            human_text='Monitoring Android clipboard',
+            warnings=['Job id not surfaced; use `agent state` to list running jobs.',
+                      'New clipboard strings arrive as async messages.'],
+        ),
+        command='android clipboard monitor',
+    )

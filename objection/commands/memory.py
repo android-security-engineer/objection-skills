@@ -2,7 +2,6 @@ import json
 import os
 from typing import List, Optional
 
-import click
 from tabulate import tabulate
 
 from objection.state.connection import state_connection
@@ -122,28 +121,31 @@ def dump_all(args: list) -> Optional[CommandResult]:
     """
 
     if len(clean_argument_flags(args)) <= 0:
-        if should_output_json(args):
-            return output_result(
-                CommandResult(
-                    result={'error': 'missing destination'},
-                    status='error',
-                    human_text='Usage: memory dump all <local destination>',
-                    exit_code=1,
-                ),
-                command='memory dump all',
-            )
-        click.secho('Usage: memory dump all <local destination>', bold=True)
-        return None
+        return output_result(
+            CommandResult(
+                result={'error': 'missing destination'},
+                status='error',
+                human_text='Usage: memory dump all <local destination>',
+                exit_code=1,
+            ),
+            command='memory dump all',
+        )
 
     # the destination file to write the dump to
     destination = args[0]
 
     # Check for file override
     if os.path.exists(destination):
-        click.secho('Destination file {dest} already exists'.format(dest=destination), fg='yellow', bold=True)
-        if not should_output_json(args):
-            if not click.confirm('Continue, appending to the file?'):
-                return None
+        if not click.confirm('Continue, appending to the file?'):
+            return output_result(
+                CommandResult(
+                    result={'error': 'aborted', 'destination': destination},
+                    status='error',
+                    human_text='Destination file {dest} already exists'.format(dest=destination),
+                    exit_code=1,
+                ),
+                command='memory dump all',
+            )
 
     # access type used when enumerating ranges
     access = 'rw-'
@@ -152,8 +154,8 @@ def dump_all(args: list) -> Optional[CommandResult]:
     ranges = api.memory_list_ranges(access)
 
     total_size = sum([x['size'] for x in ranges])
-    click.secho('Will dump {0} {1} images, totalling {2}'.format(
-        len(ranges), access, sizeof_fmt(total_size)), fg='green', dim=True)
+    human_text = 'Will dump {0} {1} images, totalling {2}\n'.format(
+        len(ranges), access, sizeof_fmt(total_size))
 
     dumped_ranges = 0
     with click.progressbar(ranges) as bar:
@@ -170,7 +172,7 @@ def dump_all(args: list) -> Optional[CommandResult]:
                 for chunk in chunks:
                     dump.extend(bytearray(api.memory_dump(chunk[0], chunk[1])))
 
-            except Exception as e:
+            except Exception:
                 continue
 
             dumped_ranges += 1
@@ -178,21 +180,20 @@ def dump_all(args: list) -> Optional[CommandResult]:
             with open(destination, 'ab') as f:
                 f.write(dump)
 
-    click.secho('Memory dumped to file: {0}'.format(destination), fg='green')
+    human_text += 'Memory dumped to file: {0}\n'.format(destination)
 
-    if should_output_json(args):
-        return output_result(
-            CommandResult(
-                result={
-                    'dumped_to': destination,
-                    'ranges_total': len(ranges),
-                    'ranges_dumped': dumped_ranges,
-                    'total_size': total_size,
-                },
-            ),
-            command='memory dump all',
-        )
-    return None
+    return output_result(
+        CommandResult(
+            result={
+                'dumped_to': destination,
+                'ranges_total': len(ranges),
+                'ranges_dumped': dumped_ranges,
+                'total_size': total_size,
+            },
+            human_text=human_text,
+        ),
+        command='memory dump all',
+    )
 
 
 def dump_from_base(args: list) -> Optional[CommandResult]:
@@ -204,18 +205,15 @@ def dump_from_base(args: list) -> Optional[CommandResult]:
     """
 
     if len(clean_argument_flags(args)) < 3:
-        if should_output_json(args):
-            return output_result(
-                CommandResult(
-                    result={'error': 'missing arguments'},
-                    status='error',
-                    human_text='Usage: memory dump from_base <base_address> <size_to_dump> <local_destination>',
-                    exit_code=1,
-                ),
-                command='memory dump from_base',
-            )
-        click.secho('Usage: memory dump from_base <base_address> <size_to_dump> <local_destination>', bold=True)
-        return None
+        return output_result(
+            CommandResult(
+                result={'error': 'missing arguments'},
+                status='error',
+                human_text='Usage: memory dump from_base <base_address> <size_to_dump> <local_destination>',
+                exit_code=1,
+            ),
+            command='memory dump from_base',
+        )
 
     # the destination file to write the dump to
     base_address = args[0]
@@ -224,13 +222,18 @@ def dump_from_base(args: list) -> Optional[CommandResult]:
 
     # Check for file override
     if os.path.exists(destination):
-        click.secho('Destination file {dest} already exists'.format(dest=destination), fg='yellow', bold=True)
-        if not should_output_json(args):
-            if not click.confirm('Override?'):
-                return None
+        if not click.confirm('Override?'):
+            return output_result(
+                CommandResult(
+                    result={'error': 'aborted', 'destination': destination},
+                    status='error',
+                    human_text='Destination file {dest} already exists'.format(dest=destination),
+                    exit_code=1,
+                ),
+                command='memory dump from_base',
+            )
 
-    click.secho('Dumping {0} from {1} to {2}'.format(sizeof_fmt(int(memory_size)), base_address, destination),
-                fg='green', dim=True)
+    human_text = 'Dumping {0} from {1} to {2}\n'.format(sizeof_fmt(int(memory_size)), base_address, destination)
 
     api = state_connection.get_api()
 
@@ -244,21 +247,20 @@ def dump_from_base(args: list) -> Optional[CommandResult]:
     with open(destination, 'wb') as f:
         f.write(dump)
 
-    click.secho('Memory dumped to file: {0}'.format(destination), fg='green')
+    human_text += 'Memory dumped to file: {0}'.format(destination)
 
-    if should_output_json(args):
-        return output_result(
-            CommandResult(
-                result={
-                    'dumped_to': destination,
-                    'base': base_address,
-                    'size': int(memory_size),
-                    'bytes_written': len(dump),
-                },
-            ),
-            command='memory dump from_base',
-        )
-    return None
+    return output_result(
+        CommandResult(
+            result={
+                'dumped_to': destination,
+                'base': base_address,
+                'size': int(memory_size),
+                'bytes_written': len(dump),
+            },
+            human_text=human_text,
+        ),
+        command='memory dump from_base',
+    )
 
 
 def list_modules(args: list = None) -> Optional[CommandResult]:
@@ -269,41 +271,42 @@ def list_modules(args: list = None) -> Optional[CommandResult]:
         :return:
     """
 
-    if not should_output_json(args):
-        click.secho('Save the output by adding `--json modules.json` to this command', dim=True)
-
     api = state_connection.get_api()
     modules = api.memory_list_modules()
 
+    destination = _get_json_destination(args)
+
+    # --json <filename> 保留旧行为：写文件
+    if destination:
+        with open(destination, 'w') as f:
+            f.write(json.dumps(modules, indent=2))
+        return output_result(
+            CommandResult(result={'dumped_to': destination, 'count': len(modules)},
+                          human_text='Writing modules as json to {0}...'.format(destination)),
+            command='memory list modules',
+        )
+
+    # 全局 JSON 模式（agent exec）：走统一输出层到 stdout
     if should_output_json(args):
-        destination = _get_json_destination(args)
-
-        # --json <filename> 保留旧行为：写文件
-        if destination:
-            click.secho('Writing modules as json to {0}...'.format(destination), dim=True)
-            with open(destination, 'w') as f:
-                f.write(json.dumps(modules, indent=2))
-            return output_result(
-                CommandResult(result={'dumped_to': destination, 'count': len(modules)}),
-                command='memory list modules',
-            )
-
-        # 全局 JSON 模式（agent exec）：走统一输出层到 stdout
         return output_result(
             CommandResult(result={'modules': modules, 'count': len(modules)}),
             command='memory list modules',
         )
 
-    # Just dump it to the screen
-    click.secho(tabulate(
+    # human mode
+    human_text = tabulate(
         [[
             entry['name'],
             entry['base'],
             str(entry['size']) + ' (' + sizeof_fmt(entry['size']) + ')',
             pretty_concat(entry['path']),
         ] for entry in modules], headers=['Name', 'Base', 'Size', 'Path'],
-    ))
-    return None
+    )
+    human_text += '\nSave the output by adding `--json modules.json` to this command'
+    return output_result(
+        CommandResult(result={'modules': modules, 'count': len(modules)}, human_text=human_text),
+        command='memory list modules',
+    )
 
 
 def list_exports(args: list) -> Optional[CommandResult]:
@@ -314,54 +317,51 @@ def list_exports(args: list) -> Optional[CommandResult]:
         :return:
     """
 
-    if not should_output_json(args):
-        click.secho('Save the output by adding `--json exports.json` to this command', dim=True)
-
     if len(clean_argument_flags(args)) <= 0:
-        if should_output_json(args):
-            return output_result(
-                CommandResult(
-                    result={'error': 'missing module name'},
-                    status='error',
-                    human_text='Usage: memory list exports <module name>',
-                    exit_code=1,
-                ),
-                command='memory list exports',
-            )
-        click.secho('Usage: memory list exports <module name>', bold=True)
-        return None
+        return output_result(
+            CommandResult(
+                result={'error': 'missing module name'},
+                status='error',
+                human_text='Usage: memory list exports <module name>',
+                exit_code=1,
+            ),
+            command='memory list exports',
+        )
 
     module_to_list = args[0]
 
     api = state_connection.get_api()
     exports = api.memory_list_exports(module_to_list)
 
+    destination = _get_json_destination(args)
+
+    if destination:
+        with open(destination, 'w') as f:
+            f.write(json.dumps(exports, indent=2))
+        return output_result(
+            CommandResult(result={'dumped_to': destination, 'module': module_to_list, 'count': len(exports)},
+                          human_text='Writing exports as json to {0}...'.format(destination)),
+            command='memory list exports',
+        )
+
     if should_output_json(args):
-        destination = _get_json_destination(args)
-
-        if destination:
-            click.secho('Writing exports as json to {0}...'.format(destination), dim=True)
-            with open(destination, 'w') as f:
-                f.write(json.dumps(exports, indent=2))
-            return output_result(
-                CommandResult(result={'dumped_to': destination, 'module': module_to_list, 'count': len(exports)}),
-                command='memory list exports',
-            )
-
         return output_result(
             CommandResult(result={'module': module_to_list, 'exports': exports, 'count': len(exports)}),
             command='memory list exports',
         )
 
-    # Just dump it to the screen
-    click.secho(tabulate(
+    human_text = tabulate(
         [[
             entry['type'],
             entry['name'],
             entry['address'],
         ] for entry in exports], headers=['Type', 'Name', 'Address'],
-    ))
-    return None
+    )
+    return output_result(
+        CommandResult(result={'module': module_to_list, 'exports': exports, 'count': len(exports)},
+                      human_text=human_text),
+        command='memory list exports',
+    )
 
 
 def find_pattern(args: list) -> Optional[CommandResult]:
@@ -373,18 +373,15 @@ def find_pattern(args: list) -> Optional[CommandResult]:
     """
 
     if len(clean_argument_flags(args)) <= 0:
-        if should_output_json(args):
-            return output_result(
-                CommandResult(
-                    result={'error': 'missing pattern'},
-                    status='error',
-                    human_text='Usage: memory search "<pattern eg: 41 41 41 ?? 41>" (--string) (--offsets-only)',
-                    exit_code=1,
-                ),
-                command='memory search',
-            )
-        click.secho('Usage: memory search "<pattern eg: 41 41 41 ?? 41>" (--string) (--offsets-only)', bold=True)
-        return None
+        return output_result(
+            CommandResult(
+                result={'error': 'missing pattern'},
+                status='error',
+                human_text='Usage: memory search "<pattern eg: 41 41 41 ?? 41>" (--string) (--offsets-only)',
+                exit_code=1,
+            ),
+            command='memory search',
+        )
 
     # if we got a string as input, convert it to hex
     if _is_string_input(args):
@@ -392,7 +389,7 @@ def find_pattern(args: list) -> Optional[CommandResult]:
     else:
         pattern = args[0]
 
-    click.secho('Searching for: {0}'.format(pattern), dim=True)
+    human_text = 'Searching for: {0}\n'.format(pattern)
 
     api = state_connection.get_api()
     data = api.memory_search(pattern, _should_only_dump_offsets(args))
@@ -404,15 +401,17 @@ def find_pattern(args: list) -> Optional[CommandResult]:
         )
 
     if len(data) > 0:
-        click.secho('Pattern matched at {0} addresses'.format(len(data)), fg='green')
+        human_text += 'Pattern matched at {0} addresses'.format(len(data))
         if _should_only_dump_offsets(args):
-            for address in data:
-                click.secho(address)
-
+            human_text += '\n' + '\n'.join(data)
     else:
-        click.secho('Unable to find the pattern in any memory region')
+        human_text += 'Unable to find the pattern in any memory region'
 
-    return None
+    return output_result(
+        CommandResult(result={'pattern': pattern, 'matches': data, 'count': len(data)},
+                      human_text=human_text),
+        command='memory search',
+    )
 
 
 def replace_pattern(args: list) -> Optional[CommandResult]:
@@ -424,19 +423,16 @@ def replace_pattern(args: list) -> Optional[CommandResult]:
     """
 
     if len(clean_argument_flags(args)) < 2:
-        if should_output_json(args):
-            return output_result(
-                CommandResult(
-                    result={'error': 'missing arguments'},
-                    status='error',
-                    human_text=('Usage: memory replace "<search pattern eg: 41 41 ?? 41>" '
-                                '"<replace value eg: 41 50>" (--string-pattern) (--string-replace)'),
-                    exit_code=1,
-                ),
-                command='memory replace',
-            )
-        click.secho('Usage: memory replace "<search pattern eg: 41 41 ?? 41>" "<replace value eg: 41 50>" (--string-pattern) (--string-replace)', bold=True)
-        return None
+        return output_result(
+            CommandResult(
+                result={'error': 'missing arguments'},
+                status='error',
+                human_text=('Usage: memory replace "<search pattern eg: 41 41 ?? 41>" '
+                            '"<replace value eg: 41 50>" (--string-pattern) (--string-replace)'),
+                exit_code=1,
+            ),
+            command='memory replace',
+        )
 
     # if we got a string as search pattern input, convert it to hex
     if _is_string_pattern(args):
@@ -451,8 +447,6 @@ def replace_pattern(args: list) -> Optional[CommandResult]:
     else:
         replace = [int(x, 16) for x in replace.split(' ')]
 
-    click.secho('Searching for: {0}, replacing with: {1}'.format(pattern, args[1]), dim=True)
-
     api = state_connection.get_api()
     data = api.memory_replace(pattern, replace)
 
@@ -465,15 +459,19 @@ def replace_pattern(args: list) -> Optional[CommandResult]:
             command='memory replace',
         )
 
+    human_text = 'Searching for: {0}, replacing with: {1}\n'.format(pattern, args[1])
     if len(data) > 0:
-        click.secho('Pattern replaced at {0} addresses'.format(len(data)), fg='green')
-        for address in data:
-            click.secho(address)
-
+        human_text += 'Pattern replaced at {0} addresses'.format(len(data))
+        if len(data) > 0:
+            human_text += '\n' + '\n'.join(data)
     else:
-        click.secho('Unable to find the pattern in any memory region')
+        human_text += 'Unable to find the pattern in any memory region'
 
-    return None
+    return output_result(
+        CommandResult(result={'pattern': pattern, 'replaced_at': data, 'count': len(data)},
+                      human_text=human_text),
+        command='memory replace',
+    )
 
 
 def write(args: list) -> Optional[CommandResult]:
@@ -487,18 +485,15 @@ def write(args: list) -> Optional[CommandResult]:
     """
 
     if len(clean_argument_flags(args)) < 2:
-        if should_output_json(args):
-            return output_result(
-                CommandResult(
-                    result={'error': 'missing arguments'},
-                    status='error',
-                    human_text='Usage: memory write "<address>" "<pattern eg: 41 41 41 41>" (--string)',
-                    exit_code=1,
-                ),
-                command='memory write',
-            )
-        click.secho('Usage: memory write "<address>" "<pattern eg: 41 41 41 41>" (--string)', bold=True)
-        return None
+        return output_result(
+            CommandResult(
+                result={'error': 'missing arguments'},
+                status='error',
+                human_text='Usage: memory write "<address>" "<pattern eg: 41 41 41 41>" (--string)',
+                exit_code=1,
+            ),
+            command='memory write',
+        )
 
     destination = args[0]
     pattern = args[1]
@@ -508,17 +503,14 @@ def write(args: list) -> Optional[CommandResult]:
     else:
         pattern = [int(x, 16) for x in pattern.split(' ')]
 
-    click.secho('Writing byte array: {0} to {1}'.format(pattern, destination), dim=True)
-
     api = state_connection.get_api()
     api.memory_write(destination, pattern)
 
-    if should_output_json(args):
-        return output_result(
-            CommandResult(
-                result={'action': 'wrote', 'address': destination, 'bytes': len(pattern)},
-                warnings=['Direct memory writes are dangerous and may crash the target.'],
-            ),
-            command='memory write',
-        )
-    return None
+    return output_result(
+        CommandResult(
+            result={'action': 'wrote', 'address': destination, 'bytes': len(pattern)},
+            human_text='Writing byte array: {0} to {1}'.format(pattern, destination),
+            warnings=['Direct memory writes are dangerous and may crash the target.'],
+        ),
+        command='memory write',
+    )
