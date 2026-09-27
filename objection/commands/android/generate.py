@@ -1,16 +1,15 @@
 import os
-from typing import Optional
 
 import click
 
 from objection.state.connection import state_connection
-from objection.utils.output import CommandResult, output_result, should_output_json
+from objection.utils.output import CommandResult, output_result
 
 
-def clazz(args: list) -> Optional[CommandResult]:
+def clazz(args: list) -> CommandResult:
     """
         Simply echoes the source for a generic Hook Manager
-        sample for Objective-C hooks with Frida.
+        sample for Java hooks with Frida.
 
         :param args:
         :return:
@@ -27,13 +26,13 @@ def clazz(args: list) -> Optional[CommandResult]:
     return output_result(
         CommandResult(
             result={'source': source, 'asset': 'javahookmanager.js'},
-            human_text=source if not should_output_json(args) else None,
+            human_text=source,
         ),
         command='android hooking generate class',
     )
 
 
-def simple(args: list) -> Optional[CommandResult]:
+def simple(args: list) -> CommandResult:
     """
         Generate simple hooks for all methods in a Java class.
 
@@ -70,9 +69,9 @@ def simple(args: list) -> Optional[CommandResult]:
 
     # nasty! :D
     unique_methods = set([x.split('(')[0].split('.')[-1] for x in methods])
-    json_mode = should_output_json(args)
 
     hooks = []
+    human_lines = []
     for method in unique_methods:
         hook = """
 Java.perform(function() {
@@ -86,15 +85,12 @@ Java.perform(function() {
 });
 """.replace('{clazz}', classname).replace('{method}', method)
         hooks.append(hook)
-
-    human_text = None
-    if not json_mode:
-        human_text = '\n'.join(hooks)
+        human_lines.append(hook)
 
     return output_result(
         CommandResult(
             result={'class': classname, 'methods': sorted(unique_methods), 'hooks': hooks},
-            human_text=human_text,
+            human_text=''.join(human_lines),
         ),
         command='android hooking generate simple',
     )

@@ -1,13 +1,13 @@
 import click
 from tabulate import tabulate
-from typing import Optional
+
 
 from ..state.connection import state_connection
 from ..state.device import device_state, Android, Ios
-from ..utils.output import CommandResult, output_result, should_output_json
+from ..utils.output import CommandResult, output_result
 
 
-def get_environment(args: list = None) -> Optional[CommandResult]:
+def get_environment(args: list = None) -> CommandResult:
     """
         Get information about the current environment.
 
@@ -30,7 +30,7 @@ def get_environment(args: list = None) -> Optional[CommandResult]:
     )
 
 
-def _get_ios_environment(args: list = None) -> Optional[CommandResult]:
+def _get_ios_environment(args: list = None) -> CommandResult:
     """
         Prints information about the iOS environment.
 
@@ -43,12 +43,6 @@ def _get_ios_environment(args: list = None) -> Optional[CommandResult]:
 
     paths = state_connection.get_api().env_ios_paths()
 
-    if should_output_json(args):
-        return output_result(
-            CommandResult(result={'platform': 'ios', 'paths': paths}),
-            command='env',
-        )
-
     human_text = tabulate(paths.items(), headers=['Name', 'Path'])
     return output_result(
         CommandResult(result={'platform': 'ios', 'paths': paths}, human_text=human_text),
@@ -56,7 +50,7 @@ def _get_ios_environment(args: list = None) -> Optional[CommandResult]:
     )
 
 
-def _get_android_environment(args: list = None) -> Optional[CommandResult]:
+def _get_android_environment(args: list = None) -> CommandResult:
     """
         Prints information about the Android environment.
 
@@ -64,12 +58,6 @@ def _get_android_environment(args: list = None) -> Optional[CommandResult]:
     """
 
     paths = state_connection.get_api().env_android_paths()
-
-    if should_output_json(args):
-        return output_result(
-            CommandResult(result={'platform': 'android', 'paths': paths}),
-            command='env',
-        )
 
     human_text = tabulate(paths.items(), headers=['Name', 'Path'])
     return output_result(

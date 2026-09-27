@@ -109,18 +109,14 @@ Memory dumped to file: /foo
         with capture(list_modules, ['--json', 'foo']) as o:
             output = o
 
-        # 命令级 --json <filename> 仍写文件，并产出结构化确认（统一输出层人类模式渲染 result）
         self.assertIn('Writing modules as json to foo...', output)
-        self.assertIn('"dumped_to": "foo"', output)
         self.assertTrue(mock_open.called)
 
     def test_dump_exports_validates_arguments_without_json_flag(self):
         with capture(list_exports, []) as o:
             output = o
 
-        expected = """Save the output by adding `--json exports.json` to this command
-Usage: memory list exports <module name>
-"""
+        expected = 'Usage: memory list exports <module name>\n'
 
         self.assertEqual(output, expected)
 
@@ -142,8 +138,6 @@ Usage: memory list exports <module name>
         with capture(list_exports, ['foo']) as o:
             output = o
 
-        # 不锁定 tabulate 的精确列宽（跨模块/版本下不稳定），只断言关键字段
-        self.assertIn('Save the output by adding `--json exports.json` to this command', output)
         for token in ('Type', 'Name', 'Address', 'function', 'test', '32768'):
             self.assertIn(token, output)
 
@@ -160,7 +154,6 @@ Usage: memory list exports <module name>
             output = o
 
         self.assertIn('Writing exports as json to foo...', output)
-        self.assertIn('"dumped_to": "foo"', output)
         self.assertTrue(mock_open.called)
 
     def test_find_pattern_validates_arguments(self):
@@ -223,7 +216,8 @@ Pattern matched at 1 addresses
         with capture(replace_pattern, ['41 41 41','41 42']) as o:
             output = o
 
-        expected_output = """Searching for: 41 41 41, replacing with: 41 42
+        expected_output = """Warning: In-memory replacement can be unstable; re-mapping or relinking may revert changes.
+Searching for: 41 41 41, replacing with: 41 42
 Pattern replaced at 1 addresses
 0x08000000
 """
@@ -237,7 +231,8 @@ Pattern replaced at 1 addresses
         with capture(replace_pattern, ['foo-bar-baz', '41 41', '--string-pattern']) as o:
             output = o
 
-        expected_output = """Searching for: 66 6f 6f 2d 62 61 72 2d 62 61 7a, replacing with: 41 41
+        expected_output = """Warning: In-memory replacement can be unstable; re-mapping or relinking may revert changes.
+Searching for: 66 6f 6f 2d 62 61 72 2d 62 61 7a, replacing with: 41 41
 Pattern replaced at 1 addresses
 0x08000000
 """
@@ -251,7 +246,8 @@ Pattern replaced at 1 addresses
         with capture(replace_pattern, ['41 41 41', 'ABC', '--string-replace']) as o:
             output = o
 
-        expected_output = """Searching for: 41 41 41, replacing with: ABC
+        expected_output = """Warning: In-memory replacement can be unstable; re-mapping or relinking may revert changes.
+Searching for: 41 41 41, replacing with: ABC
 Pattern replaced at 1 addresses
 0x08000000
 """

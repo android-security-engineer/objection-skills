@@ -1,10 +1,8 @@
-from typing import Optional
-
 from objection.state.connection import state_connection
-from objection.utils.output import CommandResult, output_result, should_output_json
+from objection.utils.output import CommandResult, output_result
 
 
-def monitor(args: list = None) -> Optional[CommandResult]:
+def monitor(args: list = None) -> CommandResult:
     """
         Starts a new objection job that monitors the iOS pasteboard
         and reports on new strings found.

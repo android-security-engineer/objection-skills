@@ -110,7 +110,7 @@ def _get_chunks(addr: int, size: int, block_size: int = BLOCK_SIZE) -> List:
 #
 # https://github.com/Nightbringer21/fridump/pull/3
 
-def dump_all(args: list) -> Optional[CommandResult]:
+def dump_all(args: list) -> CommandResult:
     """
         Dump memory from the currently injected process.
         Loosely based on:
@@ -136,6 +136,18 @@ def dump_all(args: list) -> Optional[CommandResult]:
 
     # Check for file override
     if os.path.exists(destination):
+        if should_output_json(args):
+            return output_result(
+                CommandResult(
+                    result={'error': 'aborted', 'destination': destination},
+                    status='error',
+                    human_text='Destination file {dest} already exists'.format(dest=destination),
+                    exit_code=1,
+                ),
+                command='memory dump all',
+            )
+
+        # human mode only
         if not click.confirm('Continue, appending to the file?'):
             return output_result(
                 CommandResult(
@@ -154,33 +166,31 @@ def dump_all(args: list) -> Optional[CommandResult]:
     ranges = api.memory_list_ranges(access)
 
     total_size = sum([x['size'] for x in ranges])
-    human_text = 'Will dump {0} {1} images, totalling {2}\n'.format(
+    human_text = 'Will dump {0} {1} images, totalling {2}\n\n'.format(
         len(ranges), access, sizeof_fmt(total_size))
 
     dumped_ranges = 0
-    with click.progressbar(ranges) as bar:
-        for image in bar:
-            dump = bytearray()
-            bar.label = 'Dumping {0} from base: {1}'.format(sizeof_fmt(image['size']), hex(int(image['base'], 16)))
+    for image in ranges:
+        dump = bytearray()
 
-            # catch and exception thrown while dumping.
-            # this could for a few reasons like if the protection
-            # changes or the range is reallocated
-            try:
-                # grab the (size) bytes starting at the (base_address) in chunks of BLOCK_SIZE
-                chunks = _get_chunks(int(image['base'], 16), int(image['size']), BLOCK_SIZE)
-                for chunk in chunks:
-                    dump.extend(bytearray(api.memory_dump(chunk[0], chunk[1])))
+        # catch and exception thrown while dumping.
+        # this could for a few reasons like if the protection
+        # changes or the range is reallocated
+        try:
+            # grab the (size) bytes starting at the (base_address) in chunks of BLOCK_SIZE
+            chunks = _get_chunks(int(image['base'], 16), int(image['size']), BLOCK_SIZE)
+            for chunk in chunks:
+                dump.extend(bytearray(api.memory_dump(chunk[0], chunk[1])))
 
-            except Exception:
-                continue
+        except Exception:
+            continue
 
-            dumped_ranges += 1
-            # append the results to the destination file
-            with open(destination, 'ab') as f:
-                f.write(dump)
+        dumped_ranges += 1
+        # append the results to the destination file
+        with open(destination, 'ab') as f:
+            f.write(dump)
 
-    human_text += 'Memory dumped to file: {0}\n'.format(destination)
+    human_text += 'Memory dumped to file: {0}'.format(destination)
 
     return output_result(
         CommandResult(
@@ -196,7 +206,7 @@ def dump_all(args: list) -> Optional[CommandResult]:
     )
 
 
-def dump_from_base(args: list) -> Optional[CommandResult]:
+def dump_from_base(args: list) -> CommandResult:
     """
         Dump memory from a base address for a specific size to file
 
@@ -222,6 +232,17 @@ def dump_from_base(args: list) -> Optional[CommandResult]:
 
     # Check for file override
     if os.path.exists(destination):
+        if should_output_json(args):
+            return output_result(
+                CommandResult(
+                    result={'error': 'aborted', 'destination': destination},
+                    status='error',
+                    human_text='Destination file {dest} already exists'.format(dest=destination),
+                    exit_code=1,
+                ),
+                command='memory dump from_base',
+            )
+
         if not click.confirm('Override?'):
             return output_result(
                 CommandResult(
@@ -263,7 +284,7 @@ def dump_from_base(args: list) -> Optional[CommandResult]:
     )
 
 
-def list_modules(args: list = None) -> Optional[CommandResult]:
+def list_modules(args: list = None) -> CommandResult:
     """
         List modules loaded in the current process.
 
@@ -286,14 +307,6 @@ def list_modules(args: list = None) -> Optional[CommandResult]:
             command='memory list modules',
         )
 
-    # 全局 JSON 模式（agent exec）：走统一输出层到 stdout
-    if should_output_json(args):
-        return output_result(
-            CommandResult(result={'modules': modules, 'count': len(modules)}),
-            command='memory list modules',
-        )
-
-    # human mode
     human_text = tabulate(
         [[
             entry['name'],
@@ -309,7 +322,7 @@ def list_modules(args: list = None) -> Optional[CommandResult]:
     )
 
 
-def list_exports(args: list) -> Optional[CommandResult]:
+def list_exports(args: list) -> CommandResult:
     """
         Dumps the exported methods from a loaded module to screen.
 
@@ -344,12 +357,6 @@ def list_exports(args: list) -> Optional[CommandResult]:
             command='memory list exports',
         )
 
-    if should_output_json(args):
-        return output_result(
-            CommandResult(result={'module': module_to_list, 'exports': exports, 'count': len(exports)}),
-            command='memory list exports',
-        )
-
     human_text = tabulate(
         [[
             entry['type'],
@@ -364,7 +371,7 @@ def list_exports(args: list) -> Optional[CommandResult]:
     )
 
 
-def find_pattern(args: list) -> Optional[CommandResult]:
+def find_pattern(args: list) -> CommandResult:
     """
         Searches the current processes accessible memory for a specific pattern.
 
@@ -394,12 +401,6 @@ def find_pattern(args: list) -> Optional[CommandResult]:
     api = state_connection.get_api()
     data = api.memory_search(pattern, _should_only_dump_offsets(args))
 
-    if should_output_json(args):
-        return output_result(
-            CommandResult(result={'pattern': pattern, 'matches': data, 'count': len(data)}),
-            command='memory search',
-        )
-
     if len(data) > 0:
         human_text += 'Pattern matched at {0} addresses'.format(len(data))
         if _should_only_dump_offsets(args):
@@ -414,7 +415,7 @@ def find_pattern(args: list) -> Optional[CommandResult]:
     )
 
 
-def replace_pattern(args: list) -> Optional[CommandResult]:
+def replace_pattern(args: list) -> CommandResult:
     """
         Searches the current processes accessible memory for a specific pattern and replaces it with given bytes or string.
 
@@ -450,15 +451,6 @@ def replace_pattern(args: list) -> Optional[CommandResult]:
     api = state_connection.get_api()
     data = api.memory_replace(pattern, replace)
 
-    if should_output_json(args):
-        return output_result(
-            CommandResult(
-                result={'pattern': pattern, 'replaced_at': data, 'count': len(data)},
-                warnings=['In-memory replacement can be unstable; re-mapping or relinking may revert changes.'],
-            ),
-            command='memory replace',
-        )
-
     human_text = 'Searching for: {0}, replacing with: {1}\n'.format(pattern, args[1])
     if len(data) > 0:
         human_text += 'Pattern replaced at {0} addresses'.format(len(data))
@@ -469,12 +461,13 @@ def replace_pattern(args: list) -> Optional[CommandResult]:
 
     return output_result(
         CommandResult(result={'pattern': pattern, 'replaced_at': data, 'count': len(data)},
-                      human_text=human_text),
+                      human_text=human_text,
+                      warnings=['In-memory replacement can be unstable; re-mapping or relinking may revert changes.']),
         command='memory replace',
     )
 
 
-def write(args: list) -> Optional[CommandResult]:
+def write(args: list) -> CommandResult:
     """
         Write an arbitrary amount of bytes to an arbitrary memory address.
 

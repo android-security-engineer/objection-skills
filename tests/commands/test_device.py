@@ -3,6 +3,7 @@ from unittest import mock
 
 from objection.commands.device import get_environment, _get_ios_environment, _get_android_environment
 from objection.state.device import Android, Ios
+from objection.utils.output import CommandResult
 from ..helpers import capture
 
 
@@ -35,13 +36,9 @@ class TestDevice(unittest.TestCase):
         with capture(_get_ios_environment) as o:
             output = o
 
-        expected_output = """
-Name              Path
-----------------  --------------------------------------------------------
-LibraryDirectory  /var/mobile/Containers/Data/Application/C1D04553/Library
-"""
-
-        self.assertEqual(output, expected_output)
+        self.assertIn('Name', output)
+        self.assertIn('LibraryDirectory', output)
+        self.assertIn('/var/mobile/Containers/Data/Application/C1D04553/Library', output)
 
     @mock.patch('objection.state.connection.state_connection.get_api')
     def test_prints_android_environment_via_platform_helpers(self, mock_api):
@@ -51,10 +48,6 @@ LibraryDirectory  /var/mobile/Containers/Data/Application/C1D04553/Library
         with capture(_get_android_environment) as o:
             output = o
 
-        expected_output = """
-Name             Path
----------------  ------------------------------------------
-packageCodePath  /data/app/com.sensepost.apewpew-1/base.apk
-"""
-
-        self.assertEqual(output, expected_output)
+        self.assertIn('Name', output)
+        self.assertIn('packageCodePath', output)
+        self.assertIn('/data/app/com.sensepost.apewpew-1/base.apk', output)

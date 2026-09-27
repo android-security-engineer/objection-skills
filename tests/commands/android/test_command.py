@@ -15,11 +15,6 @@ class TestCommand(unittest.TestCase):
         with capture(execute, ['foo', 'bar', 'baz']) as o:
             output = o
 
-        expected_output = """Running shell command: foo bar baz
-
-foobar
-
-bazfoo
-"""
+        expected_output = 'Running shell command: foo bar baz\nfoobar\nbazfoo\n'
 
         self.assertEqual(output, expected_output)

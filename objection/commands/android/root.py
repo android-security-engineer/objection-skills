@@ -1,8 +1,10 @@
+from typing import Optional
+
 from objection.state.connection import state_connection
-from objection.utils.output import CommandResult, output_result, should_output_json
+from objection.utils.output import CommandResult, output_result
 
 
-def disable(args: list = None) -> None:
+def disable(args: list = None) -> CommandResult:
     """
         Performs a generic anti root detection.
 
@@ -13,18 +15,17 @@ def disable(args: list = None) -> None:
     api = state_connection.get_api()
     api.android_root_detection_disable()
 
-    if should_output_json(args):
-        return output_result(
-            CommandResult(
-                result={'action': 'root_detection_disabled'},
-                warnings=['Job id not surfaced; use `agent state` to list running jobs.'],
-            ),
-            command='android root disable',
-        )
-    return None
+    return output_result(
+        CommandResult(
+            result={'action': 'root_detection_disabled'},
+            human_text='Root detection disabled',
+            warnings=['Job id not surfaced; use `agent state` to list running jobs.'],
+        ),
+        command='android root disable',
+    )
 
 
-def simulate(args: list = None) -> None:
+def simulate(args: list = None) -> CommandResult:
     """
         Simulate a rooted environment.
 
@@ -35,12 +36,11 @@ def simulate(args: list = None) -> None:
     api = state_connection.get_api()
     api.android_root_detection_enable()
 
-    if should_output_json(args):
-        return output_result(
-            CommandResult(
-                result={'action': 'root_detection_simulated'},
-                warnings=['Job id not surfaced; use `agent state` to list running jobs.'],
-            ),
-            command='android root simulate',
-        )
-    return None
+    return output_result(
+        CommandResult(
+            result={'action': 'root_detection_simulated'},
+            human_text='Root detection simulated',
+            warnings=['Job id not surfaced; use `agent state` to list running jobs.'],
+        ),
+        command='android root simulate',
+    )

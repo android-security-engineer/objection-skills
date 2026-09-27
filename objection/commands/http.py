@@ -1,13 +1,9 @@
-from typing import Optional
-
-import click
-
 from ..commands.filemanager import pwd
 from ..state.connection import state_connection
-from objection.utils.output import CommandResult, output_result, should_output_json
+from objection.utils.output import CommandResult, output_result
 
 
-def start(args: list) -> Optional[CommandResult]:
+def start(args: list) -> CommandResult:
     """
         Start's an http server, exposing the mobile devices filesystem.
 
@@ -20,20 +16,17 @@ def start(args: list) -> Optional[CommandResult]:
     if len(args) > 0:
         port = int(args[0])
 
-    click.secho('Starting server on port {port}...'.format(port=port), dim=True)
-
     api = state_connection.get_api()
     api.http_server_start(pwd(), port)
 
-    if should_output_json(args):
-        return output_result(
-            CommandResult(result={'action': 'http_start', 'port': port, 'root': pwd()}),
-            command='http start',
-        )
-    return None
+    return output_result(
+        CommandResult(result={'action': 'http_start', 'port': port, 'root': pwd()},
+                      human_text='Starting server on port {port}...'.format(port=port)),
+        command='http start',
+    )
 
 
-def stop(args: list) -> Optional[CommandResult]:
+def stop(args: list) -> CommandResult:
     """
         Stops the on device HTTP server
 
@@ -44,15 +37,13 @@ def stop(args: list) -> Optional[CommandResult]:
     api = state_connection.get_api()
     api.http_server_stop()
 
-    if should_output_json(args):
-        return output_result(
-            CommandResult(result={'action': 'http_stop'}),
-            command='http stop',
-        )
-    return None
+    return output_result(
+        CommandResult(result={'action': 'http_stop'}, human_text='HTTP server stopped'),
+        command='http stop',
+    )
 
 
-def status(args: list) -> Optional[CommandResult]:
+def status(args: list) -> CommandResult:
     """
         Get the status of the HTTP server
 
@@ -63,9 +54,7 @@ def status(args: list) -> Optional[CommandResult]:
     api = state_connection.get_api()
     api.http_server_status()
 
-    if should_output_json(args):
-        return output_result(
-            CommandResult(result={'action': 'http_status'}),
-            command='http status',
-        )
-    return None
+    return output_result(
+        CommandResult(result={'action': 'http_status'}, human_text='HTTP server status retrieved'),
+        command='http status',
+    )

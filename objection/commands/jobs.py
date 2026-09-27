@@ -1,13 +1,13 @@
-import click
+import uuid
 from tabulate import tabulate
 from typing import Optional
 
 from objection.state.connection import state_connection
-from objection.utils.output import CommandResult, output_result, should_output_json
+from objection.utils.output import CommandResult, output_result
 from ..state.jobs import job_manager_state, Job
 
 
-def show(args: list = None) -> Optional[CommandResult]:
+def show(args: list = None) -> CommandResult:
     """
         Show all of the jobs that are currently running
 
@@ -17,42 +17,29 @@ def show(args: list = None) -> Optional[CommandResult]:
     sync_job_manager()
     jobs = job_manager_state.jobs
 
-    if should_output_json(args):
-        return output_result(
-            CommandResult(
-                result={
-                    'jobs': [
-                        {'id': uuid, 'type': job.job_type, 'name': job.name}
-                        for uuid, job in jobs.items()
-                    ],
-                    'count': len(jobs),
-                },
-            ),
-            command='jobs list',
-        )
-
-    # click.secho(tabulate(
-    #     [[
-    #         entry['uuid'],
-    #         sum([
-    #             len(entry[x]) for x in [
-    #                 'invocations', 'replacements', 'implementations'
-    #             ] if x in entry
-    #         ]),
-    #         entry['type'],
-    #     ] for entry in jobs], headers=['Job ID', 'Hooks', 'Name'],
-    # ))
-    click.secho(tabulate(
+    human_lines = tabulate(
         [[
             uuid,
             job.job_type,
             job.name,
         ] for uuid, job in jobs.items()], headers=['Job ID', 'Type', 'Name'],
-    ))
-    return None
+    )
+    return output_result(
+        CommandResult(
+            result={
+                'jobs': [
+                    {'id': uuid, 'type': job.job_type, 'name': job.name}
+                    for uuid, job in jobs.items()
+                ],
+                'count': len(jobs),
+            },
+            human_text=human_lines,
+        ),
+        command='jobs list',
+    )
 
 
-def kill(args: list) -> Optional[CommandResult]:
+def kill(args: list) -> CommandResult:
     """
         Kills a specific objection job.
 
@@ -61,18 +48,15 @@ def kill(args: list) -> Optional[CommandResult]:
     """
 
     if len(args) <= 0:
-        if should_output_json(args):
-            return output_result(
-                CommandResult(
-                    result={'error': 'missing job uuid'},
-                    status='error',
-                    human_text='Usage: jobs kill <uuid>',
-                    exit_code=1,
-                ),
-                command='jobs kill',
-            )
-        click.secho('Usage: jobs kill <uuid>', bold=True)
-        return None
+        human_text = 'Usage: jobs kill <uuid>'
+        return output_result(
+            CommandResult(
+                result={'error': 'missing job uuid'},
+                status='error',
+                human_text=human_text,
+            ),
+            command='jobs kill',
+        )
 
     # agent 返回的 job identifier 通常是 base36 字符串（如 rdcjq16g8xi），
     # 也可能是纯数字。尽量转 int 以兼容旧逻辑，失败则原样保留为字符串。
@@ -84,12 +68,10 @@ def kill(args: list) -> Optional[CommandResult]:
 
     job_manager_state.remove_job(job_uuid)
 
-    if should_output_json(args):
-        return output_result(
-            CommandResult(result={'killed': job_uuid}),
-            command='jobs kill',
-        )
-    return None
+    return output_result(
+        CommandResult(result={'killed': job_uuid}, human_text='Job {0} killed'.format(job_uuid)),
+        command='jobs kill',
+    )
 
 
 def list_current_jobs() -> dict:
@@ -128,6 +110,6 @@ def sync_job_manager() -> dict[int, Job]:
                 job_manager_state.jobs[job_uuid] = Job(job_name, 'hook', None, job_uuid)
 
         return job_manager_state.jobs
-    except:
-        print("REPL not ready")
+    except Exception:
+        pass
 

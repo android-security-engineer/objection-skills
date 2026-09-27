@@ -1,24 +1,17 @@
 import os
-from typing import Optional
+
 
 from ..state.app import app_state
-from objection.utils.output import CommandResult, output_result, should_output_json
+from objection.utils.output import CommandResult, output_result
 
 
-def history(args: list) -> Optional[CommandResult]:
+def history(args: list) -> CommandResult:
     """
         Lists the commands that have been run in the current session.
 
         :param args:
         :return:
     """
-
-    if should_output_json(args):
-        return output_result(
-            CommandResult(result={'commands': app_state.successful_commands,
-                                  'count': len(app_state.successful_commands)}),
-            command='commands history',
-        )
 
     human_text = 'Unique commands run in current session:\n' + '\n'.join(app_state.successful_commands)
     return output_result(
@@ -28,7 +21,7 @@ def history(args: list) -> Optional[CommandResult]:
     )
 
 
-def save(args: list) -> Optional[CommandResult]:
+def save(args: list) -> CommandResult:
     """
         Save the current sessions command history to a file.
 
@@ -56,7 +49,7 @@ def save(args: list) -> Optional[CommandResult]:
     )
 
 
-def clear(args: list) -> Optional[CommandResult]:
+def clear(args: list) -> CommandResult:
     """
         Clears the current sessions command history.
 

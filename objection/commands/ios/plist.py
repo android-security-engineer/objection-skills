@@ -1,15 +1,14 @@
 import os
-from typing import Optional
 import click
 
 from objection.commands import filemanager
 from objection.state.connection import state_connection
 from objection.state.device import device_state
 from objection.utils.helpers import is_unix_absolute_path
-from objection.utils.output import CommandResult, output_result, should_output_json
+from objection.utils.output import CommandResult, output_result
 
 
-def cat(args: list = None) -> Optional[CommandResult]:
+def cat(args: list = None) -> CommandResult:
     """
         Parses a plist on an iOS device and echoes it in a more human
         readable way.

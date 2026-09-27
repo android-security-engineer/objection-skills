@@ -1,19 +1,30 @@
 import os
 import shutil
+from typing import Optional
 
 import click
 import delegator
 from packaging.version import Version
 
+from objection.utils.output import CommandResult, output_result
 from ..utils.patchers.android import AndroidGadget, AndroidPatcher
 from ..utils.patchers.github import Github
 from ..utils.patchers.ios import IosGadget, IosPatcher
 
 
+def _should_output_json(args: list = None) -> bool:
+    """
+        Check if we should output JSON instead of human-readable text.
+        For mobile_packages, this is always False since these are build operations,
+        not agent commands. But we keep the check for consistency.
+    """
+    return False
+
+
 def patch_ios_ipa(source: str, codesign_signature: str, provision_file: str, binary_name: str,
                   skip_cleanup: bool, unzip_unicode: bool, gadget_version: str = None,
                   pause: bool = False, gadget_config: str = None, script_source: str = None,
-                  bundle_id: str = None) -> None:
+                  bundle_id: str = None) -> CommandResult:
     """
         Patches an iOS IPA by extracting, injecting the Frida dylib,
         codesigning the dylib and app executable and rezipping the IPA.
@@ -32,6 +43,8 @@ def patch_ios_ipa(source: str, codesign_signature: str, provision_file: str, bin
         :return:
     """
 
+    messages = []
+
     github = Github(gadget_version=gadget_version)
     ios_gadget = IosGadget(github)
 
@@ -39,10 +52,10 @@ def patch_ios_ipa(source: str, codesign_signature: str, provision_file: str, bin
     # check if a gadget version was specified. if not, get the latest one.
     if gadget_version is not None:
         github_version = gadget_version
-        click.secho('Using manually specified version: {0}'.format(gadget_version), fg='green', bold=True)
+        messages.append('Using manually specified version: {0}'.format(gadget_version))
     else:
         github_version = github.get_latest_version()
-        click.secho('Using latest Github gadget version: {0}'.format(github_version), fg='green', bold=True)
+        messages.append('Using latest Github gadget version: {0}'.format(github_version))
 
     # get the local version number of the stored gadget
     local_version = ios_gadget.get_local_version('ios_universal')
@@ -51,8 +64,8 @@ def patch_ios_ipa(source: str, codesign_signature: str, provision_file: str, bin
     # the version is outdated or we simply don't have the gadget yet
     if Version(github_version) != Version(local_version) or not ios_gadget.gadget_exists():
         # download!
-        click.secho('Remote FridaGadget version is v{0}, local is v{1}. Downloading...'.format(
-            github_version, local_version), fg='green')
+        messages.append('Remote FridaGadget version is v{0}, local is v{1}. Downloading...'.format(
+            github_version, local_version))
 
         # download, unpack, update local version and cleanup the temp files.
         ios_gadget.download() \
@@ -60,14 +73,19 @@ def patch_ios_ipa(source: str, codesign_signature: str, provision_file: str, bin
             .set_local_version('ios_universal', github_version) \
             .cleanup()
 
-    click.secho('Patcher will be using Gadget version: {0}'.format(github_version), fg='green')
+    messages.append('Patcher will be using Gadget version: {0}'.format(github_version))
 
     # start the patching process
     patcher = IosPatcher(skip_cleanup=skip_cleanup)
 
     # return of we do not have all of the requirements.
     if not patcher.are_requirements_met():
-        return
+        return output_result(
+            CommandResult(result={'error': 'requirements not met'},
+                          status='error',
+                          human_text='Requirements not met for patching'),
+            command='patch ios',
+        )
 
     patcher.set_provsioning_profile(provision_file=provision_file, bundle_id=bundle_id)
     patcher.extract_ipa(unzip_unicode, ipa_source=source)
@@ -76,24 +94,30 @@ def patch_ios_ipa(source: str, codesign_signature: str, provision_file: str, bin
         frida_gadget=ios_gadget.get_gadget_path(), codesign_signature=codesign_signature, gadget_config=gadget_config)
 
     if script_source:
-        click.secho('Copying over a custom script to use with the gadget config.', fg='green')
+        messages.append('Copying over a custom script to use with the gadget config.')
         shutil.copyfile(script_source, os.path.join(patcher.app_folder, 'Frameworks', script_source))
 
     # give a chance to make any last minute modifications if needed
     if pause:
-        click.secho(('Patching paused. The next step is to rebuild the IPA. '
-                     'If you require any manual fixes, the current temp '
-                     'directory is:'), bold=True)
-        click.secho('{0}'.format(patcher.app_folder), fg='green', bold=True)
-
-        input('Press ENTER to continue...')
+        messages.append('Patching paused. The next step is to rebuild the IPA. '
+                        'If you require any manual fixes, the current temp directory is:')
+        messages.append(patcher.app_folder)
+        # in agent/json mode we cannot interact; just record the pause state
+        if _should_output_json(None):
+            messages.append('Pause skipped in non-interactive mode.')
 
     patcher.archive_and_codesign(original_name=source, codesign_signature=codesign_signature)
 
-    click.secho('Copying final ipa from {0} to current directory...'.format(patcher.get_patched_ipa_path()))
+    messages.append('Copying final ipa from {0} to current directory...'.format(patcher.get_patched_ipa_path()))
     shutil.copyfile(
         patcher.get_patched_ipa_path(),
         os.path.join(os.path.abspath('.'), os.path.basename(patcher.get_patched_ipa_path())))
+
+    return output_result(
+        CommandResult(result={'action': 'patched_ios', 'output': patcher.get_patched_ipa_path()},
+                      human_text='\n'.join(messages)),
+        command='patch ios',
+    )
 
 
 def patch_android_apk(source: str, architecture: str, pause: bool, skip_cleanup: bool = True,
@@ -101,7 +125,7 @@ def patch_android_apk(source: str, architecture: str, pause: bool, skip_cleanup:
                       network_security_config: bool = False, target_class: str = None,
                       use_aapt2: bool = False, gadget_config: str = None, script_source: str = None,
                       ignore_nativelibs: bool = True, manifest: str = None, skip_signing: bool = False,
-                      only_main_classes: bool = False, fix_concurrency_to = None) -> None:
+                      only_main_classes: bool = False, fix_concurrency_to = None) -> CommandResult:
     """
         Patches an Android APK by extracting, patching SMALI, repackaging
         and signing a new APK.
@@ -118,8 +142,6 @@ def patch_android_apk(source: str, architecture: str, pause: bool, skip_cleanup:
         :param use_aapt2:
         :param gadget_config:
         :param script_source:
-        :param manifest:
-        :param skip_signing:
         :param ignore_nativelibs:
         :param only_main_classes:
         :param fix_concurrency_to:
@@ -127,39 +149,56 @@ def patch_android_apk(source: str, architecture: str, pause: bool, skip_cleanup:
         :return:
     """
 
+    messages = []
+
     github = Github(gadget_version=gadget_version)
     android_gadget = AndroidGadget(github)
 
     # without an architecture set, attempt to determine one using adb
     if not architecture:
-        click.secho('No architecture specified. Determining it using `adb`...', dim=True)
+        messages.append('No architecture specified. Determining it using `adb`...')
         o = delegator.run('adb shell getprop ro.product.cpu.abi')
 
         # read the ach from the process' output
         architecture = o.out.strip()
 
         if len(architecture) <= 0:
-            click.secho('Failed to determine architecture. Is the device connected and authorized?',
-                        fg='red', bold=True)
-            return
+            messages.append('Failed to determine architecture. Is the device connected and authorized?')
+            return output_result(
+                CommandResult(
+                    result={'error': 'failed to determine architecture'},
+                    status='error',
+                    human_text='\n'.join(messages),
+                    exit_code=1,
+                ),
+                command='patch android',
+            )
 
-        click.secho('Detected target device architecture as: {0}'.format(architecture), fg='green', bold=True)
+        messages.append('Detected target device architecture as: {0}'.format(architecture))
 
     # set the architecture we are interested in
     android_gadget.set_architecture(architecture)
 
     # check the gadget config flags
     if script_source and not gadget_config:
-        click.secho('A script source was specified but no gadget configuration was set.', fg='red', bold=True)
-        return
+        messages.append('A script source was specified but no gadget configuration was set.')
+        return output_result(
+            CommandResult(
+                result={'error': 'gadget_config required when script_source is set'},
+                status='error',
+                human_text='\n'.join(messages),
+                exit_code=1,
+            ),
+            command='patch android',
+        )
 
     # check if a gadget version was specified. if not, get the latest one.
     if gadget_version is not None:
         github_version = gadget_version
-        click.secho('Using manually specified version: {0}'.format(gadget_version), fg='green', bold=True)
+        messages.append('Using manually specified version: {0}'.format(gadget_version))
     else:
         github_version = github.get_latest_version()
-        click.secho('Using latest Github gadget version: {0}'.format(github_version), fg='green', bold=True)
+        messages.append('Using latest Github gadget version: {0}'.format(github_version))
 
     # get local version of the stored gadget
     local_version = android_gadget.get_local_version('android_' + architecture)
@@ -169,8 +208,8 @@ def patch_android_apk(source: str, architecture: str, pause: bool, skip_cleanup:
     # a very specific version
     if Version(github_version) != Version(local_version) or not android_gadget.gadget_exists():
         # download!
-        click.secho('Remote FridaGadget version is v{0}, local is v{1}. Downloading...'.format(
-            github_version, local_version), fg='green')
+        messages.append('Remote FridaGadget version is v{0}, local is v{1}. Downloading...'.format(
+            github_version, local_version))
 
         # download, unpack, update local version and cleanup the temp files.
         android_gadget.download() \
@@ -178,18 +217,35 @@ def patch_android_apk(source: str, architecture: str, pause: bool, skip_cleanup:
             .set_local_version('android_' + architecture, github_version) \
             .cleanup()
 
-    click.secho('Patcher will be using Gadget version: {0}'.format(github_version), fg='green')
+    messages.append('Patcher will be using Gadget version: {0}'.format(github_version))
 
     patcher = AndroidPatcher(skip_cleanup=skip_cleanup, skip_resources=skip_resources, manifest=manifest, only_main_classes=only_main_classes)
 
     # ensure that we have all of the commandline requirements
     if not patcher.are_requirements_met():
-        return
+        messages.append('Requirements not met for patching')
+        return output_result(
+            CommandResult(
+                result={'error': 'requirements not met'},
+                status='error',
+                human_text='\n'.join(messages),
+                exit_code=1,
+            ),
+            command='patch android',
+        )
 
     # ensure we have the latest apk-tool and run the
     if not patcher.is_apktool_ready():
-        click.secho('apktool is not ready for use', fg='red', bold=True)
-        return
+        messages.append('apktool is not ready for use')
+        return output_result(
+            CommandResult(
+                result={'error': 'apktool not ready'},
+                status='error',
+                human_text='\n'.join(messages),
+                exit_code=1,
+            ),
+            command='patch android',
+        )
 
     # work on patching the APK
     patcher.set_apk_source(source=source)
@@ -209,19 +265,20 @@ def patch_android_apk(source: str, architecture: str, pause: bool, skip_cleanup:
     patcher.add_gadget_to_apk(architecture, android_gadget.get_frida_library_path(), gadget_config)
 
     if script_source:
-        click.secho('Copying over a custom script to use with the gadget config.', fg='green')
+        messages.append('Copying over a custom script to use with the gadget config.')
         shutil.copyfile(script_source,
                         os.path.join(patcher.apk_temp_directory, 'lib', architecture,
                                      'libfrida-gadget.script.so'))
 
     # if we are required to pause, do that.
     if pause:
-        click.secho(('Patching paused. The next step is to rebuild the APK. '
-                     'If you require any manual fixes, the current temp '
-                     'directory is:'), bold=True)
-        click.secho('{0}'.format(patcher.get_temp_working_directory()), fg='green', bold=True)
-
-        input('Press ENTER to continue...')
+        messages.append(('Patching paused. The next step is to rebuild the APK. '
+                         'If you require any manual fixes, the current temp '
+                         'directory is:'))
+        messages.append(patcher.get_temp_working_directory())
+        # in agent/json mode we cannot interact; just record the pause state
+        if _should_output_json():
+            messages.append('Pause skipped in non-interactive mode.')
 
     patcher.build_new_apk(use_aapt2=use_aapt2, fix_concurrency_to=fix_concurrency_to)
     patcher.zipalign_apk()
@@ -231,12 +288,19 @@ def patch_android_apk(source: str, architecture: str, pause: bool, skip_cleanup:
     # woohoo, get the APK!
     destination = source.replace('.apk', '.objection.apk')
 
-    click.secho(
-        'Copying final apk from {0} to {1} in current directory...'.format(patcher.get_patched_apk_path(), destination))
+    messages.append('Copying final apk from {0} to {1} in current directory...'.format(patcher.get_patched_apk_path(), destination))
     shutil.copyfile(patcher.get_patched_apk_path(), os.path.join(os.path.abspath('.'), destination))
 
+    return output_result(
+        CommandResult(
+            result={'action': 'patched_android', 'output': destination},
+            human_text='\n'.join(messages),
+        ),
+        command='patch android',
+    )
 
-def sign_android_apk(source: str, skip_cleanup: bool = True) -> None:
+
+def sign_android_apk(source: str, skip_cleanup: bool = True) -> CommandResult:
     """
         Zipaligns and signs an Android APK with the objection key.
 
@@ -246,11 +310,21 @@ def sign_android_apk(source: str, skip_cleanup: bool = True) -> None:
         :return:
     """
 
+    messages = []
     patcher = AndroidPatcher(skip_cleanup=skip_cleanup)
 
     # ensure that we have all of the commandline requirements
     if not patcher.are_requirements_met():
-        return
+        messages.append('Requirements not met for signing')
+        return output_result(
+            CommandResult(
+                result={'error': 'requirements not met'},
+                status='error',
+                human_text='\n'.join(messages),
+                exit_code=1,
+            ),
+            command='sign android',
+        )
 
     patcher.set_apk_source(source=source)
     patcher.zipalign_apk()
@@ -259,6 +333,13 @@ def sign_android_apk(source: str, skip_cleanup: bool = True) -> None:
     # woohoo, get the APK!
     destination = source.replace('.apk', '.objection.apk')
 
-    click.secho(
-        'Copying final apk from {0} to {1} in current directory...'.format(patcher.get_patched_apk_path(), destination))
+    messages.append('Copying final apk from {0} to {1} in current directory...'.format(patcher.get_patched_apk_path(), destination))
     shutil.copyfile(patcher.get_patched_apk_path(), os.path.join(os.path.abspath('.'), destination))
+
+    return output_result(
+        CommandResult(
+            result={'action': 'signed_android', 'output': destination},
+            human_text='\n'.join(messages),
+        ),
+        command='sign android',
+    )

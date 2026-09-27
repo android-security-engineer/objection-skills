@@ -1,11 +1,11 @@
-from typing import Optional
+
 
 from objection.state.connection import state_connection
-from objection.utils.output import CommandResult, output_result, should_output_json
+from objection.utils.output import CommandResult, output_result
 from ..state.device import device_state, Ios, Android
 
 
-def alert(args: list = None) -> Optional[CommandResult]:
+def alert(args: list = None) -> CommandResult:
     """
         Displays an alert message via a popup or a Toast message
         on the mobile device.
@@ -19,10 +19,10 @@ def alert(args: list = None) -> Optional[CommandResult]:
     else:
         message = args[0]
 
-    if isinstance(device_state.platform, Ios):
+    if device_state.platform == Ios:
         _alert_ios(message)
 
-    if isinstance(device_state.platform, Android):
+    if device_state.platform == Android:
         pass
 
     return output_result(
@@ -44,7 +44,7 @@ def _alert_ios(message: str):
     api.ios_ui_alert(message)
 
 
-def ios_screenshot(args: list = None) -> Optional[CommandResult]:
+def ios_screenshot(args: list = None) -> CommandResult:
     """
         Take an iOS screenshot.
 
@@ -77,7 +77,7 @@ def ios_screenshot(args: list = None) -> Optional[CommandResult]:
     )
 
 
-def dump_ios_ui(args: list = None) -> Optional[CommandResult]:
+def dump_ios_ui(args: list = None) -> CommandResult:
     """
         Dumps the current iOS user interface in a serialized form.
 
@@ -88,19 +88,13 @@ def dump_ios_ui(args: list = None) -> Optional[CommandResult]:
     api = state_connection.get_api()
     ui = api.ios_ui_window_dump()
 
-    if should_output_json(args):
-        return output_result(
-            CommandResult(result={'ui': ui}),
-            command='ios ui dump',
-        )
-
     return output_result(
         CommandResult(result={'ui': ui}, human_text=ui),
         command='ios ui dump',
     )
 
 
-def bypass_touchid(args: list = None) -> Optional[CommandResult]:
+def bypass_touchid(args: list = None) -> CommandResult:
     """
         Starts a new objection job that hooks into the iOS TouchID
         classes, replacing the verification logic to always pass.
@@ -122,7 +116,7 @@ def bypass_touchid(args: list = None) -> Optional[CommandResult]:
     )
 
 
-def android_screenshot(args: list = None) -> Optional[CommandResult]:
+def android_screenshot(args: list = None) -> CommandResult:
     """
         Take an Android screenshot.
 
@@ -156,7 +150,7 @@ def android_screenshot(args: list = None) -> Optional[CommandResult]:
     )
 
 
-def android_flag_secure(args: list = None) -> Optional[CommandResult]:
+def android_flag_secure(args: list = None) -> CommandResult:
     """
         Control FLAG_SECURE of the current Activity, allowing or disallowing
         the use of hardware key combinations and screencap to take screenshots.

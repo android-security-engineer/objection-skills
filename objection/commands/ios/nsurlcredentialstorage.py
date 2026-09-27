@@ -1,13 +1,11 @@
-from typing import Optional
-
 import click
 from tabulate import tabulate
 
 from objection.state.connection import state_connection
-from objection.utils.output import CommandResult, output_result, should_output_json
+from objection.utils.output import CommandResult, output_result
 
 
-def dump(args: list = None) -> Optional[CommandResult]:
+def dump(args: list = None) -> CommandResult:
     """
         Dumps credentials stored in NSURLCredentialStorage
 
@@ -17,12 +15,6 @@ def dump(args: list = None) -> Optional[CommandResult]:
 
     api = state_connection.get_api()
     cookies = api.ios_credential_storage()
-
-    if should_output_json(args):
-        return output_result(
-            CommandResult(result={'credentials': cookies, 'count': len(cookies)}),
-            command='ios nsurlcredentialstorage dump',
-        )
 
     human_lines = tabulate(
         [[

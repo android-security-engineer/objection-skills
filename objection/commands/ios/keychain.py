@@ -60,7 +60,7 @@ def _get_json_destination(args: list) -> Optional[str]:
     return None
 
 
-def dump(args: list = None) -> Optional[CommandResult]:
+def dump(args: list = None) -> CommandResult:
     """
         Dump the iOS keychain
 
@@ -85,14 +85,6 @@ def dump(args: list = None) -> Optional[CommandResult]:
             command='ios keychain dump',
         )
 
-    if should_output_json(args):
-        return output_result(
-            CommandResult(
-                result={'entries': keychain, 'count': len(keychain), 'smart_decoded': _should_do_smart_decode(args)},
-            ),
-            command='ios keychain dump',
-        )
-
     human_lines = tabulate(
         [[
             entry.get('create_date'),
@@ -113,7 +105,7 @@ def dump(args: list = None) -> Optional[CommandResult]:
     )
 
 
-def dump_raw(args: list = None) -> Optional[CommandResult]:
+def dump_raw(args: list = None) -> CommandResult:
     """
         Dump the iOS keychain, but without any parsing.
         The agent will output the entries it finds here.
@@ -135,7 +127,7 @@ def dump_raw(args: list = None) -> Optional[CommandResult]:
     )
 
 
-def clear(args: list = None) -> Optional[CommandResult]:
+def clear(args: list = None) -> CommandResult:
     """
         Clear the iOS keychain.
 
@@ -143,28 +135,27 @@ def clear(args: list = None) -> Optional[CommandResult]:
         :return:
     """
 
-    # JSON 模式下跳过交互确认（Agent 无法回答 confirm）
-    if should_output_json(args):
-        api = state_connection.get_api()
-        api.ios_keychain_empty()
-        return output_result(
-            CommandResult(result={'cleared': True}, human_text='Keychain cleared'),
-            command='ios keychain clear',
-        )
-
-    if not click.confirm('Are you sure you want to clear the iOS keychain?'):
-        return None
-
-    click.secho('Clearing the keychain...', dim=True)
-
     api = state_connection.get_api()
+
+    # Agent / JSON 模式下跳过交互确认，直接执行
+    if not should_output_json(args):
+        if not click.confirm('Are you sure you want to clear the iOS keychain?'):
+            human_text = 'Keystore clear cancelled'
+            return output_result(
+                CommandResult(result={'cleared': False}, human_text=human_text),
+                command='ios keychain clear',
+            )
+
     api.ios_keychain_empty()
 
-    click.secho('Keychain cleared', fg='green')
-    return None
+    human_text = 'Keychain cleared'
+    return output_result(
+        CommandResult(result={'cleared': True}, human_text=human_text),
+        command='ios keychain clear',
+    )
 
 
-def remove(args: list) -> Optional[CommandResult]:
+def remove(args: list) -> CommandResult:
     """
         Remove matching keychain entries from the keychain
 
@@ -198,7 +189,7 @@ def remove(args: list) -> Optional[CommandResult]:
     )
 
 
-def update(args: list) -> Optional[CommandResult]:
+def update(args: list) -> CommandResult:
     """
         Update matching keychain entry from the keychain
 
@@ -233,7 +224,7 @@ def update(args: list) -> Optional[CommandResult]:
     )
 
 
-def add(args: list) -> Optional[CommandResult]:
+def add(args: list) -> CommandResult:
     """
         Adds a new kSecClassGenericPassword keychain entry to the keychain
 

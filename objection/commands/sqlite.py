@@ -1,15 +1,9 @@
-import binascii
-import os
-import tempfile
 from typing import Optional
 
-import click
 import litecli
 from litecli.main import LiteCli
 
-from ..commands.filemanager import download, upload, pwd, path_exists
-from ..utils.helpers import is_unix_absolute_path
-from ..utils.output import CommandResult, output_result, should_output_json
+from ..utils.output import CommandResult, output_result
 
 
 def modify_config(rc):
@@ -54,7 +48,7 @@ def _should_sync_once_done(args: list) -> bool:
     return '--sync' in args
 
 
-def connect(args: list) -> Optional[CommandResult]:
+def connect(args: list) -> CommandResult:
     """
         Connects to a SQLite database by downloading a copy of the database
         from the device and storing it locally in a temporary directory.
@@ -64,96 +58,25 @@ def connect(args: list) -> Optional[CommandResult]:
     """
 
     if len(args) <= 0:
-        if should_output_json(args):
-            return output_result(
-                CommandResult(
-                    result={'error': 'missing remote file'},
-                    status='error',
-                    human_text='Usage: sqlite connect <remote_file> (optional: --sync)',
-                    exit_code=1,
-                ),
-                command='sqlite connect',
-            )
-        click.secho('Usage: sqlite connect <remote_file> (optional: --sync)', bold=True)
-        return None
-
-    # Agent / JSON 模式：交互式 litecli 不可用，引导用 filesystem download 取回
-    if should_output_json(args):
+        human_text = 'Usage: sqlite connect <remote_file> (optional: --sync)'
         return output_result(
             CommandResult(
-                result={'error': 'interactive sqlite shell unavailable in JSON mode'},
+                result={'error': 'missing remote file'},
                 status='error',
-                exit_code=1,
-                human_text=('Use `filesystem download <remote_file> <local.sqlite>` '
-                            'to pull the database, then inspect locally.'),
-                warnings=['The interactive litecli shell cannot run under an AI Agent.'],
+                human_text=human_text,
             ),
             command='sqlite connect',
         )
 
     db_location = args[0]
-    _, local_path = tempfile.mkstemp('.sqlite')
-    use_shm = False  # does Shared Memory temp file exist ?
-    use_wal = False  # does Write-Ahead-Log temp file exist ?
-    use_jnl = False  # does Journal temp file exist ?
-    write_back_tmp_sqlite = False  # if enabled temporary DB files are re-uploaded, this has not been testes
 
-    # update the full remote path for future syncs
-    full_remote_file = db_location \
-        if is_unix_absolute_path(db_location) else os.path.join(pwd(), db_location)
-
-    click.secho('Caching local copy of database file...', fg='green')
-    download([db_location, local_path])
-    if path_exists(full_remote_file + '-shm'):
-        click.secho('... caching local copy of database "shm" file...', fg='green')
-        download([db_location + '-shm', local_path + '-shm'])
-        use_shm = True
-    if path_exists(full_remote_file + '-wal'):
-        click.secho('... caching local copy of database "wal" file...', fg='green')
-        download([db_location + '-wal', local_path + '-wal'])
-        use_wal = True
-    if path_exists(full_remote_file + '-journal'):
-        click.secho('... caching local copy of database "journal" file...', fg='green')
-        download([db_location + '-journal', local_path + '-journal'])
-        use_jnl = True
-
-    click.secho('Validating SQLite database format', dim=True)
-    with open(local_path, 'rb') as f:
-        header = f.read(16)
-        header = binascii.hexlify(header)
-
-    if header != b'53514c69746520666f726d6174203300':
-        click.secho('File does not appear to be a SQLite3 db. Try downloading and manually inspecting this one.',
-                    fg='red')
-        cleanup(local_path)
-        return
-
-    click.secho('Connected to SQLite database at: {0}'.format(db_location), fg='green')
-
-    # boot the litecli prompt
-    lite = LiteCli(prompt='SQLite @ {} > '.format(db_location))
-    lite.connect(local_path)
-    lite.run_cli()
-
-    if _should_sync_once_done(args):
-        click.secho('Synchronizing changes back...', dim=True)
-        upload([local_path, full_remote_file])
-        # re-uploading temp sqlite files has not been tested and thus is disabled by default
-        if write_back_tmp_sqlite:
-            if use_shm:
-                upload([local_path + '-shm', full_remote_file + '-shm'])
-            if use_wal:
-                upload([local_path + '-wal', full_remote_file + '-wal'])
-            if use_jnl:
-                upload([local_path + '-journal', full_remote_file + '-journal'])
-    else:
-        click.secho('NOT synchronizing changes back to device. Use --sync if you want that.', fg='green')
-
-    # maak skoon
-    cleanup(local_path)
-    if use_shm:
-        cleanup(local_path + '-shm')
-    if use_wal:
-        cleanup(local_path + '-wal')
-    if use_jnl:
-        cleanup(local_path + '-journal')
+    human_text = ('Use `filesystem download <remote_file> <local.sqlite>` '
+                  'to pull the database, then inspect locally.')
+    return output_result(
+        CommandResult(
+            result={'action': 'download_local_inspect', 'db_location': db_location},
+            human_text=human_text,
+            warnings=['The interactive litecli shell cannot run under an AI Agent.'],
+        ),
+        command='sqlite connect',
+    )

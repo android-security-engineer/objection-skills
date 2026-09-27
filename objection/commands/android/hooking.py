@@ -5,7 +5,7 @@ import click
 
 from objection.state.connection import state_connection
 from objection.utils.helpers import clean_argument_flags
-from objection.utils.output import CommandResult, output_result, should_output_json
+from objection.utils.output import CommandResult, output_result
 
 
 def _is_pattern_or_constant(s: str) -> bool:
@@ -141,7 +141,7 @@ def _get_flag_value(flag: str, args: list) -> Optional[str]:
         return None
 
 
-def show_android_classes(args: list = None) -> Optional[CommandResult]:
+def show_android_classes(args: list = None) -> CommandResult:
     """
         Show the currently loaded classes.
         Note that Java classes are only loaded when they are used,
@@ -153,13 +153,6 @@ def show_android_classes(args: list = None) -> Optional[CommandResult]:
     api = state_connection.get_api()
     classes = sorted(api.android_hooking_get_classes())
 
-    if should_output_json(args):
-        return output_result(
-            CommandResult(result={'classes': classes, 'count': len(classes)}),
-            command='android hooking list classes',
-        )
-
-    # Human mode: build output string and return via output_result
     human_lines = list(classes)
     human_lines.append('\nFound {0} classes'.format(len(classes)))
     return output_result(
@@ -171,7 +164,7 @@ def show_android_classes(args: list = None) -> Optional[CommandResult]:
     )
 
 
-def show_android_class_loaders(args: list = None) -> Optional[CommandResult]:
+def show_android_class_loaders(args: list = None) -> CommandResult:
     """
         Show the currently registered class loaders.
 
@@ -181,13 +174,6 @@ def show_android_class_loaders(args: list = None) -> Optional[CommandResult]:
     api = state_connection.get_api()
     loaders = sorted(api.android_hooking_get_class_loaders())
 
-    if should_output_json(args):
-        return output_result(
-            CommandResult(result={'class_loaders': loaders, 'count': len(loaders)}),
-            command='android hooking list class_loaders',
-        )
-
-    # Human mode
     human_lines = ['* {0}'.format(loader) for loader in loaders]
     human_lines.append('\nFound {0} class loaders'.format(len(loaders)))
     return output_result(
@@ -199,7 +185,7 @@ def show_android_class_loaders(args: list = None) -> Optional[CommandResult]:
     )
 
 
-def show_android_class_methods(args: list = None) -> Optional[CommandResult]:
+def show_android_class_methods(args: list = None) -> CommandResult:
     """
         Shows the methods available on an Android class.
 
@@ -223,13 +209,6 @@ def show_android_class_methods(args: list = None) -> Optional[CommandResult]:
     api = state_connection.get_api()
     methods = sorted(api.android_hooking_get_class_methods(class_name))
 
-    if should_output_json(args):
-        return output_result(
-            CommandResult(result={'class': class_name, 'methods': methods, 'count': len(methods)}),
-            command='android hooking list class_methods',
-        )
-
-    # Human mode
     human_lines = [method for method in methods]
     human_lines.append('\nFound {0} method(s)'.format(len(methods)))
     return output_result(
@@ -241,7 +220,7 @@ def show_android_class_methods(args: list = None) -> Optional[CommandResult]:
     )
 
 
-def notify(args: list = None) -> Optional[CommandResult]:
+def notify(args: list = None) -> CommandResult:
     """
         Notify when a class becomes available.
 
@@ -281,26 +260,26 @@ def notify(args: list = None) -> Optional[CommandResult]:
         dump_return,
         dump_backtrace)
 
-    if should_output_json(args):
-        return output_result(
-            CommandResult(
-                result={
-                    'action': 'watching_lazy',
-                    'pattern': query,
-                    'watch': should_watch,
-                    'dump_args': dump_arguments,
-                    'dump_backtrace': dump_backtrace,
-                    'dump_return': dump_return,
-                },
-                warnings=['Lazy watch installed; hits arrive as async messages.',
-                          'Job id not surfaced; use `agent state` to list running jobs.'],
-            ),
-            command='android hooking notify',
-        )
-    return None
+    human_text = 'Watching for pattern: {0}'.format(query)
+    return output_result(
+        CommandResult(
+            result={
+                'action': 'watching_lazy',
+                'pattern': query,
+                'watch': should_watch,
+                'dump_args': dump_arguments,
+                'dump_backtrace': dump_backtrace,
+                'dump_return': dump_return,
+            },
+            human_text=human_text,
+            warnings=['Lazy watch installed; hits arrive as async messages.',
+                      'Job id not surfaced; use `agent state` to list running jobs.'],
+        ),
+        command='android hooking notify',
+    )
 
 
-def watch(args: list = None) -> Optional[CommandResult]:
+def watch(args: list = None) -> CommandResult:
     """
         Hook functions and print useful information when they are called.
 
@@ -336,25 +315,25 @@ def watch(args: list = None) -> Optional[CommandResult]:
                               _should_dump_backtrace(args),
                               _should_dump_return_value(args))
 
-    if should_output_json(args):
-        return output_result(
-            CommandResult(
-                result={
-                    'action': 'watching',
-                    'pattern': query,
-                    'dump_args': _should_dump_args(args),
-                    'dump_backtrace': _should_dump_backtrace(args),
-                    'dump_return': _should_dump_return_value(args),
-                },
-                warnings=['Job id not surfaced; use `agent state` to list running jobs.',
-                          'Hook invocations arrive as async messages; poll via `agent state` or HTTP /events.'],
-            ),
-            command='android hooking watch',
-        )
-    return None
+    human_text = 'Watching: {0}'.format(query)
+    return output_result(
+        CommandResult(
+            result={
+                'action': 'watching',
+                'pattern': query,
+                'dump_args': _should_dump_args(args),
+                'dump_backtrace': _should_dump_backtrace(args),
+                'dump_return': _should_dump_return_value(args),
+            },
+            human_text=human_text,
+            warnings=['Job id not surfaced; use `agent state` to list running jobs.',
+                      'Hook invocations arrive as async messages; poll via `agent state` or HTTP /events.'],
+        ),
+        command='android hooking watch',
+    )
 
 
-def search(args: list = None) -> Optional[CommandResult]:
+def search(args: list = None) -> CommandResult:
     """
         Enumerates the current Android application for classes and methods.
 
@@ -443,7 +422,7 @@ def search(args: list = None) -> Optional[CommandResult]:
     )
 
 
-def show_registered_broadcast_receivers(args: list = None) -> Optional[CommandResult]:
+def show_registered_broadcast_receivers(args: list = None) -> CommandResult:
     """
         Enumerate all registered BroadcastReceivers
 
@@ -452,12 +431,6 @@ def show_registered_broadcast_receivers(args: list = None) -> Optional[CommandRe
 
     api = state_connection.get_api()
     receivers = sorted(api.android_hooking_list_broadcast_receivers())
-
-    if should_output_json(args):
-        return output_result(
-            CommandResult(result={'broadcast_receivers': receivers, 'count': len(receivers)}),
-            command='android hooking list broadcast_receivers',
-        )
 
     human_lines = list(receivers)
     human_lines.append('\nFound {0} classes'.format(len(receivers)))
@@ -470,7 +443,7 @@ def show_registered_broadcast_receivers(args: list = None) -> Optional[CommandRe
     )
 
 
-def show_registered_services(args: list = None) -> Optional[CommandResult]:
+def show_registered_services(args: list = None) -> CommandResult:
     """
         Enumerate all registered Services
 
@@ -479,12 +452,6 @@ def show_registered_services(args: list = None) -> Optional[CommandResult]:
 
     api = state_connection.get_api()
     services = sorted(api.android_hooking_list_services())
-
-    if should_output_json(args):
-        return output_result(
-            CommandResult(result={'services': services, 'count': len(services)}),
-            command='android hooking list services',
-        )
 
     human_lines = list(services)
     human_lines.append('\nFound {0} classes'.format(len(services)))
@@ -497,7 +464,7 @@ def show_registered_services(args: list = None) -> Optional[CommandResult]:
     )
 
 
-def show_registered_activities(args: list = None) -> Optional[CommandResult]:
+def show_registered_activities(args: list = None) -> CommandResult:
     """
         Enumerate all registered Activities
 
@@ -506,12 +473,6 @@ def show_registered_activities(args: list = None) -> Optional[CommandResult]:
 
     api = state_connection.get_api()
     activities = sorted(api.android_hooking_list_activities())
-
-    if should_output_json(args):
-        return output_result(
-            CommandResult(result={'activities': activities, 'count': len(activities)}),
-            command='android hooking list activities',
-        )
 
     human_lines = list(activities)
     human_lines.append('\nFound {0} classes'.format(len(activities)))
@@ -524,7 +485,7 @@ def show_registered_activities(args: list = None) -> Optional[CommandResult]:
     )
 
 
-def get_current_activity(args: list = None) -> Optional[CommandResult]:
+def get_current_activity(args: list = None) -> CommandResult:
     """
         Get the currently active activity
 
@@ -534,12 +495,6 @@ def get_current_activity(args: list = None) -> Optional[CommandResult]:
     api = state_connection.get_api()
     activity = api.android_hooking_get_current_activity()
 
-    if should_output_json(args):
-        return output_result(
-            CommandResult(result=activity),
-            command='android hooking get current_activity',
-        )
-
     human_text = 'Activity: {0}\nFragment: {1}'.format(activity.get('activity'), activity.get('fragment'))
     return output_result(
         CommandResult(result=activity, human_text=human_text),
@@ -547,7 +502,7 @@ def get_current_activity(args: list = None) -> Optional[CommandResult]:
     )
 
 
-def set_method_return_value(args: list = None) -> Optional[CommandResult]:
+def set_method_return_value(args: list = None) -> CommandResult:
     """
         Sets a Java methods return value to a specified boolean.
 
@@ -574,6 +529,7 @@ def set_method_return_value(args: list = None) -> Optional[CommandResult]:
             CommandResult(
                 result={'error': 'return value must be true or false'},
                 status='error',
+                human_text='return value must be true or false',
                 exit_code=1,
             ),
             command='android hooking set return_value',
@@ -590,18 +546,18 @@ def set_method_return_value(args: list = None) -> Optional[CommandResult]:
                                           overload_filter,
                                           retval)
 
-    if should_output_json(args):
-        return output_result(
-            CommandResult(
-                result={
-                    'action': 'set_return_value',
-                    'method': class_name,
-                    'overload': overload_filter,
-                    'value': retval,
-                },
-                warnings=['Hook installed; existing invocations are affected immediately.',
-                          'Job id not surfaced; use `agent state` to list running jobs.'],
-            ),
-            command='android hooking set return_value',
-        )
-    return None
+    human_text = 'Set return value for {0} to {1}'.format(class_name, retval)
+    return output_result(
+        CommandResult(
+            result={
+                'action': 'set_return_value',
+                'method': class_name,
+                'overload': overload_filter,
+                'value': retval,
+            },
+            human_text=human_text,
+            warnings=['Hook installed; existing invocations are affected immediately.',
+                      'Job id not surfaced; use `agent state` to list running jobs.'],
+        ),
+        command='android hooking set return_value',
+    )

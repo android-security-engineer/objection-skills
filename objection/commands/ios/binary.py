@@ -1,13 +1,12 @@
-from typing import Optional
 
 import click
 from tabulate import tabulate
 
 from objection.state.connection import state_connection
-from objection.utils.output import CommandResult, output_result, should_output_json
+from objection.utils.output import CommandResult, output_result
 
 
-def info(args: list) -> Optional[CommandResult]:
+def info(args: list) -> CommandResult:
     """
         Gets information about binaries and frameworks.
 
@@ -17,12 +16,6 @@ def info(args: list) -> Optional[CommandResult]:
 
     api = state_connection.get_api()
     binary_info = api.ios_binary_info()
-
-    if should_output_json(args):
-        return output_result(
-            CommandResult(result={'binaries': binary_info, 'count': len(binary_info)}),
-            command='ios binary info',
-        )
 
     human_lines = tabulate(
         [[

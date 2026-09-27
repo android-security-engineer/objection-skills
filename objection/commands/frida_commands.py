@@ -1,10 +1,10 @@
 import os
-from typing import Optional
+
 
 from tabulate import tabulate
 
 from objection.state.connection import state_connection
-from objection.utils.output import CommandResult, output_result, should_output_json
+from objection.utils.output import CommandResult, output_result
 from ..utils.helpers import sizeof_fmt, clean_argument_flags
 
 
@@ -20,7 +20,7 @@ def _should_disable_exception_handler(args: list = None) -> bool:
     return len(args) > 0 and '--no-exception-handler' in args
 
 
-def frida_environment(args: list = None) -> Optional[CommandResult]:
+def frida_environment(args: list = None) -> CommandResult:
     """
         Prints information about the current Frida environment.
 
@@ -29,12 +29,6 @@ def frida_environment(args: list = None) -> Optional[CommandResult]:
     """
 
     frida_env = state_connection.get_api().env_frida()
-
-    if should_output_json(args):
-        return output_result(
-            CommandResult(result=frida_env),
-            command='frida_environment',
-        )
 
     human_text = tabulate([
         ('Frida Version', frida_env['version']),
@@ -50,7 +44,7 @@ def frida_environment(args: list = None) -> Optional[CommandResult]:
     )
 
 
-def ping(args: list = None) -> Optional[CommandResult]:
+def ping(args: list = None) -> CommandResult:
     """
         Pings the agent.
 
@@ -61,12 +55,6 @@ def ping(args: list = None) -> Optional[CommandResult]:
     agent = state_connection.get_api()
     ok = agent.ping()
 
-    if should_output_json(args):
-        return output_result(
-            CommandResult(result={'ok': bool(ok)}, status='ok' if ok else 'error', exit_code=0 if ok else 1),
-            command='ping',
-        )
-
     human_text = 'The agent responds ok!' if ok else 'The agent did not respond ok!'
     return output_result(
         CommandResult(result={'ok': bool(ok)}, status='ok' if ok else 'error', human_text=human_text),
@@ -74,7 +62,7 @@ def ping(args: list = None) -> Optional[CommandResult]:
     )
 
 
-def load_background(args: list = None) -> Optional[CommandResult]:
+def load_background(args: list = None) -> CommandResult:
     """
         Loads a Frida script and runs it in the background.
 

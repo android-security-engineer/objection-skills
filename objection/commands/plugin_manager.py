@@ -7,10 +7,10 @@ from typing import Optional
 import click
 
 from ..utils.plugin import Plugin as PluginType
-from objection.utils.output import CommandResult, output_result, should_output_json
+from objection.utils.output import CommandResult, output_result
 
 
-def load_plugin(args: list = None) -> Optional[CommandResult]:
+def load_plugin(args: list = None) -> CommandResult:
     """
         Loads an objection plugin.
 
@@ -19,27 +19,25 @@ def load_plugin(args: list = None) -> Optional[CommandResult]:
     """
 
     if len(args) <= 0:
-        click.secho('Usage: plugin load <plugin path> (<plugin namespace>)', bold=True)
-        if should_output_json(args):
-            return output_result(
-                CommandResult(status='error', result={'error': 'missing plugin path'}),
-                command='plugin load',
-            )
-        return None
+        human_text = 'Usage: plugin load <plugin path> (<plugin namespace>)'
+        return output_result(
+            CommandResult(status='error', result={'error': 'missing plugin path'},
+                          human_text=human_text),
+            command='plugin load',
+        )
 
     path = os.path.abspath(args[0])
     if os.path.isdir(path):
         path = os.path.join(path, '__init__.py')
 
     if not os.path.exists(path):
-        click.secho('[plugin] {0} does not appear to be a valid plugin. Missing __init__.py'.format(
-            os.path.dirname(path)), fg='red', dim=True)
-        if should_output_json(args):
-            return output_result(
-                CommandResult(status='error', result={'error': 'plugin path does not exist', 'path': path}),
-                command='plugin load',
-            )
-        return None
+        human_text = '[plugin] {0} does not appear to be a valid plugin. Missing __init__.py'.format(
+            os.path.dirname(path))
+        return output_result(
+            CommandResult(status='error', result={'error': 'plugin path does not exist', 'path': path},
+                          human_text=human_text),
+            command='plugin load',
+        )
 
     spec = importlib.util.spec_from_file_location(str(uuid.uuid4())[:8], path)
     plugin = importlib.util.module_from_spec(spec)
@@ -58,32 +56,29 @@ def load_plugin(args: list = None) -> Optional[CommandResult]:
         assert isinstance(instance, PluginType)
 
     except AssertionError:
-        click.secho('Failed to load plugin \'{0}\'. Invalid plugin type.'.format(namespace), fg='red', bold=True)
-        if should_output_json(args):
-            return output_result(
-                CommandResult(status='error', result={'error': 'invalid plugin type', 'namespace': namespace}),
-                command='plugin load',
-            )
-        return None
+        human_text = "Failed to load plugin '{0}'. Invalid plugin type.".format(namespace)
+        return output_result(
+            CommandResult(status='error', result={'error': 'invalid plugin type', 'namespace': namespace},
+                          human_text=human_text),
+            command='plugin load',
+        )
 
     except Exception as e:
-        click.secho('Failed to load plugin \'{0}\' with error: {1}'.format(namespace, str(e)), fg='red', bold=True)
-        click.secho('{0}'.format(traceback.format_exc()), dim=True)
-        if should_output_json(args):
-            return output_result(
-                CommandResult(status='error', result={'error': str(e), 'namespace': namespace,
-                                                      'traceback': traceback.format_exc()}),
-                command='plugin load',
-            )
-        return None
+        human_text = "Failed to load plugin '{0}' with error: {1}\n{2}".format(
+            namespace, str(e), traceback.format_exc())
+        return output_result(
+            CommandResult(status='error', result={'error': str(e), 'namespace': namespace,
+                                                  'traceback': traceback.format_exc()},
+                          human_text=human_text),
+            command='plugin load',
+        )
 
     from ..console import commands
     commands.COMMANDS['plugin']['commands'][instance.namespace] = instance.implementation
-    click.secho('Loaded plugin: {0}'.format(plugin.__name__), bold=True)
+    human_text = 'Loaded plugin: {0}'.format(plugin.__name__)
 
-    if should_output_json(args):
-        return output_result(
-            CommandResult(result={'loaded': True, 'namespace': instance.namespace, 'path': path}),
-            command='plugin load',
-        )
-    return None
+    return output_result(
+        CommandResult(result={'loaded': True, 'namespace': instance.namespace, 'path': path},
+                      human_text=human_text),
+        command='plugin load',
+    )

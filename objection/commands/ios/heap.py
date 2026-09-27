@@ -1,14 +1,12 @@
 import pprint
-from typing import Optional
 
-import click
 from prompt_toolkit import prompt
 from prompt_toolkit.lexers import PygmentsLexer
 from pygments.lexers.javascript import JavascriptLexer
 from tabulate import tabulate
 
 from objection.state.connection import state_connection
-from objection.utils.output import CommandResult, output_result, should_output_json
+from objection.utils.output import CommandResult, output_result
 
 
 def _should_ignore_methods_with_arguments(args) -> bool:
@@ -55,7 +53,7 @@ def _should_interpret_inline_js(args) -> bool:
     return len(args) > 0 and '--inline' in args
 
 
-def instances(args: list) -> Optional[CommandResult]:
+def instances(args: list) -> CommandResult:
     """
         Asks the agent to print the currently live instances of a particular class
 
@@ -79,15 +77,10 @@ def instances(args: list) -> Optional[CommandResult]:
     api = state_connection.get_api()
     instance_results = api.ios_heap_print_live_instances(target_class)
 
-    if should_output_json(args):
-        return output_result(
-            CommandResult(result={'class': target_class, 'instances': instance_results, 'count': len(instance_results)}),
-            command='ios heap search instances',
-        )
-
     if len(instance_results) <= 0:
         return output_result(
-            CommandResult(result={'class': target_class, 'instances': [], 'count': 0}),
+            CommandResult(result={'class': target_class, 'instances': [], 'count': 0},
+                          human_text='No instances found'),
             command='ios heap search instances',
         )
 
@@ -108,7 +101,7 @@ def instances(args: list) -> Optional[CommandResult]:
     )
 
 
-def ivars(args: list) -> Optional[CommandResult]:
+def ivars(args: list) -> CommandResult:
     """
         Get ivars for an Objective-C object at a pointer
 
@@ -132,15 +125,6 @@ def ivars(args: list) -> Optional[CommandResult]:
     api = state_connection.get_api()
     ivar_results = api.ios_heap_print_ivars(target_pointer, _should_print_as_utf8(args))
 
-    if should_output_json(args):
-        return output_result(
-            CommandResult(
-                result={'pointer': target_pointer, 'class': ivar_results[0], 'ivars': ivar_results[1],
-                        'to_utf8': _should_print_as_utf8(args)},
-            ),
-            command='ios heap print ivars',
-        )
-
     human_lines = tabulate(
         [[key, value] for key, value in ivar_results[1].items()], headers=['iVar', 'Value'],
     )
@@ -154,7 +138,7 @@ def ivars(args: list) -> Optional[CommandResult]:
     )
 
 
-def methods(args: list) -> Optional[CommandResult]:
+def methods(args: list) -> CommandResult:
     """
         Get methods for an Objective-C object at a pointer
 
@@ -181,15 +165,6 @@ def methods(args: list) -> Optional[CommandResult]:
     if _should_ignore_methods_with_arguments(args):
         method_results[1] = list(filter(lambda x: ':' not in x, method_results[1]))
 
-    if should_output_json(args):
-        return output_result(
-            CommandResult(
-                result={'pointer': target_pointer, 'class': method_results[0], 'methods': method_results[1],
-                        'count': len(method_results[1])},
-            ),
-            command='ios heap print methods',
-        )
-
     human_lines = tabulate(
         [[
             entry,
@@ -208,7 +183,7 @@ def methods(args: list) -> Optional[CommandResult]:
     )
 
 
-def execute(args: list) -> Optional[CommandResult]:
+def execute(args: list) -> CommandResult:
     """
         Executes a method on a pointer which is assumed to be an Objective-C
         object.
@@ -245,15 +220,6 @@ def execute(args: list) -> Optional[CommandResult]:
     api = state_connection.get_api()
     exec_results = api.ios_heap_exec_method(target_pointer, method, _should_return_as_string(args))
 
-    if should_output_json(args):
-        return output_result(
-            CommandResult(
-                result={'pointer': target_pointer, 'method': method, 'result': exec_results,
-                        'as_string': _should_return_as_string(args)},
-            ),
-            command='ios heap execute method',
-        )
-
     human_text = pprint.pformat(exec_results)
     return output_result(
         CommandResult(
@@ -265,7 +231,7 @@ def execute(args: list) -> Optional[CommandResult]:
     )
 
 
-def evaluate(args: list) -> Optional[CommandResult]:
+def evaluate(args: list) -> CommandResult:
     """
         Evaluate JavaScript on an Objective-C pointer.
 
@@ -289,21 +255,9 @@ def evaluate(args: list) -> Optional[CommandResult]:
     if _should_interpret_inline_js(args):
         args = list(args)
         args.remove('--inline')
-        js = ''.join(args[1:])
-    elif should_output_json(args):
-        return output_result(
-            CommandResult(
-                result={'error': 'JSON mode requires --inline <js>; interactive prompt unavailable'},
-                status='error',
-                exit_code=1,
-            ),
-            command='ios heap execute js',
-        )
+        js = ' '.join(args[1:])
     else:
         js = prompt(
-            click.secho('(The pointer at `{pointer}` will be available as the `ptr` variable.)n'.format(
-                pointer=target_pointer
-            ), dim=True),
             multiline=True, lexer=PygmentsLexer(JavascriptLexer),
             bottom_toolbar='JavaScript edit mode. [ESC] and then [ENTER] to accept. [CTRL] + C to cancel.').strip()
 
@@ -322,6 +276,7 @@ def evaluate(args: list) -> Optional[CommandResult]:
     return output_result(
         CommandResult(
             result={'action': 'evaluated_js', 'pointer': target_pointer},
+            human_text='JavaScript capture complete. Evaluating...',
             warnings=['JS evaluation results, if any, are emitted by the agent as async messages.'],
         ),
         command='ios heap execute js',

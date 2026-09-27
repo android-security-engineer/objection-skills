@@ -1,7 +1,7 @@
 import os
 import tempfile
 import time
-from typing import Optional
+
 
 import click
 from tabulate import tabulate
@@ -18,7 +18,6 @@ from ..utils.helpers import is_unix_absolute_path
 # by the _get_short_*_listing methods.
 _ls_cache = {}
 
-
 def _should_download_folder(args: list) -> bool:
     """
         Checks if --json is in the list of tokens received from the command line.
@@ -29,8 +28,7 @@ def _should_download_folder(args: list) -> bool:
 
     return len(args) > 0 and '--folder' in args
 
-
-def cd(args: list) -> Optional[CommandResult]:
+def cd(args: list) -> CommandResult:
     """
         Change the current working directory of the device.
 
@@ -178,7 +176,6 @@ def cd(args: list) -> Optional[CommandResult]:
             command='cd',
         )
 
-
 def path_exists(path: str) -> bool:
     """
         Checks if a path exists on remote device.
@@ -193,7 +190,6 @@ def path_exists(path: str) -> bool:
     if device_state.platform == Android:
         return _path_exists_android(path)
 
-
 def _path_exists_ios(path: str) -> bool:
     """
         Checks an iOS device if a path exists.
@@ -205,7 +201,6 @@ def _path_exists_ios(path: str) -> bool:
     api = state_connection.get_api()
     return api.ios_file_exists(path)
 
-
 def _path_exists_android(path: str) -> bool:
     """
         Checks an Android device if a path exists.
@@ -216,7 +211,6 @@ def _path_exists_android(path: str) -> bool:
 
     api = state_connection.get_api()
     return api.android_file_exists(path)
-
 
 def pwd(args: list = None) -> str:
     """
@@ -240,8 +234,7 @@ def pwd(args: list = None) -> str:
     if device_state.platform == Android:
         return _pwd_android()
 
-
-def pwd_print(args: list = None) -> Optional[CommandResult]:
+def pwd_print(args: list = None) -> CommandResult:
     """
         Prints the current working directory.
 
@@ -254,7 +247,6 @@ def pwd_print(args: list = None) -> Optional[CommandResult]:
         CommandResult(result={'cwd': cwd}, human_text='Current directory: {0}'.format(cwd)),
         command='pwd',
     )
-
 
 def _pwd_ios() -> str:
     """
@@ -272,7 +264,6 @@ def _pwd_ios() -> str:
 
     return cwd
 
-
 def _pwd_android() -> str:
     """
         Execute a Frida hook that gets the current working
@@ -289,8 +280,7 @@ def _pwd_android() -> str:
 
     return cwd
 
-
-def ls(args: list) -> Optional[CommandResult]:
+def ls(args: list) -> CommandResult:
     """
         Get a directory listing for a path on a device.
         If no path is provided, the current working directory is used.
@@ -318,14 +308,11 @@ def ls(args: list) -> Optional[CommandResult]:
             command='ls',
         )
 
-    if should_output_json(args):
-        human_text = None
-    else:
-        if device_state.platform == Ios:
-            human_text = _ls_ios(path, data)
+    if device_state.platform == Ios:
+        human_text = _ls_ios(path, data)
 
-        if device_state.platform == Android:
-            human_text = _ls_android(path, data)
+    if device_state.platform == Android:
+        human_text = _ls_android(path, data)
 
     return output_result(
         CommandResult(
@@ -335,7 +322,6 @@ def ls(args: list) -> Optional[CommandResult]:
         ),
         command='ls',
     )
-
 
 def _ls_ios(path: str, data: dict = None) -> str:
     """
@@ -413,7 +399,6 @@ def _ls_ios(path: str, data: dict = None) -> str:
     human_text += '\nReadable: {0}  Writable: {1}'.format(data['readable'], data['writable'])
     return human_text
 
-
 def _ls_android(path: str, data: dict = None) -> str:
     """
         Lit files implementation for Android devices.
@@ -467,8 +452,7 @@ def _ls_android(path: str, data: dict = None) -> str:
     human_text += '\nReadable: {0}  Writable: {1}'.format(data['readable'], data['writable'])
     return human_text
 
-
-def download(args: list) -> Optional[CommandResult]:
+def download(args: list) -> CommandResult:
     """
         Downloads a file from a remote filesystem and stores
         it locally.
@@ -502,11 +486,23 @@ def download(args: list) -> Optional[CommandResult]:
     else:
         destination = os.path.basename(source)
 
+    download_result = None
     if device_state.platform == Ios:
-        _download_ios(source, destination, should_download_folder)
+        download_result = _download_ios(source, destination, should_download_folder)
 
     if device_state.platform == Android:
-        _download_android(source, destination, should_download_folder)
+        download_result = _download_android(source, destination, should_download_folder)
+
+    if isinstance(download_result, dict) and download_result.get('status') == 'error':
+        return output_result(
+            CommandResult(
+                result={'error': download_result.get('message'), 'source': source, 'destination': destination},
+                status='error',
+                human_text=download_result.get('message'),
+                exit_code=1,
+            ),
+            command='filesystem download',
+        )
 
     return output_result(
         CommandResult(
@@ -517,8 +513,7 @@ def download(args: list) -> Optional[CommandResult]:
         command='filesystem download',
     )
 
-
-def _download_ios(path: str, destination: str, should_download_folder: bool, path_root: bool = True) -> None:
+def _download_ios(path: str, destination: str, should_download_folder: bool, path_root: bool = True) -> dict:
     """
         Download a file from an iOS filesystem and store it locally.
 
@@ -535,54 +530,43 @@ def _download_ios(path: str, destination: str, should_download_folder: bool, pat
     api = state_connection.get_api()
 
     if path_root:
-        click.secho('Downloading {0} to {1}'.format(path, destination), fg='green', dim=True)
+        human_text = 'Downloading {0} to {1}'.format(path, destination)
 
     if not api.ios_file_readable(path):
-        click.secho('Unable to download file. File is not readable.', fg='red')
-        return
+        return {'status': 'error', 'message': 'Unable to download file. File is not readable.', 'path': path}
 
     if not api.ios_file_path_is_file(path):
         if not should_download_folder:
-            click.secho('To download folders, specify --folder.', fg='yellow')
-            return
+            return {'status': 'skipped', 'message': 'To download folders, specify --folder.', 'path': path}
 
         if os.path.exists(destination):
-            click.secho('The target path already exists.', fg='yellow')
-            return
+            return {'status': 'skipped', 'message': 'The target path already exists.', 'path': path}
 
         os.makedirs(destination)
 
         if path_root:
-            if not should_output_json(None) and not click.confirm('Do you want to download the full directory?', default=True):
-                click.secho('Download aborted.', fg='yellow')
-                return
-            click.secho('Downloading directory recursively...', fg='green')
+            if should_output_json(None):
+                human_text = 'Directory download confirmed in non-interactive mode.'
+            else:
+                if not click.confirm('Do you want to download the full directory?', default=True):
+                    return {'status': 'aborted', 'message': 'Download aborted.', 'path': path}
 
         data = api.ios_file_ls(path)
+        results = []
         for name, _ in data['files'].items():
             sub_path = device_state.platform.path_separator.join([path, name])
             sub_destination = os.path.join(destination, name)
+            results.append(_download_ios(sub_path, sub_destination, True, False))
+        return {'status': 'ok', 'message': 'Recursive download finished.', 'results': results}
 
-            _download_ios(sub_path, sub_destination, True, False)
-        if path_root:
-            click.secho('Recursive download finished.', fg='green')
-
-        return
-
-    if path_root:
-        click.secho('Streaming file from device...', dim=True)
     file_data = api.ios_file_download(path)
-
-    if path_root:
-        click.secho('Writing bytes to destination...', dim=True)
-
     with open(destination, 'wb') as fh:
         fh.write(bytearray(file_data['data']))
 
-    click.secho('Successfully downloaded {0} to {1}'.format(path, destination), bold=True)
+    human_text = 'Successfully downloaded {0} to {1}'.format(path, destination)
+    return {'status': 'ok', 'message': human_text, 'path': path}
 
-
-def _download_android(path: str, destination: str, should_download_folder: bool, path_root: bool = True) -> None:
+def _download_android(path: str, destination: str, should_download_folder: bool, path_root: bool = True) -> dict:
     """
         Download a file from the Android filesystem and store it locally.
 
@@ -599,53 +583,43 @@ def _download_android(path: str, destination: str, should_download_folder: bool,
     api = state_connection.get_api()
 
     if path_root:
-        click.secho('Downloading {0} to {1}'.format(path, destination), fg='green', dim=True)
+        human_text = 'Downloading {0} to {1}'.format(path, destination)
 
     if not api.android_file_readable(path):
-        click.secho('Unable to download file. Target path is not readable.', fg='red')
-        return
+        return {'status': 'error', 'message': 'Unable to download file. Target path is not readable.', 'path': path}
 
     if not api.android_file_path_is_file(path):
         if not should_download_folder:
-            click.secho('To download folders, specify --folder.', fg='yellow')
-            return
+            return {'status': 'skipped', 'message': 'To download folders, specify --folder.', 'path': path}
 
         if os.path.exists(destination):
-            click.secho('The target path already exists.', fg='yellow')
-            return
+            return {'status': 'skipped', 'message': 'The target path already exists.', 'path': path}
 
         os.makedirs(destination)
 
         if path_root:
-            if not should_output_json(None) and not click.confirm('Do you want to download the full directory?', default=True):
-                click.secho('Download aborted.', fg='yellow')
-                return
-            click.secho('Downloading directory recursively...', fg='green')
+            if should_output_json(None):
+                human_text = 'Directory download confirmed in non-interactive mode.'
+            else:
+                if not click.confirm('Do you want to download the full directory?', default=True):
+                    return {'status': 'aborted', 'message': 'Download aborted.', 'path': path}
 
         data = api.android_file_ls(path)
+        results = []
         for name, _ in data['files'].items():
             sub_path = device_state.platform.path_separator.join([path, name])
             sub_destination = os.path.join(destination, name)
+            results.append(_download_android(sub_path, sub_destination, True, False))
+        return {'status': 'ok', 'message': 'Recursive download finished.', 'results': results}
 
-            _download_android(sub_path, sub_destination, True, False)
-        if path_root:
-            click.secho('Recursive download finished.', fg='green')
-        return
-
-    if path_root:
-        click.secho('Streaming file from device...', dim=True)
     file_data = api.android_file_download(path)
-
-    if path_root:
-        click.secho('Writing bytes to destination...', dim=True)
-
     with open(destination, 'wb') as fh:
         fh.write(bytearray(file_data['data']))
 
-    click.secho('Successfully downloaded {0} to {1}'.format(path, destination), bold=True)
+    human_text = 'Successfully downloaded {0} to {1}'.format(path, destination)
+    return {'status': 'ok', 'message': human_text, 'path': path}
 
-
-def upload(args: list) -> Optional[CommandResult]:
+def upload(args: list) -> CommandResult:
     """
         Uploads a local file to the remote operating system.
 
@@ -671,92 +645,99 @@ def upload(args: list) -> Optional[CommandResult]:
     destination = args[1] if len(args) > 1 else device_state.platform.path_separator.join(
         [pwd(), os.path.basename(source)])
 
+    messages = []
     if device_state.platform == Ios:
-        _upload_ios(source, destination)
+        messages.extend(_upload_ios(source, destination))
 
     if device_state.platform == Android:
-        _upload_android(source, destination)
+        messages.extend(_upload_android(source, destination))
 
+    human_text = '\n'.join(messages) if messages else 'Uploaded {0} to {1}'.format(source, destination)
     return output_result(
         CommandResult(
             result={'action': 'uploaded', 'source': source, 'destination': destination},
-            human_text='Uploaded {0} to {1}'.format(source, destination),
+            human_text=human_text,
         ),
         command='filesystem upload',
     )
 
-
-def _upload_ios(path: str, destination: str) -> None:
+def _upload_ios(path: str, destination: str) -> list:
     """
         Upload a file to a remote iOS filesystem.
 
         :param path:
         :param destination:
-        :return:
+        :return: list of status messages
     """
+
+    messages = []
 
     if not is_unix_absolute_path(destination):
         destination = device_state.platform.path_separator.join([pwd(), destination])
 
     api = state_connection.get_api()
-    click.secho('Uploading {0} to {1}'.format(path, destination), fg='green', dim=True)
+    messages.append('Uploading {0} to {1}'.format(path, destination))
 
     # if we cant read the file, just stop
     if not api.ios_file_writable(os.path.dirname(destination)):
-        click.secho('Unable to upload file. Destination is not writable.', fg='red')
-        return
+        messages.append('Unable to upload file. Destination is not writable.')
+        return messages
 
-    click.secho('Reading source file...', dim=True)
+    messages.append('Reading source file...')
     with open(path, 'rb') as f:
         data = f.read().hex()
 
-    click.secho('Sending file to device for writing...', dim=True)
+    messages.append('Sending file to device for writing...')
     api.ios_file_upload(destination, data)
 
-    click.secho('Uploaded: {0}'.format(destination), dim=True)
+    messages.append('Uploaded: {0}'.format(destination))
 
     # unset the cache key for this directory so the next short listing
     # will have updated contents
     if os.path.dirname(destination) in _ls_cache:
         del _ls_cache[os.path.dirname(destination)]
 
+    return messages
 
-def _upload_android(path: str, destination: str) -> None:
+def _upload_android(path: str, destination: str) -> list:
     """
         Upload a file to a remote Android filesystem.
 
         :param path:
         :param destination:
-        :return:
+        :return: list of status messages
     """
+
+    messages = []
 
     if not is_unix_absolute_path(destination):
         destination = device_state.platform.path_separator.join([pwd(), destination])
 
     api = state_connection.get_api()
-    click.secho('Uploading {0} to {1}'.format(path, destination), fg='green', dim=True)
+    messages.append('Uploading {0} to {1}'.format(path, destination))
 
     # if we cant read the file, just stop
     if not api.android_file_writable(os.path.dirname(destination)):
-        click.secho('Unable to upload file. Destination is not writable.', fg='red')
-        return
+        messages.append('Unable to upload file. Destination is not writable.')
+        return messages
 
-    click.secho('Reading source file...', dim=True)
+    messages.append('Reading source file...')
     with open(path, 'rb') as f:
         data = f.read().hex()
 
-    click.secho('Sending file to device for writing...', dim=True)
+    messages.append('Sending file to device for writing...')
     api.android_file_upload(destination, data)
 
-    click.secho('Uploaded: {0}'.format(destination), dim=True)
+    messages.append('Uploaded: {0}'.format(destination))
 
     # unset the cache key for this directory so the next short listing
     # will have updated contents
     if os.path.dirname(destination) in _ls_cache:
         del _ls_cache[os.path.dirname(destination)]
 
+    return messages
 
-def rm(args: list) -> Optional[CommandResult]:
+def rm(args: list) -> CommandResult:
     """
         Remove a file from the remote filesystem.
 
@@ -781,7 +762,10 @@ def rm(args: list) -> Optional[CommandResult]:
         target = device_state.platform.path_separator.join([pwd(), target])
 
     # human mode 下保留交互确认
-    if not should_output_json(args):
+    if should_output_json(args):
+        # Agent/JSON 模式下直接执行，不阻塞
+        pass
+    else:
         if not click.confirm('Really delete {0} ?'.format(target)):
             return output_result(
                 CommandResult(result={'action': 'deleted', 'target': target, 'deleted': False},
@@ -801,7 +785,6 @@ def rm(args: list) -> Optional[CommandResult]:
                       human_text='{0} successfully deleted'.format(target) if deleted else '{0} does not exist'.format(target)),
         command='rm',
     )
-
 
 def _rm_android(t: str) -> bool:
     """
@@ -824,7 +807,6 @@ def _rm_android(t: str) -> bool:
 
     return bool(deleted)
 
-
 def _rm_ios(t: str) -> bool:
     """
         Removes a file from an iOS device.
@@ -846,8 +828,7 @@ def _rm_ios(t: str) -> bool:
 
     return bool(deleted)
 
-
-def cat(args: list) -> Optional[CommandResult]:
+def cat(args: list) -> CommandResult:
     """
         Downloads a file from a remote filesystem and echos
         it's contents
@@ -891,7 +872,6 @@ def cat(args: list) -> Optional[CommandResult]:
                       human_text='====\n{0}\n===='.format(content)),
         command='filesystem cat',
     )
-
 
 def _get_short_ios_listing() -> list:
     """
@@ -937,7 +917,6 @@ def _get_short_ios_listing() -> list:
     # grab the output lets seeeeee
     return resp
 
-
 def _get_short_android_listing() -> list:
     """
         Get a shortened file and directory listing for
@@ -975,7 +954,6 @@ def _get_short_android_listing() -> list:
     # grab the output lets seeeeee
     return resp
 
-
 def list_folders_in_current_fm_directory() -> dict:
     """
         Return folders in the current working directory of the
@@ -1009,7 +987,6 @@ def list_folders_in_current_fm_directory() -> dict:
 
     return resp
 
-
 def list_files_in_current_fm_directory() -> dict:
     """
         Return files in the current working directory of the
@@ -1042,7 +1019,6 @@ def list_files_in_current_fm_directory() -> dict:
                 resp[file_name] = file_name
 
     return resp
-
 
 def list_content_in_current_fm_directory() -> dict:
     """

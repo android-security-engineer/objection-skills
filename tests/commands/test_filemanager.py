@@ -5,6 +5,7 @@ from objection.commands.filemanager import cd, _path_exists_ios, _path_exists_an
     _pwd_android, ls, _ls_ios, _ls_android, download, _download_ios, _download_android, upload, rm, _rm_android
 from objection.state.device import device_state, Ios, Android
 from objection.state.filemanager import file_manager_state
+from objection.utils.output import CommandResult
 from ..helpers import capture, normalize_table_whitespace
 
 
@@ -181,12 +182,9 @@ class TestFileManager(unittest.TestCase):
         mock_exists.return_value = True
         mock_api.return_value.android_file_delete.return_value = True
 
-        with capture(_rm_android, '/poo') as o:
-            output = o
+        result = _rm_android('/poo')
 
-        expected = '/poo successfully deleted\n'
-
-        self.assertTrue(output, expected)
+        self.assertTrue(result)
 
     @mock.patch('objection.state.connection.state_connection.get_api')
     def test_android_path_exists_helper(self, mock_api):
@@ -237,35 +235,47 @@ class TestFileManager(unittest.TestCase):
         self.assertEqual(_pwd_android(), '/foo/baz')
         self.assertEqual(file_manager_state.cwd, '/foo/baz')
 
+    @mock.patch('objection.state.connection.state_connection.get_api')
     @mock.patch('objection.commands.filemanager.pwd')
     @mock.patch('objection.commands.filemanager._ls_ios')
-    def test_ls_gets_pwd_from_helper_with_no_argument(self, _, mock_pwd):
+    def test_ls_gets_pwd_from_helper_with_no_argument(self, _, mock_pwd, mock_api):
         device_state.platform = Ios
 
         ls([])
 
         self.assertTrue(mock_pwd.called)
 
+    @mock.patch('objection.state.connection.state_connection.get_api')
     @mock.patch('objection.commands.filemanager._ls_ios')
-    def test_ls_calls_ios_helper_method(self, mock_ls_ios):
+    def test_ls_calls_ios_helper_method(self, mock_ls_ios, mock_get_api):
         device_state.platform = Ios
 
         ls(['/foo/bar'])
 
         self.assertTrue(mock_ls_ios.called)
 
-    @mock.patch('objection.commands.filemanager.os.path.isabs', return_value=False)
+    @mock.patch('objection.state.connection.state_connection.get_api')
     @mock.patch('objection.commands.filemanager._ls_ios')
-    def test_ls_treats_unix_style_path_as_absolute_when_host_is_windows(self, mock_ls_ios, _):
+    def test_ls_treats_unix_style_path_as_absolute_when_host_is_windows(self, mock_ls_ios, mock_api):
         device_state.platform = Ios
         file_manager_state.cwd = '/current'
+        mock_api.return_value.ios_file_ls.return_value = {
+            'readable': True,
+            'writable': True,
+            'files': {}
+        }
+        mock_ls_ios.return_value = 'mocked listing'
 
         ls(['/foo/bar'])
 
-        mock_ls_ios.assert_called_once_with('/foo/bar')
+        self.assertTrue(mock_ls_ios.called)
+        args = mock_ls_ios.call_args[0]
+        self.assertEqual(args[0], '/foo/bar')
+        self.assertIsInstance(args[1], dict)
 
+    @mock.patch('objection.state.connection.state_connection.get_api')
     @mock.patch('objection.commands.filemanager._ls_android')
-    def test_ls_calls_android_helper_method(self, mock_ls_android):
+    def test_ls_calls_android_helper_method(self, mock_ls_android, mock_get_api):
         device_state.platform = Android
 
         ls(['/foo/bar'])
@@ -298,15 +308,14 @@ class TestFileManager(unittest.TestCase):
             }
         }
 
-        with capture(_ls_ios, ['/foo/bar']) as o:
-            output = o
+        data = mock_api.return_value.ios_file_ls.return_value
+        human_text = _ls_ios('/foo/bar', data)
 
-        # 不锁定 tabulate 精确列宽，断言关键字段
         for token in ('NSFileType', 'Perms', 'NSFileProtection', 'Read', 'Write',
                       'Owner', 'Group', 'Size', 'Creation', 'Name',
                       'A', 'B', 'C', 'D (E)', 'F (G)', '115.4 GiB', 'H', 'test',
                       'Readable: True  Writable: False'):
-            self.assertIn(token, output)
+            self.assertIn(token, human_text)
 
     @mock.patch('objection.state.connection.state_connection.get_api')
     def test_lists_readable_ios_directory_using_helper_method_no_attributes(self, mock_api):
@@ -324,14 +333,14 @@ class TestFileManager(unittest.TestCase):
             }
         }
 
-        with capture(_ls_ios, ['/foo/bar']) as o:
-            output = o
+        data = mock_api.return_value.ios_file_ls.return_value
+        human_text = _ls_ios('/foo/bar', data)
 
         for token in ('NSFileType', 'Perms', 'NSFileProtection', 'Read', 'Write',
                       'Owner', 'Group', 'Size', 'Creation', 'Name',
                       'n/a', 'n/a (n/a)', 'test',
                       'Readable: True  Writable: True'):
-            self.assertIn(token, output)
+            self.assertIn(token, human_text)
 
     @mock.patch('objection.state.connection.state_connection.get_api')
     def test_lists_unreadable_ios_directory_using_helper_method(self, mock_api):
@@ -342,10 +351,10 @@ class TestFileManager(unittest.TestCase):
             'files': {}
         }
 
-        with capture(_ls_ios, ['/foo/bar']) as o:
-            output = o
+        data = mock_api.return_value.ios_file_ls.return_value
+        human_text = _ls_ios('/foo/bar', data)
 
-        self.assertEqual(output, '\nReadable: False  Writable: False\n')
+        self.assertEqual(human_text, '\nReadable: False  Writable: False')
 
     @mock.patch('objection.state.connection.state_connection.get_api')
     def test_lists_readable_android_directory_using_helper_method(self, mock_api):
@@ -369,14 +378,13 @@ class TestFileManager(unittest.TestCase):
             }
         }
 
-        with capture(_ls_android, ['/foo/bar']) as o:
-            output = o
+        data = mock_api.return_value.android_file_ls.return_value
+        human_text = _ls_android('/foo/bar', data)
 
-        # 不锁定 tabulate 精确列宽，断言关键字段
         for token in ('Type', 'Last Modified', 'Read', 'Write', 'Hidden', 'Size', 'Name',
                       'File', '2017-10-05 07:36:41 GMT', 'True', 'False', '249.0 B', 'test',
                       'Readable: True  Writable: True'):
-            self.assertIn(token, output)
+            self.assertIn(token, human_text)
 
     @mock.patch('objection.state.connection.state_connection.get_api')
     def test_lists_unreadable_android_directory_using_helper_method(self, mock_api):
@@ -387,10 +395,9 @@ class TestFileManager(unittest.TestCase):
             'files': {}
         }
 
-        with capture(_ls_android, ['/foo/bar']) as o:
-            output = o
+        human_text = _ls_android('/foo/bar', mock_api.return_value.android_file_ls.return_value)
 
-        self.assertEqual(output, '\nReadable: False  Writable: False\n')
+        self.assertEqual(human_text, '\nReadable: False  Writable: False')
 
     def test_download_platform_proxy_validates_arguments(self):
         with capture(download, []) as o:
@@ -423,36 +430,30 @@ class TestFileManager(unittest.TestCase):
 
         file_manager_state.cwd = '/foo'
 
-        with capture(_download_ios, '/foo', '/bar', False) as o:
-            output = o
-
-        expected_output = """Downloading /foo to /bar
-Streaming file from device...
-Writing bytes to destination...
-Successfully downloaded /foo to /bar
-"""
+        result = _download_ios('/foo', '/bar', False)
 
         self.assertTrue(mock_open.called)
-        self.assertEqual(output, expected_output)
+        self.assertEqual(result['status'], 'ok')
+        self.assertIn('Successfully downloaded /foo to /bar', result['message'])
 
     @mock.patch('objection.state.connection.state_connection.get_api')
     def test_downloads_file_but_fails_on_unreadable_with_ios_helper(self, mock_api):
         mock_api.return_value.ios_file_readable.return_value = False
 
-        with capture(_download_ios, '/foo', '/bar', False) as o:
-            output = o
+        result = _download_ios('/foo', '/bar', False)
 
-        self.assertEqual(output, 'Downloading /foo to /bar\nUnable to download file. File is not readable.\n')
+        self.assertEqual(result['status'], 'error')
+        self.assertIn('Unable to download file. File is not readable.', result['message'])
 
     @mock.patch('objection.state.connection.state_connection.get_api')
     def test_downloads_file_but_fails_on_file_type_with_ios_helper(self, mock_api):
         mock_api.return_value.ios_file_readable.return_value = True
         mock_api.return_value.ios_file_path_is_file.return_value = False
 
-        with capture(_download_ios, '/foo', '/bar', False) as o:
-            output = o
+        result = _download_ios('/foo', '/bar', False)
 
-        self.assertEqual(output, 'Downloading /foo to /bar\nTo download folders, specify --folder.\n')
+        self.assertEqual(result['status'], 'skipped')
+        self.assertIn('To download folders, specify --folder.', result['message'])
 
     @mock.patch('objection.state.connection.state_connection.get_api')
     @mock.patch('objection.commands.filemanager.open', create=True)
@@ -463,17 +464,11 @@ Successfully downloaded /foo to /bar
 
         file_manager_state.cwd = '/foo'
 
-        with capture(_download_android, '/foo', '/bar', False) as o:
-            output = o
-
-        expected = """Downloading /foo to /bar
-Streaming file from device...
-Writing bytes to destination...
-Successfully downloaded /foo to /bar
-"""
+        result = _download_android('/foo', '/bar', False)
 
         self.assertTrue(mock_open.called)
-        self.assertEqual(output, expected)
+        self.assertEqual(result['status'], 'ok')
+        self.assertIn('Successfully downloaded /foo to /bar', result['message'])
 
     @mock.patch('objection.state.connection.state_connection.get_api')
     @mock.patch('objection.commands.filemanager.open', create=True)
@@ -482,11 +477,11 @@ Successfully downloaded /foo to /bar
 
         file_manager_state.cwd = '/foo'
 
-        with capture(_download_android, '/foo', '/bar', False) as o:
-            output = o
+        result = _download_android('/foo', '/bar', False)
 
         self.assertFalse(mock_open.called)
-        self.assertEqual(output, 'Downloading /foo to /bar\nUnable to download file. Target path is not readable.\n')
+        self.assertEqual(result['status'], 'error')
+        self.assertIn('Unable to download file. Target path is not readable.', result['message'])
 
     @mock.patch('objection.state.connection.state_connection.get_api')
     @mock.patch('objection.commands.filemanager.open', create=True)
@@ -496,11 +491,11 @@ Successfully downloaded /foo to /bar
 
         file_manager_state.cwd = '/foo'
 
-        with capture(_download_android, '/foo', '/bar', False) as o:
-            output = o
+        result = _download_android('/foo', '/bar', False)
 
         self.assertFalse(mock_open.called)
-        self.assertEqual(output, 'Downloading /foo to /bar\nTo download folders, specify --folder.\n')
+        self.assertEqual(result['status'], 'skipped')
+        self.assertIn('To download folders, specify --folder.', result['message'])
 
     def test_file_upload_method_proxy_validates_arguments(self):
         with capture(upload, []) as o:

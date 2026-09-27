@@ -5,7 +5,7 @@ from objection.state.connection import state_connection
 from objection.utils.output import CommandResult, output_result, should_output_json
 
 
-def entries(args: list = None) -> None:
+def entries(args: list = None) -> CommandResult:
     """
         Lists entries in the Android KeyStore
 
@@ -16,18 +16,15 @@ def entries(args: list = None) -> None:
     api = state_connection.get_api()
     ks = api.android_keystore_list()
 
-    if should_output_json(args):
-        return output_result(
-            CommandResult(result={'entries': ks, 'count': len(ks)}),
-            command='android keystore list',
-        )
-
     output = [[x['alias'], x['is_key'], x['is_certificate']] for x in ks]
-    click.secho(tabulate(output, headers=['Alias', 'Key', 'Certificate']))
-    return None
+    human_text = tabulate(output, headers=['Alias', 'Key', 'Certificate'])
+    return output_result(
+        CommandResult(result={'entries': ks, 'count': len(ks)}, human_text=human_text),
+        command='android keystore list',
+    )
 
 
-def detail(args: list = None) -> None:
+def detail(args: list = None) -> CommandResult:
     """
         Lists details of all items in the Android KeyStore
 
@@ -38,13 +35,7 @@ def detail(args: list = None) -> None:
     api = state_connection.get_api()
     ks = api.android_keystore_detail()
 
-    if should_output_json(args):
-        return output_result(
-            CommandResult(result={'details': ks, 'count': len(ks)}),
-            command='android keystore detail',
-        )
-
-    click.secho('Listing details for all items in the Android KeyStore...', dim=True)
+    human_text = 'Listing details for all items in the Android KeyStore...\n'
     output = [[
         x['keystoreAlias'],
         x['keyAlgorithm'],
@@ -59,14 +50,17 @@ def detail(args: list = None) -> None:
         x['isInsideSecureHardware'],
     ] for x in ks]
 
-    click.secho(tabulate(output, headers=[
+    human_text += tabulate(output, headers=[
         'Alias', 'Alg', 'Size', 'Modes', 'Paddings', 'Digests',
         'Validity Start', 'Origin', 'Purposes', 'Sig Paddings', 'Sec Hardware'
-    ]))
-    return None
+    ])
+    return output_result(
+        CommandResult(result={'details': ks, 'count': len(ks)}, human_text=human_text),
+        command='android keystore detail',
+    )
 
 
-def clear(args: list = None) -> None:
+def clear(args: list = None) -> CommandResult:
     """
         Clears out an Android KeyStore
 
@@ -74,23 +68,26 @@ def clear(args: list = None) -> None:
         :return:
     """
 
-    # JSON 模式下跳过交互确认（Agent 无法回答 confirm）
+    # Agent / JSON 模式下跳过交互确认，直接执行
     if not should_output_json(args):
         if not click.confirm('Are you sure you want to clear the Android keystore?'):
-            return None
+            human_text = 'Keystore clear cancelled'
+            return output_result(
+                CommandResult(result={'cleared': False}, human_text=human_text),
+                command='android keystore clear',
+            )
 
     api = state_connection.get_api()
     api.android_keystore_clear()
 
-    if should_output_json(args):
-        return output_result(
-            CommandResult(result={'cleared': True}),
-            command='android keystore clear',
-        )
-    return None
+    human_text = 'Android keystore cleared'
+    return output_result(
+        CommandResult(result={'cleared': True}, human_text=human_text),
+        command='android keystore clear',
+    )
 
 
-def watch(args: list = None) -> None:
+def watch(args: list = None) -> CommandResult:
     """
         Watches usage of the Android KeyStore
 
@@ -101,12 +98,11 @@ def watch(args: list = None) -> None:
     api = state_connection.get_api()
     api.android_keystore_watch()
 
-    if should_output_json(args):
-        return output_result(
-            CommandResult(
-                result={'watching': True},
-                warnings=['Job id not surfaced; use `agent state` to list running jobs.'],
-            ),
-            command='android keystore watch',
-        )
-    return None
+    return output_result(
+        CommandResult(
+            result={'watching': True},
+            human_text='Watching Android keystore',
+            warnings=['Job id not surfaced; use `agent state` to list running jobs.'],
+        ),
+        command='android keystore watch',
+    )

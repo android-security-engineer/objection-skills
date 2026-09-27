@@ -5,7 +5,7 @@ import click
 
 from objection.state.connection import state_connection
 from objection.utils.helpers import clean_argument_flags
-from objection.utils.output import CommandResult, output_result, should_output_json
+from objection.utils.output import CommandResult, output_result
 
 # a thumb sucked list of prefixes used in Objective-C runtime
 # for iOS applications. This is not a science, but a gut feeling.
@@ -197,7 +197,7 @@ def _get_flag_value(flag: str, args: list) -> Optional[str]:
         return None
 
 
-def show_ios_classes(args: list = None) -> Optional[CommandResult]:
+def show_ios_classes(args: list = None) -> CommandResult:
     """
         Prints the classes available in the current Objective-C
         runtime to the screen.
@@ -214,14 +214,6 @@ def show_ios_classes(args: list = None) -> Optional[CommandResult]:
     else:
         classes = sorted(classes)
 
-    if should_output_json(args):
-        return output_result(
-            CommandResult(
-                result={'classes': classes, 'count': len(classes), 'ignored_native': _should_ignore_native_classes(args)},
-            ),
-            command='ios hooking list classes',
-        )
-
     human_text = '\n'.join(classes)
     human_text += '\n\nFound {0} classes'.format(len(classes))
     return output_result(
@@ -233,7 +225,7 @@ def show_ios_classes(args: list = None) -> Optional[CommandResult]:
     )
 
 
-def show_ios_class_methods(args: list) -> Optional[CommandResult]:
+def show_ios_class_methods(args: list) -> CommandResult:
     """
         Displays the methods available in a class.
 
@@ -257,15 +249,6 @@ def show_ios_class_methods(args: list) -> Optional[CommandResult]:
     api = state_connection.get_api()
     methods = api.ios_hooking_get_class_methods(classname, _should_include_parent_methods(args))
 
-    if should_output_json(args):
-        return output_result(
-            CommandResult(
-                result={'class': classname, 'methods': methods, 'count': len(methods),
-                        'include_parents': _should_include_parent_methods(args)},
-            ),
-            command='ios hooking list class_methods',
-        )
-
     human_text = '\n'.join(methods)
     human_text += '\n\nFound {0} methods'.format(len(methods))
     return output_result(
@@ -278,7 +261,7 @@ def show_ios_class_methods(args: list) -> Optional[CommandResult]:
     )
 
 
-def set_method_return_value(args: list) -> Optional[CommandResult]:
+def set_method_return_value(args: list) -> CommandResult:
     """
         Make an Objective-C method return a specific boolean
         value, always.
@@ -314,7 +297,7 @@ def set_method_return_value(args: list) -> Optional[CommandResult]:
     )
 
 
-def watch(args: list) -> Optional[CommandResult]:
+def watch(args: list) -> CommandResult:
     """
         Watches a pattern for invocations.
 
@@ -359,7 +342,7 @@ def watch(args: list) -> Optional[CommandResult]:
     )
 
 
-def search(args: list) -> Optional[CommandResult]:
+def search(args: list) -> CommandResult:
     """
         Searches the current iOS application for classes and methods.
 

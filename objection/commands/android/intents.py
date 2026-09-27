@@ -1,8 +1,7 @@
-from typing import Optional
 
 from objection.state.connection import state_connection
 from objection.utils.helpers import clean_argument_flags
-from objection.utils.output import CommandResult, output_result, should_output_json
+from objection.utils.output import CommandResult, output_result
 
 
 def _should_dump_backtrace(args: list = None) -> bool:
@@ -16,7 +15,7 @@ def _should_dump_backtrace(args: list = None) -> bool:
     return '--dump-backtrace' in args
 
 
-def analyze_implicit_intents(args: list) -> Optional[CommandResult]:
+def analyze_implicit_intents(args: list) -> CommandResult:
     """
         Analyzes implicit intents in hooked methods.
     """
@@ -35,7 +34,7 @@ def analyze_implicit_intents(args: list) -> Optional[CommandResult]:
     )
 
 
-def launch_activity(args: list) -> Optional[CommandResult]:
+def launch_activity(args: list) -> CommandResult:
     """
         Launches an activity class using an Android Intent
 
@@ -65,7 +64,7 @@ def launch_activity(args: list) -> Optional[CommandResult]:
     )
 
 
-def launch_service(args: list) -> Optional[CommandResult]:
+def launch_service(args: list) -> CommandResult:
     """
         Launches an exported service using an Android Intent
 
