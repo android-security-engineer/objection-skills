@@ -4,6 +4,26 @@
 
 > 这些命令在目标 Android 进程内的实现，见 [agent TS · android](/reference/agent/)。
 
+## 🗺️ 模块地图
+
+```mermaid
+flowchart LR
+    REPL[REPL: android ...] --> AND[commands/android/]
+    AND --> HK[hooking<br/>list / watch / set return_value / search]
+    AND --> HP[heap<br/>search instances / print fields / execute]
+    AND --> KS[keystore<br/>list / detail / clear / watch]
+    AND --> PIN[pinning<br/>sslpinning disable]
+    AND --> CLIP[clipboard<br/>monitor]
+    AND --> INT[intents<br/>launch_activity / implicit_intents]
+    AND --> ROOT[root<br/>disable / simulate]
+    AND --> PRX[proxy<br/>set]
+    AND --> GEN[general<br/>deoptimize / shell_exec / ui]
+    AND --> GENR[generate<br/>hooking generate]
+    AND --> MON[monitor<br/>运行时监控]
+    AND --> CMD[command<br/>自定义命令执行]
+    AND --> AGENT[agent.js<br/>Java.perform 实现]
+```
+
 ## 📂 文件清单
 
 | 文档 | 源码 | 命令组 |

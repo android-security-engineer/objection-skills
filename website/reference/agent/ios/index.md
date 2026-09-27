@@ -2,6 +2,31 @@
 
 `agent/src/ios/` 下每个 `.ts` 文件实现一组在 **iOS 目标进程内**运行的逻辑，通过 `rpc.exports` 暴露给 Python 侧。所有 ObjC 交互经 `lib/libobjc.ts` 的 `libObjc` Proxy（懒加载 + 方法指针缓存）。
 
+## 🗺️ 实现结构
+
+```mermaid
+flowchart LR
+    RPC[rpc/ios.ts<br/>ios* 前缀聚合] --> IOS[ios/*.ts 主模块]
+    IOS --> BC[binarycookies.ts]
+    IOS --> BIN[binary.ts · bundles.ts]
+    IOS --> CS[credentialstorage.ts]
+    IOS --> CR[crypto.ts]
+    IOS --> FS[filesystem.ts]
+    IOS --> HEAP[heap.ts]
+    IOS --> HK[hooking.ts]
+    IOS --> JB[jailbreak.ts]
+    IOS --> KC[keychain.ts]
+    IOS --> NSUD[nsuserdefaults.ts]
+    IOS --> PB[pasteboard.ts]
+    IOS --> PIN[pinning.ts]
+    IOS --> PL[plist.ts]
+    IOS --> UI[userinterface.ts]
+    IOS --> LIB[ios/lib/]
+    LIB --> LO[libobjc.ts<br/>ObjC 桥 Proxy]
+    LIB --> CONS[constants.ts · helpers.ts<br/>interfaces.ts · types.ts]
+    IOS --> OBJC[ObjC runtime<br/>Interception.attach]
+```
+
 ## 📂 文件清单
 
 ### 主模块

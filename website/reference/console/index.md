@@ -2,6 +2,19 @@
 
 `objection/console/` 实现两层入口：基于 Click 的命令行 `cli.py`，以及交互式 REPL `repl.py`。本分区逐文件讲解。
 
+## 🗺️ 调用关系
+
+```mermaid
+flowchart TD
+    CLI[cli.py<br/>Click 顶层入口] --> MODE{模式}
+    MODE -->|explore / start| REPL[repl.py<br/>prompt_toolkit 主循环]
+    MODE -->|agent| AGCLI[agent_cli.py<br/>一次性命令执行]
+    REPL --> CMDS[commands.py<br/>COMMANDS 命令树]
+    REPL --> COMP[completer.py<br/>命令补全]
+    CMDS --> EXEC[命令实现<br/>commands/*.py]
+    AGCLI --> EXEC
+```
+
 ## 📂 文件清单
 
 | 文档 | 源码 | 职责 |

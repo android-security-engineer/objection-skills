@@ -48,7 +48,7 @@ flowchart LR
     CLI["CLI 参数解析"] -->|"set_*"| SC["StateConnection 单例<br/>state_connection"]
     AGENT["Agent.run()<br/>注入完成"] -->|set_agent| SC
     SC -->|get_agent| PLUGIN["utils/plugin.py<br/>Plugin.inject()"]
-    SC -->|get_api → agent.exports()| CMDS["commands/*<br/>RPC 调用"]
+    SC -->|get_api → agent.exports| CMDS["commands/*<br/>RPC 调用"]
     SC -->|name / device_id| PROMPT["REPL 提示符渲染"]
 ```
 

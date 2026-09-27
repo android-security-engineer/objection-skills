@@ -2,6 +2,30 @@
 
 `agent/src/android/` 下每个 `.ts` 文件实现一组在 **Android 目标进程内**运行的逻辑，通过 `rpc.exports` 暴露给 Python 侧。所有 Java 交互经 `lib/libjava.ts` 的 `wrapJavaPerform` Promise 化包装。
 
+## 🗺️ 实现结构
+
+```mermaid
+flowchart LR
+    RPC[rpc/android.ts<br/>android* 前缀聚合] --> AND[android/*.ts 主模块]
+    AND --> CLIP[clipboard.ts]
+    AND --> FS[filesystem.ts]
+    AND --> GEN[general.ts · shell.ts]
+    AND --> HEAP[heap.ts]
+    AND --> HK[hooking.ts]
+    AND --> INT[intent.ts]
+    AND --> KS[keystore.ts]
+    AND --> MON[monitor.ts]
+    AND --> PIN[pinning.ts]
+    AND --> PRX[proxy.ts]
+    AND --> ROOT[root.ts]
+    AND --> UI[userinterface.ts]
+    AND --> LIB[android/lib/]
+    LIB --> LJ[libjava.ts<br/>Java 桥]
+    LIB --> IU[intentUtils.ts]
+    LIB --> IF[interfaces.ts · types.ts]
+    AND --> JAVA[Java 运行时<br/>Java.perform]
+```
+
 ## 📂 文件清单
 
 ### 主模块

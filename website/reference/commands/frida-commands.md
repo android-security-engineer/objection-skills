@@ -175,10 +175,10 @@ sequenceDiagram
 flowchart LR
     subgraph ping 诊断
       P1[api.ping] --> P2{ok?}
-      P2 --true--> P3[status=ok exit=0<br/>绿色 "responds ok"]
-      P2 --false--> P4[status=error exit=1<br/>红色 "did not respond"]
+      P2 --true--> P3[status=ok exit=0<br/>绿色 responds ok]
+      P2 --false--> P4[status=error exit=1<br/>红色 did not respond]
     end
-    subgraph frida 环境 (env_frida)
+    subgraph frida 环境 [env_frida]
       F1[Process.id] --> F2[version]
       F2 --> F3[arch<br/>Process.platform/arch]
       F3 --> F4[platform<br/>Process.platform]

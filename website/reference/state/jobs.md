@@ -62,8 +62,8 @@ def end(self):
 
 ```mermaid
 flowchart LR
-    HCMD["hooking/pinning 命令"] -->|创建 Job(job_type=hook)| JM["JobManagerState"]
-    SCMD["agent.attach_script / 插件"] -->|创建 Job(job_type=script)| JM
+    HCMD["hooking/pinning 命令"] -->|创建 Job·job_type=hook| JM["JobManagerState"]
+    SCMD["agent.attach_script / 插件"] -->|创建 Job·job_type=script| JM
     JM -->|jobs list| USER["REPL 用户"]
     USER -->|jobs kill id| JM
     JM -->|job.end| HOOKEND["hook: api.jobs_kill(uuid)"]

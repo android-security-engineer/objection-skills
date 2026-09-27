@@ -118,7 +118,7 @@ flowchart TD
     F --> H4[jailMonkeyBypass: JailMonkeyModule.getConstants]
     F --> H5[RootBeer 8 个方法]
     H1 & H2 & H3 & H4 & H5 --> G[Job.addImplementation 仅在非 null 时挂载]
-    G --> J[jobs.add 注册 root-detection-{disable,enable}]
+    G --> J["jobs.add 注册 root-detection-#123;disable,enable#125;"]
 ```
 
 ## ⚙️ 实现要点

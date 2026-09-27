@@ -316,7 +316,7 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    subgraph agent_endpoints.bp url_prefix=''
+    subgraph agent_endpoints_bp["agent_endpoints.bp url_prefix=''"]
         CE["POST /command/exec<br/>需 agent"]
         ST["GET /state<br/>需 agent"]
         EV["GET /events/poll<br/>不需 agent (读本地缓冲)"]
@@ -324,11 +324,11 @@ flowchart TD
         ARPC["GET/POST /agent/rpc/<method><br/>需 agent"]
     end
 
-    subgraph rpc.bp url_prefix='/rpc'
+    subgraph rpc_bp["rpc.bp url_prefix='/rpc'"]
         RINV["GET/POST /rpc/invoke/<method><br/>需 agent"]
     end
 
-    subgraph script.bp url_prefix='/script'
+    subgraph script_bp["script.bp url_prefix='/script'"]
         SR["POST /script/runonce<br/>需 agent"]
     end
 

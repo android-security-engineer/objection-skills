@@ -123,3 +123,80 @@ a:hover {
 .custom-block.tip {
   border-color: var(--vp-c-brand-1);
 }
+
+/* =====================================================
+   安卓 / 安全风格扩展
+   —— 终端会话、机器人墨绿点缀、安全徽章、Agent 安装 CTA
+   ===================================================== */
+
+/* 新增：安卓深墨绿（Android 机器人主色）作为"平台副强调色" */
+:root {
+  --obj-android: #3DDC84;
+  --obj-android-dim: rgba(61, 220, 132, 0.14);
+  --obj-console: #0A0E14;   /* 终端深底 */
+}
+
+.dark {
+  --obj-android: #5ce6a0;
+  --obj-android-dim: rgba(61, 220, 132, 0.12);
+}
+
+/* ---------- 首页 hero：更"终端 / 注入"感 ---------- */
+
+/* hero 副标题（tagline）改造成终端首行：等宽 + 灰 + 行内闪烁光标 */
+.VPHero .text {
+  font-family: var(--vp-font-family-mono);
+  letter-spacing: -0.02em;
+}
+
+/* hero 下方 actions 按钮：保留告警红主色，hover 加"通电"微光 */
+.VPHome .VPButton.brand {
+  background: var(--vp-c-brand-1);
+  border-color: var(--vp-c-brand-1);
+  font-weight: 600;
+}
+.VPHome .VPButton.brand:hover {
+  background: var(--vp-c-brand-2);
+  box-shadow: 0 0 18px rgba(232, 72, 85, 0.35);
+}
+
+/* ---------- mermaid 图：统一描边色，对齐主题 ---------- */
+.mermaid {
+  text-align: center;
+}
+
+/* 给 mermaid 里的"命中 / 危险"节点语义色（配合主题红）已由 VitePress 主题默认承担 */
+
+/* ---------- 安全徽章（markdown 里用 <Badge> / 代码块） ---------- */
+.vp-doc .badge {
+  font-family: var(--vp-font-family-mono);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+/* ---------- 代码块：块头加"终端标签"般的红色竖条 ---------- */
+.vp-doc div[class*='language-']::before {
+  /* 代码块左上角小标签，模拟终端窗口点 */
+  content: '● ● ●';
+  display: block;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: var(--obj-accent);
+  opacity: 0.7;
+  padding: 0.4rem 1rem 0.2rem;
+}
+
+/* ---------- Agent 安装 CTA 卡片（首页） ---------- */
+/* 在 index.md 用 <div class="agent-cta"> 包裹即可获得终端感卡片 */
+.agent-cta {
+  border: 1px solid var(--vp-c-brand-1);
+  border-left: 4px solid var(--vp-c-brand-1);
+  background: var(--vp-c-brand-soft);
+  border-radius: 8px;
+  padding: 0.8rem 1.2rem;
+  margin: 1.2rem 0;
+  font-family: var(--vp-font-family-mono);
+}
+.agent-cta strong {
+  color: var(--vp-c-brand-1);
+}

@@ -136,7 +136,7 @@ flowchart TD
     E1 -- 是 --> E2[error: failed to load script\n+ detail]
     E1 -- 否 --> E3[红色提示 + return None]
     E -- 否 --> F{JSON?}
-    F -- 是 --> F1[{action:evaluated, source}\n+ async warning]
+    F -- 是 --> F1["#123;action:evaluated, source#125;\n+ async warning"]
     F -- 否 --> F2[静默 return None]
 ```
 

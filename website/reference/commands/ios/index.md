@@ -4,6 +4,27 @@
 
 > 这些命令在目标 iOS 进程内的实现，见 [agent TS · ios](/reference/agent/)。
 
+## 🗺️ 模块地图
+
+```mermaid
+flowchart LR
+    REPL[REPL: ios ...] --> IOS[commands/ios/]
+    IOS --> KC[keychain<br/>dump / clear / remove / add]
+    IOS --> HKG[hooking<br/>list / watch / set return_value / search]
+    IOS --> HP[heap<br/>search instances / print ivars / execute]
+    IOS --> PIN[pinning<br/>sslpinning disable]
+    IOS --> JB[jailbreak<br/>disable / simulate]
+    IOS --> CD[cookies<br/>get]
+    IOS --> PL[plist<br/>cat]
+    IOS --> NSD[nsuserdefaults<br/>get]
+    IOS --> NSC[nsurlcredentialstorage<br/>dump]
+    IOS --> PB[pasteboard<br/>monitor]
+    IOS --> MN[monitor<br/>crypto]
+    IOS --> INF[bundles / binary<br/>info]
+    IOS --> GEN[generate<br/>hooking generate]
+    IOS --> AGENT[agent.js<br/>ObjC bridge 实现]
+```
+
 ## 📂 文件清单
 
 | 文档 | 源码 | 命令组 |

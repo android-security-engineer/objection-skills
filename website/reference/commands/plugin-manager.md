@@ -79,7 +79,7 @@ flowchart TD
     D --> E{"存在?"}
     E -- 否 --> F["错误: 路径不存在"]
     E -- 是 --> G["importlib 加载模块"]
-    G --> H["namespace = args[1] or plugin.namespace"]
+    G --> H["namespace = args#91;1#93; or plugin.namespace"]
     H --> I["instance = plugin.plugin(namespace)"]
     I --> J{"isinstance PluginType?"}
     J -- 否 --> K["错误: invalid plugin type"]
@@ -111,7 +111,7 @@ flowchart TD
     A[load_plugin args] --> B[abspath + 目录补 __init__.py]
     B --> C[importlib.spec_from_file_location\n模块名=uuid前8位]
     C --> D[exec_module 执行插件 __init__]
-    D --> E[namespace = args[1] or plugin.namespace]
+    D --> E["namespace = args#91;1#93; or plugin.namespace"]
     E --> F[instance = plugin.plugin namespace]
     F --> G{isinstance Plugin?}
     G -- 否 --> H[error: invalid plugin type]

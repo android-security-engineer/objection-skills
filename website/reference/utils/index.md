@@ -2,6 +2,24 @@
 
 `objection/utils/` 提供 agent.js 注入、事件轮询、输出格式化、插件加载、版本检查与 APK/IPA patcher 等工具能力。本分区逐文件讲解。
 
+## 🗺️ 工具层结构
+
+```mermaid
+flowchart TD
+    UT[utils/] --> AG[agent.py<br/>加载并注入 agent.js]
+    UT --> EV[events.py<br/>异步事件队列与轮询]
+    UT --> OUT[output.py<br/>CommandResult / should_output_json]
+    UT --> HELP[helpers.py<br/>通用辅助]
+    UT --> PLG[plugin.py<br/>插件加载]
+    UT --> UP[update_checker.py<br/>新版本检查]
+    UT --> PATCH[patchers/<br/>应用重打包]
+    PATCH --> PB[base.py 基类]
+    PATCH --> PAD[android.py<br/>APK + Gadget]
+    PATCH --> PI[ios.py<br/>IPA patch]
+    PATCH --> PG[github.py<br/>下载 Gadget]
+    AG --> F[Frida 目标进程]
+```
+
 ## 📂 文件清单
 
 ### 通用工具

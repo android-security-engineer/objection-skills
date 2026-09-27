@@ -2,6 +2,26 @@
 
 `tests/` 下每个测试文件验证 objection 一个源码模块的行为。本分区按测试目录结构逐文件讲解。
 
+## 🗺️ 测试地图
+
+```mermaid
+flowchart TD
+    TST[tests/] --> TA[api/agent-endpoints]
+    TST --> TC[commands/]
+    TST --> TCON[console/]
+    TST --> TSTT[state/]
+    TST --> TU[utils/]
+    TC --> TCA[android/]
+    TC --> TCI[ios/]
+    TC --> TCC[通用命令]
+    TU --> TUP[patchers/]
+    TUP --> TUPB[base]
+    TUP --> TUPAD[android]
+    TUP --> TUPI[ios]
+    TUP --> TUPG[github]
+    TST --> TH[helpers.py 公共工具]
+```
+
 ## 📂 文件清单
 
 ### API

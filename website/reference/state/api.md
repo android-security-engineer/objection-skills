@@ -33,8 +33,8 @@ flowchart LR
     CREATE["api/app.py<br/>create_app()"] -->|注册核心蓝图| CORE["Flask app<br/>rpc / script / agent_endpoints"]
     CORE --> AS["ApiState.core_api"]
     PLUGIN["utils/plugin.py<br/>Plugin.http_api()"] -->|返回 Blueprint| AS2["ApiState.blueprints[]"]
-    AS2 -->|start() 挂载| CORE
-    CLI["console/cli.py<br/>objection api"] -->|api_state.start(host,port)| AS
+    AS2 -->|start 挂载| CORE
+    CLI["console/cli.py<br/>objection api"] -->|api_state.start host,port| AS
 ```
 
 ### `append_api_blueprint` — 插件蓝图入列

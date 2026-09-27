@@ -2,6 +2,20 @@
 
 `objection/state/` 管理 objection 与 Frida 的连接、设备、应用、文件管理器与作业的全局状态，并把 agent 的 RPC 方法包装成 Python 可调接口。本分区逐文件讲解。
 
+## 🗺️ 状态层结构
+
+```mermaid
+flowchart TD
+    CLI[命令实现] -->|get_api 单例| API[api.py<br/>RPC 方法包装]
+    API --> CONN[connection.py<br/>Frida session/agent attach]
+    CONN --> F[Frida 设备<br/>frida-server / gadget]
+    CONN --> APP[app.py<br/>应用句柄]
+    CONN --> DEV[device.py<br/>设备与平台信息]
+    CONN --> FM[filemanager.py<br/>远程文件系统 cwd]
+    CONN --> JOBS[jobs.py<br/>作业注册表]
+    API -->|脚本调用| AGENT[注入的 agent.js]
+```
+
 ## 📂 文件清单
 
 | 文档 | 源码 | 职责 |

@@ -2,6 +2,26 @@
 
 `objection/commands/` 根目录下的 Python 文件实现**跨平台通用**命令（文件系统、内存、作业等）。本分区逐文件讲解。
 
+## 🗺️ 模块地图
+
+```mermaid
+flowchart LR
+    REPL[REPL 命令分发] --> GEN[commands/ 通用命令]
+    GEN --> FM[filemanager<br/>ls / cd / filesystem / rm]
+    GEN --> MEM[memory<br/>dump / list / search / replace / write]
+    GEN --> JOB[jobs<br/>list / kill]
+    GEN --> HIST[command_history<br/>history / save / clear]
+    GEN --> FRI[frida_commands<br/>import / ping]
+    GEN --> HTTP[http 服务器]
+    GEN --> DEV[device<br/>env / frida]
+    GEN --> MPK[mobile_packages<br/>包管理 / patch]
+    GEN --> PLG[plugin_manager<br/>plugin load]
+    GEN --> SQL[sqlite<br/>connect]
+    GEN --> UI[ui alert]
+    GEN --> CUS[custom<br/>自定义脚本]
+    GEN --> AGENT[agent 扩展<br/>rpc / events]
+```
+
 ## 📂 文件清单
 
 | 文档 | 源码 | 命令组 |

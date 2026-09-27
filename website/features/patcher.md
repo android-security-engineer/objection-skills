@@ -14,7 +14,7 @@ flowchart LR
     INST --> LAUNCH[App 启动]
     LAUNCH --> LOAD[系统加载 gadget.so]
     LOAD --> AGENT[agent 被拉起]
-    AGENT --> OBJ["objection -g 包名 start<br/>附加]
+    AGENT --> OBJ["objection -g 包名 start<br/>附加"]
 ```
 
 ## 用法

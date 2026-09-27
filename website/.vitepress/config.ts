@@ -77,6 +77,7 @@ export default withMermaid(
           {
             text: 'AI Agent 集成',
             items: [
+              { text: '把 objection 装进你的 AI Agent', link: '/guide/agent-installation' },
               { text: '面向 AI Agent 使用', link: '/guide/agent-usage' },
               { text: '统一 JSON Schema', link: '/guide/agent-schema' },
               { text: 'HTTP API 端点', link: '/guide/agent-http' }

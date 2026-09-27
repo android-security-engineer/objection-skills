@@ -284,7 +284,9 @@ stateDiagram-v2
     Found --> Watching: watchMatches + jobs.add
     Found --> Stopped: clearInterval
     Watching --> [*]
-    Note right of Polling: 已知竞态: 首次 Promise 与 interval 不同步
+    note right of Polling
+        已知竞态: 首次 Promise 与 interval 不同步
+    end note
 ```
 
 ## 🧱 Android vs iOS Hook 的内存/调用栈布局对比

@@ -95,12 +95,12 @@ return objcEnumerate(patternOrClass);
 ```mermaid
 flowchart TD
     RPC[rpc.iosHookingWatch] --> JOB[new ios-watch 任务]
-    JOB --> CHK{pattern 含 [ ?}
+    JOB --> CHK{"pattern 含 #91; ?"}
     CHK -->|是 选择子| ENUM[objcEnumerate 展开匹配]
     CHK -->|否 类名| WC[watchClass]
     ENUM --> LOOP[forEach watchMethod]
     WC --> METHODS[$methods / $ownMethods]
-    METHODS --> LOOP2[拼 -[Class method] watchMethod]
+    METHODS --> LOOP2["拼 -#91;Class method#93; watchMethod"]
     LOOP --> WM[watchMethod]
     LOOP2 --> WM
     WM --> RES[ApiResolver 解析地址]
